@@ -73,7 +73,7 @@ const Routing = ({ from, to }) => {
     };
   }, [map, from, to]);
 
-  const colors = ["red", "green"];
+  const colors = ["#4285F4", "#B0BEC5"];
   const dashStyles = ["5, 5", null];
 
   const formatDistance = (meters) =>
@@ -133,7 +133,7 @@ const Routing = ({ from, to }) => {
                   style={{
                     marginTop: "4px",
                     fontWeight: "bold",
-                    color: i === 0 ? "red" : "green",
+                    color: i === 0 ? "#202124" : "#5F6368",
                   }}
                 >
                   {isFaster ? "⚡ Faster" : "🐢 Slower"}{" "}
@@ -164,39 +164,89 @@ const Routing = ({ from, to }) => {
         <h2 style={{ marginTop: 0, fontSize: "18px" }}>Choose Your Route</h2>
         <p style={{ margin: "12px 0" }}>
           You're planning a route. One is{" "}
-          <span style={{ color: "red" }}>faster but less safe</span>. The other is{" "}
-          <span style={{ color: "green" }}>safer but slower</span>.
+          <span style={{ fontWeight: "bold" }}>faster but less safe</span>. The other is{" "}
+          <span style={{ fontWeight: "bold" }}>slower but safer</span>.
         </p>
         <p>Which would you choose today?</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
-          <button
-            onClick={() => setSelectedRoute(0)}
-            style={{
-              padding: "10px 12px",
-              backgroundColor: "red",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            ⚡ Fast & Less Safe
-          </button>
-          <button
-            onClick={() => setSelectedRoute(1)}
-            style={{
-              padding: "10px 12px",
-              backgroundColor: "green",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            🛡️ Safe & Slower
-          </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px", alignItems: "center" }}>
+          {/* Fast & Less Safe toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontWeight: "bold", color: selectedRoute === 0 ? "#202124" : "#5F6368" }}>⚡ Fast & Less Safe</span>
+
+            <label style={{ position: "relative", display: "inline-block", width: "60px", height: "34px" }}>
+              <input
+                type="checkbox"
+                checked={selectedRoute === 0}
+                onChange={() => setSelectedRoute(0)}
+                style={{ opacity: 0, width: 0, height: 0 }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  cursor: "pointer",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: selectedRoute === 0 ? "#4285F4" : "#E0E0E0",
+                  transition: ".4s",
+                  borderRadius: "34px",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  height: "26px",
+                  width: "26px",
+                  left: selectedRoute === 0 ? "32px" : "4px",
+                  bottom: "4px",
+                  backgroundColor: "#FFFFFF",
+                  transition: ".4s",
+                  borderRadius: "50%",
+                }}
+              />
+            </label>
+          </div>
+
+          {/* Safe & Slower toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontWeight: "bold", color: selectedRoute === 1 ? "#202124" : "#5F6368" }}>🛡 Slower & Safe</span>
+
+            <label style={{ position: "relative", display: "inline-block", width: "60px", height: "34px" }}>
+              <input
+                type="checkbox"
+                checked={selectedRoute === 1}
+                onChange={() => setSelectedRoute(1)}
+                style={{ opacity: 0, width: 0, height: 0 }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  cursor: "pointer",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: selectedRoute === 1 ? "#202124" : "#5F6368",
+                  transition: ".4s",
+                  borderRadius: "34px",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  height: "26px",
+                  width: "26px",
+                  left: selectedRoute === 1 ? "32px" : "4px",
+                  bottom: "4px",
+                  backgroundColor: "white",
+                  transition: ".4s",
+                  borderRadius: "50%",
+                }}
+              />
+            </label>
+          </div>
+
           <button
             onClick={handleGoClick}
             style={{
@@ -212,6 +262,8 @@ const Routing = ({ from, to }) => {
             ✅ Go
           </button>
         </div>
+
+
       </div>
     </>
   );

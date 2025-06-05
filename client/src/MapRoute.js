@@ -168,100 +168,54 @@ const Routing = ({ from, to }) => {
           <span style={{ fontWeight: "bold" }}>slower but safer</span>.
         </p>
         <p>Which would you choose today?</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px", alignItems: "center" }}>
-          {/* Fast & Less Safe toggle */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontWeight: "bold", color: selectedRoute === 0 ? "#202124" : "#5F6368" }}>⚡ Fast & Less Safe</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
+  <label style={{ display: "flex", alignItems: "center", gap: "10px", fontWeight: "bold" }}>
+    <span style={{ color: "#202124" }}>
+      {selectedRoute === 0 ? "⚡ Fast & Less Safe" : "🛡️ Safe & Slower"}
+    </span>
+    <div
+      onClick={() => setSelectedRoute(selectedRoute === 0 ? 1 : 0)}
+      style={{
+        width: "50px",
+        height: "28px",
+        borderRadius: "14px",
+        backgroundColor: selectedRoute === 0 ? "#E0E0E0" : "#202124",
+        position: "relative",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease",
+      }}
+    >
+      <div
+        style={{
+          width: "24px",
+          height: "24px",
+          borderRadius: "50%",
+          backgroundColor: "#fff",
+          position: "absolute",
+          top: "2px",
+          left: selectedRoute === 0 ? "2px" : "24px",
+          transition: "left 0.3s ease",
+        }}
+      />
+    </div>
+  </label>
 
-            <label style={{ position: "relative", display: "inline-block", width: "60px", height: "34px" }}>
-              <input
-                type="checkbox"
-                checked={selectedRoute === 0}
-                onChange={() => setSelectedRoute(0)}
-                style={{ opacity: 0, width: 0, height: 0 }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  cursor: "pointer",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: selectedRoute === 0 ? "#4285F4" : "#E0E0E0",
-                  transition: ".4s",
-                  borderRadius: "34px",
-                }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  height: "26px",
-                  width: "26px",
-                  left: selectedRoute === 0 ? "32px" : "4px",
-                  bottom: "4px",
-                  backgroundColor: "#FFFFFF",
-                  transition: ".4s",
-                  borderRadius: "50%",
-                }}
-              />
-            </label>
-          </div>
+  <button
+    onClick={handleGoClick}
+    style={{
+      padding: "10px 12px",
+      backgroundColor: "#333",
+      color: "#fff",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    ✅ Go
+  </button>
+</div>
 
-          {/* Safe & Slower toggle */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontWeight: "bold", color: selectedRoute === 1 ? "#202124" : "#5F6368" }}>🛡 Slower & Safe</span>
-
-            <label style={{ position: "relative", display: "inline-block", width: "60px", height: "34px" }}>
-              <input
-                type="checkbox"
-                checked={selectedRoute === 1}
-                onChange={() => setSelectedRoute(1)}
-                style={{ opacity: 0, width: 0, height: 0 }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  cursor: "pointer",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: selectedRoute === 1 ? "#202124" : "#5F6368",
-                  transition: ".4s",
-                  borderRadius: "34px",
-                }}
-              />
-              <span
-                style={{
-                  position: "absolute",
-                  height: "26px",
-                  width: "26px",
-                  left: selectedRoute === 1 ? "32px" : "4px",
-                  bottom: "4px",
-                  backgroundColor: "white",
-                  transition: ".4s",
-                  borderRadius: "50%",
-                }}
-              />
-            </label>
-          </div>
-
-          <button
-            onClick={handleGoClick}
-            style={{
-              padding: "10px 12px",
-              backgroundColor: "#333",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            ✅ Go
-          </button>
-        </div>
 
 
       </div>

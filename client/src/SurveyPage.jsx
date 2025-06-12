@@ -1,8 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import MapRoute from "./MapRoute";
+import React from "react";
 
-// New inline ThankYou component that embeds Microsoft Form
-const ThankYou = () => {
+const SurveyPage = () => {
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
       <iframe
@@ -23,15 +21,4 @@ const ThankYou = () => {
   );
 };
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MapRoute />} />
-        <Route path="/thank-you" element={<ThankYou />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
+export default SurveyPage;

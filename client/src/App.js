@@ -8,7 +8,7 @@ const ThankYou = () => {
       <iframe
         width="640px"
         height="480px"
-        src="https://forms.office.com/Pages/ResponsePage.aspx?id=sdof1BV-_Uy1-nIA5U3ra9Sa9rH8Ha1GrT0GgsGOJKVUNUVQTUw5Mk5UVzVGQTBSWEVXWFNLTkJURS4u&embed=true"
+        src="https://forms.office.com/Pages/ResponsePage.aspx?id=sdof1BV-_Uy1-nIA5U3ra9Sa9rH8Ha1GrT0GgsGOJKVUNUVQTUw5Mk5UVzVGQTBSWEVXWFNLTkJURS4u&r4e2137dcf52946c9900dfff16a521df9=safe"
         frameBorder="0"
         marginWidth="0"
         marginHeight="0"

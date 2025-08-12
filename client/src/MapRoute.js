@@ -1,41 +1,84 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import Routing from "./Routing";
 import RoutingLabels from "./RoutingLabels";
-import appConfig from "./appConfig";
 import OnboardingModal from "./OnboardingModal";
+import ConsentModal from "./ConsentModal";
+import ScenarioPanel from "./ScenarioPanel";
+import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 const MapRoute = () => {
-  const { start, end } = appConfig.routeEndpoints;
-  const numRoutes = 1 + appConfig.middlePoints.length;
+  const [routeConfig, setRouteConfig] = useState(null);
   const [consentGiven, setConsentGiven] = useState(false);
-
-  const [selectedRouteIndex, setSelectedRouteIndex] = useState(() =>
-    Math.floor(Math.random() * numRoutes)
-  );
-
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
-
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
-
-  // Shared state to pass summary positions from Routing to RoutingLabels
   const [mapPoints, setMapPoints] = useState([]);
   const [routes, setRoutes] = useState([]);
+  const [scenarios, setScenarios] = useState([]);
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const [selectedLabel, setSelectedLabel] = useState("default");
+  const [sessionId] = useState(uuidv4());
+  const navigate = useNavigate();
 
-  const handleGoClick = async () => {
-    const label =
-      selectedRouteIndex === 0
-        ? "default"
-        : appConfig.routeNames[selectedRouteIndex - 1] || `route-${selectedRouteIndex}`;
+  useEffect(() => {
+    fetch("http://localhost:5000/api/route-endpoints")
+      .then((res) => res.json())
+      .then((data) => {
+        setRouteConfig(data);
+        setScenarios(generateScenarios(data));
+      })
+      .catch((err) => console.error("Failed to load route config:", err));
+  }, []);
+
+  const generateScenarios = (config) => {
+    const defaultTime = config.routes.default.totalTimeMinutes;
+    const variants = [];
+
+    for (const [routeName, routeData] of Object.entries(config.routes)) {
+      if (routeName === "default") continue;
+      for (const variant of routeData.variants || []) {
+        for (const tts of variant.tts) {
+          variants.push({
+            label: `${routeName}`,
+            routeName,
+            middle: variant.middle,
+            tts,
+            totalTimeMinutes: defaultTime + tts,
+          });
+        }
+      }
+    }
+
+    const shuffled = variants.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, config.numberOfScenarios);
+  };
+
+  const handleChoice = async (label) => {
+    const scenario = scenarios[scenarioIndex];
+    const defaultTime = routeConfig.routes.default.totalTimeMinutes;
+
     try {
       await fetch("http://localhost:5000/api/log-choice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ choice: label }),
+        body: JSON.stringify({
+          sessionId,
+          scenarioIndex,
+          choice: label,
+          tts: scenario.tts,
+          defaultTime,
+        }),
       });
-      window.location.href = "/thank-you";
+
+      if (scenarioIndex + 1 >= scenarios.length) {
+        navigate("/thank-you", { state: { sessionId } });
+      } else {
+        setScenarioIndex((prev) => prev + 1);
+        setSelectedLabel("default");
+      }
     } catch (err) {
       console.error("Error sending choice:", err);
       alert("Failed to log choice. Please try again.");
@@ -46,6 +89,12 @@ const MapRoute = () => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     if (scrollTop + clientHeight >= scrollHeight - 5) setScrolledToBottom(true);
   };
+
+  if (!routeConfig || scenarios.length === 0) return null;
+
+  const { start, end, routes: routeDict, consentText } = routeConfig;
+  const currentScenario = scenarios[scenarioIndex];
+  const defaultTime = routeDict.default.totalTimeMinutes;
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
@@ -63,15 +112,17 @@ const MapRoute = () => {
         <Routing
           from={start}
           to={end}
+          middle={currentScenario.middle}
+          totalTimeMinutes={currentScenario.totalTimeMinutes}
+          defaultTimeMinutes={defaultTime}
+          selectedLabel={selectedLabel}
+          setSelectedLabel={setSelectedLabel}
           consentGiven={consentGiven}
-          selectedRouteIndex={selectedRouteIndex}
-          setSelectedRouteIndex={setSelectedRouteIndex}
           setMapPoints={setMapPoints}
           setRoutes={setRoutes}
         />
       </MapContainer>
 
-      {/* ✅ Overlay labels on top of the map */}
       {consentGiven && (
         <div
           style={{
@@ -88,163 +139,34 @@ const MapRoute = () => {
         </div>
       )}
 
-      {/* Onboarding Modal */}
-      {showOnboarding && (
-        <OnboardingModal
-          step={onboardingStep}
-          onNext={() => setOnboardingStep((s) => s + 1)}
-          onBack={() => setOnboardingStep((s) => s - 1)}
-          onSkip={() => setShowOnboarding(false)}
-          onFinish={() => setShowOnboarding(false)}
+      {!consentGiven && (
+        <ConsentModal
+          consentText={consentText}
+          checkboxChecked={checkboxChecked}
+          setCheckboxChecked={setCheckboxChecked}
+          scrolledToBottom={scrolledToBottom}
+          handleScroll={handleScroll}
+          onSubmit={() => {
+            setConsentGiven(true);
+            setShowOnboarding(true);
+          }}
         />
       )}
 
-      {/* Consent Form */}
-      {!consentGiven && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              width: "90%",
-              maxWidth: "600px",
-              maxHeight: "80vh",
-              borderRadius: "10px",
-              padding: "20px",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-            }}
-          >
-            <h2>Consent Form</h2>
-            <div
-              onScroll={handleScroll}
-              style={{
-                overflowY: "scroll",
-                flex: "1 1 auto",
-                marginBottom: "12px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-                padding: "10px",
-              }}
-            >
-              {appConfig.consentText.split("\n").map((line, index) => (
-                <p key={index}>{line.trim()}</p>
-              ))}
-            </div>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <input
-                type="checkbox"
-                checked={checkboxChecked}
-                onChange={(e) => setCheckboxChecked(e.target.checked)}
-              />
-              I agree to the terms and conditions.
-            </label>
-            <button
-              disabled={!scrolledToBottom || !checkboxChecked}
-              onClick={() => {
-                setConsentGiven(true);
-                setShowOnboarding(true);
-              }}
-              style={{
-                marginTop: "12px",
-                padding: "10px",
-                backgroundColor: scrolledToBottom && checkboxChecked ? "#1452EE" : "#ccc",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: "bold",
-                cursor: scrolledToBottom && checkboxChecked ? "pointer" : "not-allowed",
-              }}
-            >
-              Submit
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Toggle Controls */}
       {consentGiven && (
-        <div
-          style={{
-            position: "absolute",
-            top: 20,
-            left: 20,
-            width: 300,
-            background: "#fff",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            zIndex: 1000,
-            fontFamily: "sans-serif",
-            fontSize: "15px",
-          }}
-        >
-          <h2 style={{ marginTop: 0 }}>Choose Your Route</h2>
-          <p>
-            Select one of the available routes. If no toggle is enabled, the default route is shown.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
-            {appConfig.routeNames.map((name, index) => (
-              <label key={index} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span>{name}</span>
-                <div
-                  onClick={() =>
-                    setSelectedRouteIndex(selectedRouteIndex === index + 1 ? 0 : index + 1)
-                  }
-                  style={{
-                    width: "50px",
-                    height: "28px",
-                    borderRadius: "14px",
-                    backgroundColor: selectedRouteIndex === index + 1 ? "#202124" : "#ccc",
-                    position: "relative",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      backgroundColor: "#fff",
-                      position: "absolute",
-                      top: "2px",
-                      left: selectedRouteIndex === index + 1 ? "24px" : "2px",
-                      transition: "left 0.3s ease",
-                    }}
-                  />
-                </div>
-              </label>
-            ))}
-            <button
-              onClick={handleGoClick}
-              style={{
-                padding: "10px 12px",
-                backgroundColor: "#333",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              ✅ Go
-            </button>
-          </div>
-        </div>
+        <ScenarioPanel
+          scenarioIndex={scenarioIndex}
+          totalScenarios={scenarios.length}
+          label={currentScenario.label}
+          description={routeDict[currentScenario.routeName].description}
+          selectedLabel={selectedLabel}
+          onToggle={() =>
+            setSelectedLabel(
+              selectedLabel === currentScenario.label ? "default" : currentScenario.label
+            )
+          }
+          onSubmit={() => handleChoice(selectedLabel)}
+        />
       )}
     </div>
   );

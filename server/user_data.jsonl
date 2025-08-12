@@ -1,0 +1,4 @@
+{"sessionId":"408a5f59-d7ea-4601-b6bd-1ee0a1599b15","timestamp":"2025-08-06T16:07:47.522Z","defaultTime":12,"totalScenarios":1,"choices":["4-1"],"responses":{"age":"1","drivingYears":"1","navFrequency":"Never"}}
+{"sessionId":"ba428b97-8966-409b-a519-767866600119","timestamp":"2025-08-06T16:13:54.520Z","defaultTime":12,"totalScenarios":1,"choices":["7-0"],"responses":{"age":"1","drivingYears":"2","navFrequency":"Never"}}
+{"sessionId":"9ae32c86-4e2d-466d-a664-d0a599e7657a","timestamp":"2025-08-06T16:19:14.262Z","defaultTime":12,"totalScenarios":1,"choices":["7-1"],"responses":{"age":"","drivingYears":"","navFrequency":""}}
+{"sessionId":"4408e735-07b9-4b50-aa40-4d9c176f04d9","timestamp":"2025-08-08T13:15:00.508Z","defaultTime":12,"totalScenarios":5,"choices":["4-1","9-0","7-0","6-0","5-0"],"responses":{"age":"3","drivingYears":"2","navFrequency":"Rarely"}}

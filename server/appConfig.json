@@ -1,0 +1,37 @@
+{
+  "start": [45.42376893995412, -75.68643663030589],
+  "end": [45.38318580824864, -75.6715176376448],
+  "numberOfScenarios": 5,
+  "routes": {
+    "default": {
+      "totalTimeMinutes": 12
+    },
+    "Safety": {
+      "description": "This route prioritizes safer streets with better lighting and lower traffic.",
+      "variants": [
+        {
+          "middle": [45.41580204841045, -75.6427574157715],
+          "tts": [4]
+        },
+        {
+          "middle": [45.41580204841045, -75.6427574157],
+          "tts": [6]
+        },
+        {
+          "middle": [45.4101022, -75.6400011],
+          "tts": [5]
+        }
+      ]
+    }
+  },
+  "survey": [
+    { "name": "age", "type": "number" },
+    { "name": "drivingYears", "type": "number" },
+    {
+      "name": "navFrequency",
+      "type": "select",
+      "options": ["Never", "Rarely", "Sometimes", "Often", "Always"]
+    }
+  ],
+  "consentText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ..."
+}

@@ -80,7 +80,14 @@ const Routing = ({
     });
 
     return () => {
-      controls.forEach((ctrl) => map.removeControl(ctrl));
+      controls.forEach((ctrl) => {
+        // Cancel any in-flight routing requests and detach listeners
+        ctrl.off();
+        if (ctrl.getRouter && typeof ctrl.getRouter().abort === "function") {
+          ctrl.getRouter().abort();
+        }
+        map.removeControl(ctrl);
+      });
       setLocalRoutes([]);
     };
   }, [map, from, to, middle, totalTimeMinutes, defaultTimeMinutes]);

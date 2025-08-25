@@ -297,7 +297,17 @@ function MultiRoutingLayer({ from, to, middles, selectedIdx, onSelect, defaultTi
       ctrls.push(control);
     });
 
-    return () => { ctrls.forEach(c => map.removeControl(c)); setRoutesData([]); };
+    return () => {
+      ctrls.forEach(c => {
+        // Remove event listeners and abort any pending routing requests
+        c.off();
+        if (c.getRouter && typeof c.getRouter().abort === "function") {
+          c.getRouter().abort();
+        }
+        map.removeControl(c);
+      });
+      setRoutesData([]);
+    };
   }, [map, from, to, JSON.stringify(middles)]);
 
   return (

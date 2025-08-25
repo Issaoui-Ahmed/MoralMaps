@@ -16,16 +16,8 @@ const createTextPinIcon = (color, label) =>
     `,
   });
 
-const startIcon = createPinIcon(
-  "#34A853",
-  "M18.92 5.01C18.72 4.42 18.16 4 17.5 4h-11c-.66 0-1.23.42-1.43 1.01L3 11v7c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h10v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-7l-1.08-5.99zM6.85 6h10.29l1.04 3H5.81l1.04-3zM5 16v-3h14v3H5z"
-);
-
-const endIcon = createPinIcon(
-  "#EA4335",
-  "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"
-);
-
+const startIcon = createTextPinIcon("#34A853", "S");
+const endIcon = createTextPinIcon("#EA4335", "E");
 
 const Routing = ({
   from,

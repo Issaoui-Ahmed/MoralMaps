@@ -3,37 +3,19 @@
 import React, { useState } from "react";
 
 const ExampleSwitch = () => {
-
   const [enabled, setEnabled] = useState(false);
   return (
-    <div
-      role="switch"
-      aria-checked={enabled}
-      onClick={() => setEnabled((prev) => !prev)}
-      style={{
-        width: "50px",
-        height: "28px",
-        borderRadius: "14px",
-        backgroundColor: enabled ? "#202124" : "#ccc",
-        position: "relative",
-        margin: "12px auto 0",
-        cursor: "pointer",
-        transition: "background-color 0.3s ease",
-      }}
-    >
-      <div
-        style={{
-          width: "24px",
-          height: "24px",
-          borderRadius: "50%",
-          backgroundColor: "#fff",
-          position: "absolute",
-          top: "2px",
-          left: enabled ? "24px" : "2px",
-          transition: "left 0.3s ease",
-        }}
+    <label className="inline-flex items-center cursor-pointer mt-3 mx-auto">
+      <input
+        type="checkbox"
+        checked={enabled}
+        onChange={() => setEnabled((prev) => !prev)}
+        className="sr-only peer"
       />
-    </div>
+      <div className="relative w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-600 transition-colors">
+        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
+      </div>
+    </label>
   );
 };
 
@@ -42,18 +24,9 @@ const ExampleButton = () => {
   return (
     <button
       onClick={() => setPressed(true)}
-      style={{
-        padding: "10px 12px",
-        backgroundColor: "#333",
-        color: "#fff",
-        border: "none",
-        borderRadius: "6px",
-        fontWeight: "bold",
-        marginTop: "8px",
-        cursor: "pointer",
-      }}
+      className="mt-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
-      {pressed ? "Clicked!" : "✅ Select & Continue"}
+      {pressed ? "Confirmed!" : "Confirm & Continue"}
     </button>
   );
 };
@@ -100,7 +73,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
               fontWeight: 500,
             }}
           >
-            When you're ready, press the button below:
+            Use the button below to confirm your choice:
           </h3>
           <ExampleButton />
 

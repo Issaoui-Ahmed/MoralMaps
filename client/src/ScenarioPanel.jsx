@@ -9,68 +9,56 @@ const ScenarioPanel = ({
   onToggle,
   onSubmit,
 }) => {
+  const isSelected = selectedLabel === label;
+
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 20,
-        left: 20,
-        width: 300,
-        background: "#fff",
-        padding: "20px",
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        zIndex: 1000,
-        fontFamily: "sans-serif",
-        fontSize: "15px",
-      }}
-    >
-      <h2 style={{ marginTop: 0 }}>Scenario {scenarioIndex + 1} of {totalScenarios}</h2>
-      <p>Select a route to proceed.</p>
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
-        <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          <span>{label}</span>
-          {description && (
-            <span style={{ fontSize: "13px", color: "#666" }}>{description}</span>
-          )}
-          <div
-            onClick={onToggle}
-            style={{
-              width: "50px",
-              height: "28px",
-              borderRadius: "14px",
-              backgroundColor: selectedLabel === label ? "#202124" : "#ccc",
-              position: "relative",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "50%",
-                backgroundColor: "#fff",
-                position: "absolute",
-                top: "2px",
-                left: selectedLabel === label ? "24px" : "2px",
-                transition: "left 0.3s ease",
-              }}
-            />
+    <div className="absolute top-5 left-5 w-72 bg-white p-5 rounded-xl shadow-lg z-50 text-sm text-gray-800 font-sans">
+      <h2 className="text-lg font-semibold mb-1">
+        Scenario {scenarioIndex + 1} of {totalScenarios}
+      </h2>
+      <p className="text-gray-600">Choose your preferred route to continue.</p>
+
+      <div className="mt-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">{label}</p>
+            {description && (
+              <p className="text-xs text-gray-500">{description}</p>
+            )}
           </div>
-        </label>
+
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={onToggle}
+              className="sr-only peer"
+            />
+            <div
+              className={
+                "relative w-12 h-6 bg-gray-300 rounded-full " +
+                "peer-checked:bg-blue-600 transition-colors"
+              }
+            >
+              <div
+                className={
+                  "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full " +
+                  "transition-transform peer-checked:translate-x-6"
+                }
+              ></div>
+            </div>
+          </label>
+        </div>
+
         <button
           onClick={onSubmit}
-          style={{
-            padding: "10px 12px",
-            backgroundColor: "#333",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+          className={
+            "w-full py-2 px-4 bg-blue-600 text-white font-semibold " +
+            "rounded-md shadow hover:bg-blue-700 " +
+            "focus:outline-none focus:ring-2 focus:ring-blue-500"
+          }
         >
-          ✅ Select & Continue
+          Confirm & Continue
         </button>
       </div>
     </div>

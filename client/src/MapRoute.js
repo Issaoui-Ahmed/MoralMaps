@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 import Routing from "./Routing";
 import RoutingLabels from "./RoutingLabels";
 import OnboardingModal from "./OnboardingModal";
@@ -7,21 +7,6 @@ import ConsentModal from "./ConsentModal";
 import ScenarioPanel from "./ScenarioPanel";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
-
-const DisableMapZoom = () => {
-  const map = useMap();
-
-  useEffect(() => {
-    map.scrollWheelZoom.disable();
-    map.doubleClickZoom.disable();
-    map.touchZoom.disable();
-    map.boxZoom.disable();
-    map.keyboard.disable();
-    map.zoomControl.remove();
-  }, [map]);
-
-  return null;
-};
 
 const MapRoute = () => {
   const [routeConfig, setRouteConfig] = useState(null);
@@ -129,7 +114,6 @@ const MapRoute = () => {
         keyboard={false}
         zoomControl={false}
       >
-        <DisableMapZoom />
         <TileLayer
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

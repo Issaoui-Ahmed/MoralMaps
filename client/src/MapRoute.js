@@ -123,6 +123,7 @@ const MapRoute = () => {
           consentGiven={consentGiven}
           setMapPoints={setMapPoints}
           setRoutes={setRoutes}
+          scenarioLabel={currentScenario.label}
         />
       </MapContainer>
 

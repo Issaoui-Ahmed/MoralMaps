@@ -107,7 +107,9 @@ const MapRoute = () => {
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
-      <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length} />
+      {consentGiven && !showOnboarding && (
+        <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length} />
+      )}
       <MapContainer
         center={start}
         zoom={13}
@@ -197,6 +199,8 @@ const MapRoute = () => {
             )
           }
           onSubmit={() => handleChoice(selectedLabel)}
+          scenarioNumber={scenarioIndex + 1}
+          totalScenarios={scenarios.length}
         />
       )}
     </div>

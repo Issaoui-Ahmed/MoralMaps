@@ -8,42 +8,21 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
       title: "Welcome!",
       content: (
         <>
-          <p>
-            In this short task, you will be shown multiple routes from point A to B. One is{" "}
-            <strong>default</strong>, and others have their own features.
-          </p>
-          <p>Your job is to choose the one you would take today.</p>
+          <p>We'll show you a few routes from point A to B.</p>
+          <p>Each one is different. Pick the route you'd take today.</p>
         </>
       ),
     },
     {
-      title: "How to choose a route",
+      title: "Choose a route",
       content: (
-        <>
-          <video
-            src="/videos/select-routes.mp4"
-            controls
-            style={{ width: "100%", borderRadius: "8px", marginBottom: "10px" }}
-          />
-          <p>
-            Click directly on the route or use the toggle panel to choose the one you prefer.
-          </p>
-        </>
+        <p>Tap a route on the map or use the panel to select your preference.</p>
       ),
     },
     {
-      title: "Submit your choice",
+      title: "Submit",
       content: (
-        <>
-          <video
-            src="/videos/submit-choice.mp4"
-            controls
-            style={{ width: "100%", borderRadius: "8px", marginBottom: "10px" }}
-          />
-          <p>
-            When you're ready, click the <strong>✅ Go</strong> button to submit.
-          </p>
-        </>
+        <p>Press the <strong>Go</strong> button to record your choice.</p>
       ),
     },
   ];
@@ -64,20 +43,23 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
+        color: "#333",
+        fontFamily: "sans-serif",
       }}
     >
       <div
         style={{
           backgroundColor: "#fff",
-          maxWidth: "600px",
+          maxWidth: "480px",
           width: "100%",
-          borderRadius: "10px",
-          padding: "20px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+          borderRadius: "12px",
+          padding: "24px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+          textAlign: "center",
         }}
       >
         <h2 style={{ marginTop: 0 }}>{steps[step].title}</h2>
-        <div style={{ marginBottom: "20px" }}>{steps[step].content}</div>
+        <div style={{ marginBottom: "24px", lineHeight: 1.5 }}>{steps[step].content}</div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <button
@@ -91,7 +73,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
               textDecoration: "underline",
             }}
           >
-            Skip tutorial
+            Skip
           </button>
 
           <div>

@@ -5,6 +5,7 @@ import RoutingLabels from "./RoutingLabels";
 import OnboardingModal from "./OnboardingModal";
 import ConsentModal from "./ConsentModal";
 import ScenarioPanel from "./ScenarioPanel";
+import ProgressBar from "./ProgressBar";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 
@@ -106,6 +107,7 @@ const MapRoute = () => {
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+      <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length} />
       <MapContainer
         center={start}
         zoom={13}

@@ -57,6 +57,50 @@ const ExampleButton = () => {
   );
 };
 
+const ExampleToggle = (
+  <div
+    style={{
+      width: "50px",
+      height: "28px",
+      borderRadius: "14px",
+      backgroundColor: "#ccc",
+      position: "relative",
+      margin: "12px auto 0",
+      pointerEvents: "none",
+    }}
+  >
+    <div
+      style={{
+        width: "24px",
+        height: "24px",
+        borderRadius: "50%",
+        backgroundColor: "#fff",
+        position: "absolute",
+        top: "2px",
+        left: "2px",
+      }}
+    />
+  </div>
+);
+
+const ExampleButton = (
+  <button
+    style={{
+      padding: "10px 12px",
+      backgroundColor: "#333",
+      color: "#fff",
+      border: "none",
+      borderRadius: "6px",
+      fontWeight: "bold",
+      marginTop: "8px",
+      cursor: "default",
+      pointerEvents: "none",
+    }}
+  >
+    ✅ Select & Continue
+  </button>
+);
+
 const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
   const steps = [
     {
@@ -82,11 +126,13 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
             deciding:
           </h3>
           <ExampleToggle />
+
         </>
+
       ),
     },
     {
-      title: "Submit your choice",
+      title: "Submit",
       content: (
         <>
           <h3
@@ -100,7 +146,9 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
             When you're ready, press the button below:
           </h3>
           <ExampleButton />
+
         </>
+
       ),
     },
   ];
@@ -123,6 +171,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
         padding: "20px",
         color: "#333",
         fontFamily: "system-ui, sans-serif",
+
       }}
     >
       <div
@@ -149,6 +198,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
         <div style={{ marginBottom: "24px", lineHeight: 1.6, fontSize: "1rem" }}>
           {steps[step].content}
         </div>
+
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <button

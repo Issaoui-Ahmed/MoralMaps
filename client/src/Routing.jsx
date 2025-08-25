@@ -3,7 +3,7 @@ import { useMap, Polyline, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet-routing-machine";
 
-const createPinIcon = (color, path) =>
+const createTextPinIcon = (color, label) =>
   L.divIcon({
     className: "",
     iconSize: [40, 40],
@@ -11,9 +11,7 @@ const createPinIcon = (color, path) =>
     html: `
       <svg width="40" height="40" viewBox="0 0 24 24">
         <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-        <g transform="translate(4,4) scale(0.67)" fill="#fff">
-          <path d="${path}" />
-        </g>
+        <text x="12" y="16" text-anchor="middle" font-size="10" font-family="Arial" font-weight="bold" fill="#fff">${label}</text>
       </svg>
     `,
   });
@@ -27,6 +25,7 @@ const endIcon = createPinIcon(
   "#EA4335",
   "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"
 );
+
 
 const Routing = ({
   from,

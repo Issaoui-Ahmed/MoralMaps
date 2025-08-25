@@ -1,33 +1,87 @@
 // src/OnboardingModal.js
 
-import React from "react";
+import React, { useState } from "react";
+
+const ExampleSwitch = () => {
+  const [enabled, setEnabled] = useState(false);
+  return (
+    <div
+      role="switch"
+      aria-checked={enabled}
+      onClick={() => setEnabled((prev) => !prev)}
+      style={{
+        width: "50px",
+        height: "28px",
+        borderRadius: "14px",
+        backgroundColor: enabled ? "#202124" : "#ccc",
+        position: "relative",
+        margin: "12px auto 0",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease",
+      }}
+    >
+      <div
+        style={{
+          width: "24px",
+          height: "24px",
+          borderRadius: "50%",
+          backgroundColor: "#fff",
+          position: "absolute",
+          top: "2px",
+          left: enabled ? "24px" : "2px",
+          transition: "left 0.3s ease",
+        }}
+      />
+    </div>
+  );
+};
+
+const ExampleButton = () => {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <button
+      onClick={() => setPressed(true)}
+      style={{
+        padding: "10px 12px",
+        backgroundColor: "#333",
+        color: "#fff",
+        border: "none",
+        borderRadius: "6px",
+        fontWeight: "bold",
+        marginTop: "8px",
+        cursor: "pointer",
+      }}
+    >
+      {pressed ? "Clicked!" : "✅ Select & Continue"}
+    </button>
+  );
+};
 
 const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
   const steps = [
     {
-      title: "Welcome!",
+      title: "Welcome",
       content: (
         <>
-          <p>
-            In this short task, you will be shown multiple routes from point A to B. One is{" "}
-            <strong>default</strong>, and others have their own features.
+          <p style={{ margin: "0 0 12px" }}>
+            We'll guide you through a few quick route choices.
           </p>
-          <p>Your job is to choose the one you would take today.</p>
+          <p style={{ margin: 0 }}>
+            Each scenario compares a <strong>default</strong> path with an
+            alternative. Pick the route you'd take today.
+          </p>
         </>
       ),
     },
     {
-      title: "How to choose a route",
+      title: "Compare routes",
       content: (
         <>
-          <video
-            src="/videos/select-routes.mp4"
-            controls
-            style={{ width: "100%", borderRadius: "8px", marginBottom: "10px" }}
-          />
-          <p>
-            Click directly on the route or use the toggle panel to choose the one you prefer.
-          </p>
+          <h3 style={{ margin: "0 0 12px", fontSize: "1rem" }}>
+            Use this switch in the panel to preview the alternative route before
+            deciding:
+          </h3>
+          <ExampleSwitch />
         </>
       ),
     },
@@ -35,14 +89,17 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
       title: "Submit your choice",
       content: (
         <>
-          <video
-            src="/videos/submit-choice.mp4"
-            controls
-            style={{ width: "100%", borderRadius: "8px", marginBottom: "10px" }}
-          />
-          <p>
-            When you're ready, click the <strong>✅ Go</strong> button to submit.
-          </p>
+          <h3
+            style={{
+              margin: "0 0 12px",
+              fontSize: "1rem",
+              color: "#1452EE",
+              fontWeight: 500,
+            }}
+          >
+            When you're ready, press the button below:
+          </h3>
+          <ExampleButton />
         </>
       ),
     },
@@ -64,20 +121,34 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
+        color: "#333",
+        fontFamily: "system-ui, sans-serif",
       }}
     >
       <div
         style={{
           backgroundColor: "#fff",
-          maxWidth: "600px",
+          maxWidth: "480px",
           width: "100%",
-          borderRadius: "10px",
-          padding: "20px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+          borderRadius: "12px",
+          padding: "24px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+          textAlign: "center",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>{steps[step].title}</h2>
-        <div style={{ marginBottom: "20px" }}>{steps[step].content}</div>
+        <h2
+          style={{
+            marginTop: 0,
+            marginBottom: "16px",
+            fontSize: "1.5rem",
+            fontWeight: 600,
+          }}
+        >
+          {steps[step].title}
+        </h2>
+        <div style={{ marginBottom: "24px", lineHeight: 1.6, fontSize: "1rem" }}>
+          {steps[step].content}
+        </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <button
@@ -91,7 +162,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
               textDecoration: "underline",
             }}
           >
-            Skip tutorial
+            Skip
           </button>
 
           <div>

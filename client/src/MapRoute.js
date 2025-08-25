@@ -201,6 +201,8 @@ const MapRoute = () => {
           onSubmit={() => handleChoice(selectedLabel)}
           scenarioNumber={scenarioIndex + 1}
           totalScenarios={scenarios.length}
+          defaultTime={defaultTime}
+          alternativeTime={currentScenario.totalTimeMinutes}
         />
       )}
     </div>

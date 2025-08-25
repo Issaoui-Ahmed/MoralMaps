@@ -10,10 +10,18 @@ const ExampleSwitch = () => {
         type="checkbox"
         checked={enabled}
         onChange={() => setEnabled((prev) => !prev)}
-        className="sr-only peer"
+        className="sr-only"
       />
-      <div className="relative w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-600 transition-colors">
-        <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
+      <div
+        className={`relative w-12 h-6 rounded-full transition-colors ${
+          enabled ? "bg-blue-600" : "bg-gray-300"
+        }`}
+      >
+        <div
+          className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+            enabled ? "translate-x-6" : ""
+          }`}
+        />
       </div>
     </label>
   );

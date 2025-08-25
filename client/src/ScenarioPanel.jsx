@@ -8,15 +8,25 @@ const ScenarioPanel = ({
   onSubmit,
   scenarioNumber,
   totalScenarios,
+  defaultTime,
+  alternativeTime,
 }) => {
   const isSelected = selectedLabel === label;
 
   return (
     <div className="absolute top-5 left-5 w-72 bg-white p-5 rounded-xl shadow-lg z-[1000] text-sm text-gray-800 font-sans">
       <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
-      <p className="text-gray-600">Choose your preferred route to continue.</p>
+      <div className="mt-2 mb-4 p-3 bg-gray-100 rounded-md text-gray-700">
+        <p className="mb-1">
+          The <span className="font-medium">time-efficient route</span> takes approximately {defaultTime} minutes.
+        </p>
+        <p className="mb-1">
+          The <span className="font-medium">{label} route</span> prioritizes safety and takes about {alternativeTime} minutes.
+        </p>
+        <p>Use the toggle below to activate the {label.toLowerCase()} route if you prefer safety over speed.</p>
+      </div>
 
-      <div className="mt-4 space-y-4">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">{label}</p>

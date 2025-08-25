@@ -1,10 +1,19 @@
 import React from "react";
 
-const ScenarioPanel = ({ label, description, selectedLabel, onToggle, onSubmit }) => {
+const ScenarioPanel = ({
+  label,
+  description,
+  selectedLabel,
+  onToggle,
+  onSubmit,
+  scenarioNumber,
+  totalScenarios,
+}) => {
   const isSelected = selectedLabel === label;
 
   return (
     <div className="absolute top-5 left-5 w-72 bg-white p-5 rounded-xl shadow-lg z-[1000] text-sm text-gray-800 font-sans">
+      <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
       <p className="text-gray-600">Choose your preferred route to continue.</p>
 
       <div className="mt-4 space-y-4">

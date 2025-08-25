@@ -105,7 +105,11 @@ const MapRoute = () => {
         center={start}
         zoom={13}
         style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom
+        scrollWheelZoom={false}
+        doubleClickZoom={false}
+        touchZoom={false}
+        boxZoom={false}
+        keyboard={false}
         zoomControl={false}
       >
         <TileLayer

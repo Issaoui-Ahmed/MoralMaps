@@ -26,6 +26,7 @@ const Routing = ({
   consentGiven,
   setMapPoints,
   setRoutes,
+  scenarioLabel,
 }) => {
   const map = useMap();
   const [localRoutes, setLocalRoutes] = useState([]);
@@ -133,7 +134,7 @@ const Routing = ({
               opacity: 1,
             }}
             eventHandlers={{
-              click: () => setSelectedLabel(i === 0 ? "default" : "alternative"),
+              click: () => setSelectedLabel(i === 0 ? "default" : scenarioLabel),
             }}
             ref={(el) => {
               if (el) polylineRefs.current[i] = el;

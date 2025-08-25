@@ -3,7 +3,9 @@ import { useLocation } from "react-router-dom";
 
 const ThankYou = () => {
   const location = useLocation();
-  const sessionId = location.state?.sessionId;
+const sessionIdFromState = location.state?.sessionId;
+const sessionId = sessionIdFromState || localStorage.getItem("sessionId");
+
 
   const [config, setConfig] = useState(null);
   const [responses, setResponses] = useState({});
@@ -32,24 +34,26 @@ const ThankYou = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/log-survey", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, responses }),
-      });
+  setError(null);
+  try {
+    const res = await fetch("http://localhost:5000/api/log-survey", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, responses }),
+    });
 
-      const result = await res.json();
-      if (result.success) {
-        setSubmitted(true);
-      } else {
-        throw new Error("Submission failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Could not submit survey. Please try again.");
+    const payloadText = await res.text();
+    const payload = (() => { try { return JSON.parse(payloadText); } catch { return {}; } })();
+
+    if (!res.ok || !payload?.success) {
+      throw new Error(payload?.error || "Submission failed");
     }
-  };
+    setSubmitted(true);
+  } catch (err) {
+    setError(err.message || "Could not submit survey. Please try again.");
+  }
+};
+
 
   if (submitted) {
     return (

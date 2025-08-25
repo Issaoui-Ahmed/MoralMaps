@@ -1,8 +1,8 @@
 import React from "react";
-import AdminMap from "./AdminMap";
+import AdminApp from "./AdminApp"; // make sure AdminApp.jsx is next to this file
 
 function App() {
-  return <AdminMap />;
+  return <AdminApp />;
 }
 
 export default App;

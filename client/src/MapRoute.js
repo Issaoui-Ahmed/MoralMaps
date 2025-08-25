@@ -21,6 +21,9 @@ const MapRoute = () => {
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState("default");
   const [sessionId] = useState(uuidv4());
+  useEffect(() => {
+  localStorage.setItem("sessionId", sessionId);
+}, [sessionId]);
   const navigate = useNavigate();
 
   useEffect(() => {

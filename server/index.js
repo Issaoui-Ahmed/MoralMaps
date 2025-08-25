@@ -34,7 +34,7 @@ app.post("/api/log-choice", (req, res) => {
   const encoded = `${tts}-${isChosen}`;
 
   // Read numberOfScenarios from config file
-  let totalScenarios = 3;
+  let totalScenarios = 0;
   try {
     const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
     totalScenarios = config.numberOfScenarios || totalScenarios;
@@ -67,9 +67,9 @@ app.post("/api/log-survey", (req, res) => {
   }
 
   const session = sessions.get(sessionId);
-  if (!session || !session.choices.every((c) => c !== undefined)) {
-    return res.status(400).json({ error: "Session not complete or not found" });
-  }
+  if (!session) {
+    return res.status(400).json({ error: "Session not found" });
+}
 
   session.responses = responses;
 

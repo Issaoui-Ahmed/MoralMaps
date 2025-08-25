@@ -1,7 +1,13 @@
 {
-  "start": [45.42376893995412, -75.68643663030589],
-  "end": [45.38318580824864, -75.6715176376448],
-  "numberOfScenarios": 5,
+  "start": [
+    45.426286138155426,
+    -75.68635940551759
+  ],
+  "end": [
+    45.42506947908089,
+    -75.64910586654823
+  ],
+  "numberOfScenarios": 3,
   "routes": {
     "default": {
       "totalTimeMinutes": 12
@@ -10,27 +16,50 @@
       "description": "This route prioritizes safer streets with better lighting and lower traffic.",
       "variants": [
         {
-          "middle": [45.41580204841045, -75.6427574157715],
-          "tts": [4]
+          "middle": [
+            45.40388011824468,
+            -75.70902779084176
+          ],
+          "tts": [
+            4
+          ]
         },
         {
-          "middle": [45.41580204841045, -75.6427574157],
-          "tts": [6]
+          "middle": [
+            45.41580204841045,
+            -75.6427574157
+          ],
+          "tts": [
+            6
+          ]
         },
         {
-          "middle": [45.4101022, -75.6400011],
-          "tts": [5]
+          "middle": [
+            45.41532091508852,
+            -75.62095386182266
+          ],
+          "tts": [
+            5
+          ]
         }
       ]
     }
   },
   "survey": [
-    { "name": "age", "type": "number" },
-    { "name": "drivingYears", "type": "number" },
     {
       "name": "navFrequency",
       "type": "select",
-      "options": ["Never", "Rarely", "Sometimes", "Often", "Always"]
+      "options": [
+        "Never",
+        "Rarely",
+        "Sometimes",
+        "Often",
+        "Always"
+      ]
+    },
+    {
+      "name": "age",
+      "type": "text"
     }
   ],
   "consentText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ..."

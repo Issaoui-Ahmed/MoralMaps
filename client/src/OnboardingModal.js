@@ -2,27 +2,89 @@
 
 import React from "react";
 
+const ExampleToggle = (
+  <div
+    style={{
+      width: "50px",
+      height: "28px",
+      borderRadius: "14px",
+      backgroundColor: "#ccc",
+      position: "relative",
+      margin: "12px auto 0",
+      pointerEvents: "none",
+    }}
+  >
+    <div
+      style={{
+        width: "24px",
+        height: "24px",
+        borderRadius: "50%",
+        backgroundColor: "#fff",
+        position: "absolute",
+        top: "2px",
+        left: "2px",
+      }}
+    />
+  </div>
+);
+
+const ExampleButton = (
+  <button
+    style={{
+      padding: "10px 12px",
+      backgroundColor: "#333",
+      color: "#fff",
+      border: "none",
+      borderRadius: "6px",
+      fontWeight: "bold",
+      marginTop: "8px",
+      cursor: "default",
+      pointerEvents: "none",
+    }}
+  >
+    ✅ Select & Continue
+  </button>
+);
+
 const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
   const steps = [
     {
-      title: "Welcome!",
+      title: "Welcome",
       content: (
         <>
-          <p>We'll show you a few routes from point A to B.</p>
-          <p>Each one is different. Pick the route you'd take today.</p>
+          <p style={{ fontStyle: "italic" }}>
+            We'll guide you through a few quick route choices.
+          </p>
+          <p>
+            Each scenario compares a <strong>default</strong> path with an
+            alternative. Pick the route you'd take today.
+          </p>
         </>
       ),
     },
     {
-      title: "Choose a route",
+      title: "Compare routes",
       content: (
-        <p>Tap a route on the map or use the panel to select your preference.</p>
+        <>
+          <p style={{ fontWeight: "bold" }}>
+            Use this switch in the panel to preview the alternative route before
+            deciding:
+          </p>
+          {ExampleToggle}
+        </>
+
       ),
     },
     {
       title: "Submit",
       content: (
-        <p>Press the <strong>Go</strong> button to record your choice.</p>
+        <>
+          <p style={{ color: "#1452EE", fontWeight: 500 }}>
+            When you're ready, press the button below:
+          </p>
+          {ExampleButton}
+        </>
+
       ),
     },
   ];

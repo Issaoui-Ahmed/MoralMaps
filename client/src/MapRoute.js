@@ -20,10 +20,11 @@ const MapRoute = () => {
   const [scenarios, setScenarios] = useState([]);
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState("default");
+  const [error, setError] = useState(null);
   const [sessionId] = useState(uuidv4());
   useEffect(() => {
-  localStorage.setItem("sessionId", sessionId);
-}, [sessionId]);
+    localStorage.setItem("sessionId", sessionId);
+  }, [sessionId]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +34,10 @@ const MapRoute = () => {
         setRouteConfig(data);
         setScenarios(generateScenarios(data));
       })
-      .catch((err) => console.error("Failed to load route config:", err));
+      .catch((err) => {
+        console.error("Failed to load route config:", err);
+        setError("Failed to load route configuration. Please try again later.");
+      });
   }, []);
 
   const generateScenarios = (config) => {
@@ -93,7 +97,8 @@ const MapRoute = () => {
     if (scrollTop + clientHeight >= scrollHeight - 5) setScrolledToBottom(true);
   };
 
-  if (!routeConfig || scenarios.length === 0) return null;
+  if (error) return <div>{error}</div>;
+  if (!routeConfig || scenarios.length === 0) return <div>Loading route data...</div>;
 
   const { start, end, routes: routeDict, consentText } = routeConfig;
   const currentScenario = scenarios[scenarioIndex];

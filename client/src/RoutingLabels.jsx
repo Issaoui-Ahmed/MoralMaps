@@ -10,28 +10,43 @@ const RoutingLabels = ({ mapPoints, routes }) => {
             key={`label-${i}`}
             style={{
               position: "absolute",
-              left: pt.x + 8,
-              top: pt.y - 20,
-              background: "#fff",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              padding: "4px 6px",
-              fontSize: "12px",
-              fontFamily: "sans-serif",
-              color: "#333",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-              width: "80px",
+              left: pt.x,
+              top: pt.y,
+              transform: "translate(-50%, -100%)",
               pointerEvents: "none",
+              fontFamily: "Roboto, sans-serif",
+              fontSize: "13px",
+              color: "#202124",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: "4px",
+                padding: "4px 8px",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontWeight: 500,
+              }}
+            >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#5f6368">
-                <path d="M5 11h14l-1.5-4.5h-11L5 11zm0 2c-.6 0-1 .4-1 1v6h2v-2h12v2h2v-6c0-.6-.4-1-1-1H5zm3.5 3c-.8 0-1.5-.7-1.5-1.5S7.7 13 8.5 13s1.5.7 1.5 1.5S9.3 16 8.5 16zm7 0c-.8 0-1.5-.7-1.5-1.5S14.7 13 15.5 13s1.5.7 1.5 1.5S16.3 16 15.5 16z" />
+                <path d="M18.92 5.01C18.72 4.42 18.16 4 17.5 4h-11c-.66 0-1.23.42-1.43 1.01L3 11v7c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h10v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-7l-1.08-5.99zM6.85 6h10.29l1.04 3H5.81l1.04-3zM5 16v-3h14v3H5z" />
               </svg>
-              <span style={{ fontWeight: "bold", fontSize: "13px" }}>
-                {route.totalTimeMinutes} min
-              </span>
+              <span>{route.totalTimeMinutes} min</span>
             </div>
+            <div
+              style={{
+                width: 0,
+                height: 0,
+                margin: "0 auto",
+                borderLeft: "6px solid transparent",
+                borderRight: "6px solid transparent",
+                borderTop: "6px solid #fff",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+              }}
+            />
           </div>
         );
       })}

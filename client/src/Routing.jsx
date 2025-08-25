@@ -3,17 +3,30 @@ import { useMap, Polyline, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet-routing-machine";
 
-const carIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/744/744465.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
+const createPinIcon = (color, path) =>
+  L.divIcon({
+    className: "",
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    html: `
+      <svg width="40" height="40" viewBox="0 0 24 24">
+        <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+        <g transform="translate(4,4) scale(0.67)" fill="#fff">
+          <path d="${path}" />
+        </g>
+      </svg>
+    `,
+  });
 
-const flagIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
+const carIcon = createPinIcon(
+  "#4285F4",
+  "M18.92 5.01C18.72 4.42 18.16 4 17.5 4h-11c-.66 0-1.23.42-1.43 1.01L3 11v7c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h10v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-7l-1.08-5.99zM6.85 6h10.29l1.04 3H5.81l1.04-3zM5 16v-3h14v3H5z"
+);
+
+const flagIcon = createPinIcon(
+  "#EA4335",
+  "M14.4 5l-.24-1.2C14.04 3.34 13.66 3 13.23 3H6v16h2v-6h5.17c.43 0 .81-.34.89-.78L14.4 5z"
+);
 
 const Routing = ({
   from,

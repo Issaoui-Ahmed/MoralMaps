@@ -157,7 +157,23 @@ const MapRoute = () => {
         />
       )}
 
-      {consentGiven && (
+      {showOnboarding && (
+        <OnboardingModal
+          step={onboardingStep}
+          onNext={() => setOnboardingStep((prev) => prev + 1)}
+          onBack={() => setOnboardingStep((prev) => prev - 1)}
+          onSkip={() => {
+            setShowOnboarding(false);
+            setOnboardingStep(0);
+          }}
+          onFinish={() => {
+            setShowOnboarding(false);
+            setOnboardingStep(0);
+          }}
+        />
+      )}
+
+      {consentGiven && !showOnboarding && (
         <ScenarioPanel
           scenarioIndex={scenarioIndex}
           totalScenarios={scenarios.length}

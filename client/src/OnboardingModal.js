@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 
 const ExampleSwitch = () => {
+
   const [enabled, setEnabled] = useState(false);
   return (
     <div
@@ -82,11 +83,13 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
             deciding:
           </h3>
           <ExampleSwitch />
+
         </>
+
       ),
     },
     {
-      title: "Submit your choice",
+      title: "Submit",
       content: (
         <>
           <h3
@@ -100,7 +103,9 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
             When you're ready, press the button below:
           </h3>
           <ExampleButton />
+
         </>
+
       ),
     },
   ];
@@ -123,6 +128,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
         padding: "20px",
         color: "#333",
         fontFamily: "system-ui, sans-serif",
+
       }}
     >
       <div
@@ -149,6 +155,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
         <div style={{ marginBottom: "24px", lineHeight: 1.6, fontSize: "1rem" }}>
           {steps[step].content}
         </div>
+
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <button

@@ -113,8 +113,6 @@ const MapRoute = () => {
       <MapContainer
         center={start}
         zoom={13}
-        minZoom={13}
-        maxZoom={13}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={false}
         doubleClickZoom={false}

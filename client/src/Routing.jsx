@@ -18,14 +18,14 @@ const createPinIcon = (color, path) =>
     `,
   });
 
-const carIcon = createPinIcon(
-  "#4285F4",
+const startIcon = createPinIcon(
+  "#34A853",
   "M18.92 5.01C18.72 4.42 18.16 4 17.5 4h-11c-.66 0-1.23.42-1.43 1.01L3 11v7c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h10v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-7l-1.08-5.99zM6.85 6h10.29l1.04 3H5.81l1.04-3zM5 16v-3h14v3H5z"
 );
 
-const flagIcon = createPinIcon(
+const endIcon = createPinIcon(
   "#EA4335",
-  "M14.4 5l-.24-1.2C14.04 3.34 13.66 3 13.23 3H6v16h2v-6h5.17c.43 0 .81-.34.89-.78L14.4 5z"
+  "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"
 );
 
 const Routing = ({
@@ -140,8 +140,8 @@ const Routing = ({
 
   return (
     <>
-      <Marker position={from} icon={carIcon} />
-      <Marker position={to} icon={flagIcon} />
+      <Marker position={from} icon={startIcon} />
+      <Marker position={to} icon={endIcon} />
 
       {localRoutes.map((route, i) =>
         route?.coords ? (

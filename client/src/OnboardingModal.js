@@ -72,10 +72,11 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
           </p>
           {ExampleToggle}
         </>
+
       ),
     },
     {
-      title: "Submit your choice",
+      title: "Submit",
       content: (
         <>
           <p style={{ color: "#1452EE", fontWeight: 500 }}>
@@ -83,6 +84,7 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
           </p>
           {ExampleButton}
         </>
+
       ),
     },
   ];

@@ -36,17 +36,13 @@ const ScenarioPanel = ({
             />
             <div
               className={
-                "relative w-12 h-6 bg-gray-300 rounded-full " +
-                "peer-checked:bg-blue-600 transition-colors"
+                "w-12 h-6 bg-gray-300 rounded-full relative transition-colors " +
+                "peer-checked:bg-blue-600 " +
+                "after:content-[''] after:absolute after:top-[2px] after:left-[2px] " +
+                "after:w-5 after:h-5 after:bg-white after:rounded-full after:transition-transform " +
+                "peer-checked:after:translate-x-6"
               }
-            >
-              <div
-                className={
-                  "absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full " +
-                  "transition-transform peer-checked:translate-x-6"
-                }
-              ></div>
-            </div>
+            ></div>
           </label>
         </div>
 

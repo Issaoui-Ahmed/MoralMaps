@@ -5,3 +5,10 @@
 {"sessionId":"8da3d658-b9c2-4b87-a050-4608b1260faf","timestamp":"2025-08-12T16:06:11.588Z","defaultTime":12,"totalScenarios":6,"choices":["6-0","4-0","5-0",null,null,null],"responses":{"navFrequency":""}}
 {"sessionId":"3d2bc1d5-2701-40d3-b6f3-f9419a24192e","timestamp":"2025-08-14T15:49:38.281Z","defaultTime":12,"totalScenarios":3,"choices":["6-0","5-0","4-0"],"responses":{"navFrequency":"","age":""}}
 {"sessionId":"8ac492df-8efc-41f2-a136-37e8084ade56","timestamp":"2025-08-25T16:18:55.924Z","defaultTime":12,"totalScenarios":3,"choices":["6-0","4-0","5-0"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"2e54c489-86c3-4c21-8eb1-45c21c94215f","timestamp":"2025-08-25T17:22:52.174Z","defaultTime":12,"totalScenarios":3,"choices":["4-1","6-0","5-0"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"638949b7-c687-4e7e-8e17-402b6f936409","timestamp":"2025-08-25T17:31:38.295Z","defaultTime":12,"totalScenarios":3,"choices":["4-1","5-0","6-0"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"04d3f03d-ace5-42c5-96cb-ea395d8b6990","timestamp":"2025-08-25T22:04:51.747Z","defaultTime":12,"totalScenarios":3,"choices":["6-0","4-0","5-0"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"621c44d6-1969-4322-b5e5-d550b1c5f393","timestamp":"2025-08-27T15:07:26.370Z","defaultTime":25,"totalScenarios":3,"choices":["4-1","10-1","6-1"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"a85b0a22-2f5e-47a1-85e3-c664a4db2440","timestamp":"2025-08-28T18:37:23.830Z","defaultTime":25,"totalScenarios":3,"choices":["6-1","4-1","10-1"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"c2ab5c52-a702-43f4-a3ba-8567fe6e5d4f","timestamp":"2025-08-28T18:52:05.408Z","defaultTime":25,"totalScenarios":3,"choices":["6-0","10-0","4-0"],"responses":{"name":"","age":""}}
+{"sessionId":"38af135b-28c9-43a9-af83-8ceb25192e1e","timestamp":"2025-08-29T01:39:57.163Z","defaultTime":25,"totalScenarios":3,"choices":["6-1","4-0","10-0"],"responses":{"navFrequency":"","age":""}}

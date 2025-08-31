@@ -12,3 +12,4 @@
 {"sessionId":"a85b0a22-2f5e-47a1-85e3-c664a4db2440","timestamp":"2025-08-28T18:37:23.830Z","defaultTime":25,"totalScenarios":3,"choices":["6-1","4-1","10-1"],"responses":{"navFrequency":"","age":""}}
 {"sessionId":"c2ab5c52-a702-43f4-a3ba-8567fe6e5d4f","timestamp":"2025-08-28T18:52:05.408Z","defaultTime":25,"totalScenarios":3,"choices":["6-0","10-0","4-0"],"responses":{"name":"","age":""}}
 {"sessionId":"38af135b-28c9-43a9-af83-8ceb25192e1e","timestamp":"2025-08-29T01:39:57.163Z","defaultTime":25,"totalScenarios":3,"choices":["6-1","4-0","10-0"],"responses":{"navFrequency":"","age":""}}
+{"sessionId":"d06e7ad9-aa69-483e-91fa-b5e7607cc4da","timestamp":"2025-08-31T19:46:02.683Z","defaultTime":25,"totalScenarios":3,"choices":["4-1","10-0","6-0"],"responses":{"navFrequency":"","age":"3456789098765432","gender":"","primaryTransport":"","comfortNight":"","feedback":""}}

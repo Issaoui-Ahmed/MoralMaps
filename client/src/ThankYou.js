@@ -75,12 +75,11 @@ const ThankYou = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-lg">
-        <h2 className="mb-6 text-2xl font-semibold text-gray-800">Final Survey</h2>
 
         {(config.survey || []).map((field) => (
           <div key={field.name} className="mb-5">
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              {field.name}:
+              {field.name}
             </label>
             {field.type === "select" ? (
               <select

@@ -1,7 +1,7 @@
 {
   "start": [
-    45.41146424238291,
-    -75.69699773077708
+    45.41616538908873,
+    -75.69648825672836
   ],
   "end": [
     45.29735770015956,
@@ -45,7 +45,7 @@
       ]
     }
   },
-  "survey": [
+"survey": [
     {
       "name": "Navigation App Usage Frequency",
       "type": "select",
@@ -93,5 +93,5 @@
       "type": "text"
     }
   ],
-  "consentText": "Thank you for considering participation in this research study examining how people choose routes during navigation. The survey will ask you about your background and preferences in urban travel.\n\nYour participation is voluntary and should take approximately five minutes. You may decline to answer any question and can exit the survey at any time prior to submission.\n\nNo personally identifiable information will be collected, and responses will be stored securely and analyzed in aggregate. By continuing, you confirm that you are at least 18 years old and consent to the collection of your responses for research purposes. If you have any questions about this study, please contact the research team at research@example.edu."
+  "consentText": "Thank routes during  background and in urban travel.\n\nYour participation is voluntary and should take approximately five minutes. You may decline to answer any question and can exit the survey at any time prior to submission.\n\nNo personally identifiable information will be collected, and responses will be stored securely and analyzed in aggregate. By continuing, you confirm that you are at least 18 years old and consent to the collection of your responses for research purposes."
 }

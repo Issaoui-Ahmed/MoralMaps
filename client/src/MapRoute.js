@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import Routing from "./Routing";
@@ -7,7 +9,7 @@ import ConsentModal from "./ConsentModal";
 import ScenarioPanel from "./ScenarioPanel";
 import ProgressBar from "./ProgressBar";
 import { v4 as uuidv4 } from "uuid";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 const MapRoute = () => {
   const [routeConfig, setRouteConfig] = useState(null);
@@ -26,7 +28,7 @@ const MapRoute = () => {
   useEffect(() => {
     localStorage.setItem("sessionId", sessionId);
   }, [sessionId]);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/route-endpoints")
@@ -81,9 +83,9 @@ const MapRoute = () => {
         }),
       });
 
-      if (scenarioIndex + 1 >= scenarios.length) {
-        navigate("/thank-you", { state: { sessionId } });
-      } else {
+        if (scenarioIndex + 1 >= scenarios.length) {
+          router.push("/thank-you");
+        } else {
         setScenarioIndex((prev) => prev + 1);
         setSelectedLabel("default");
       }

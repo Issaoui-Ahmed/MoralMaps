@@ -58,12 +58,17 @@ export default function AdminApp() {
     setSaving(true);
     setError("");
     try {
-      // Only send fields managed by the admin UI to avoid overwriting
-      // manual edits in the config file (e.g., consent text).
-      const { consentText, ...payload } = config || {};
+      // Send only the fields that the admin UI is allowed to modify
+      const { start, end, routes, numberOfScenarios } = config || {};
+      const payload = {};
+      if (start !== undefined) payload.start = start;
+      if (end !== undefined) payload.end = end;
+      if (routes !== undefined) payload.routes = routes;
+      if (numberOfScenarios !== undefined)
+        payload.numberOfScenarios = numberOfScenarios;
 
       const res = await fetch(API_URL, {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });

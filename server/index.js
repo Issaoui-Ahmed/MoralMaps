@@ -141,6 +141,70 @@ app.post("/api/route-endpoints", (req, res) => {
   });
 });
 
+// 🔹 PATCH: Update specific config fields
+app.patch("/api/route-endpoints", (req, res) => {
+  const incoming = req.body || {};
+  const allowed = {};
+
+  if (Object.prototype.hasOwnProperty.call(incoming, "start")) {
+    if (!Array.isArray(incoming.start)) {
+      return res.status(400).json({ error: "Invalid start format" });
+    }
+    allowed.start = incoming.start;
+  }
+  if (Object.prototype.hasOwnProperty.call(incoming, "end")) {
+    if (!Array.isArray(incoming.end)) {
+      return res.status(400).json({ error: "Invalid end format" });
+    }
+    allowed.end = incoming.end;
+  }
+  if (Object.prototype.hasOwnProperty.call(incoming, "routes")) {
+    if (typeof incoming.routes !== "object") {
+      return res.status(400).json({ error: "Invalid routes format" });
+    }
+    allowed.routes = incoming.routes;
+  }
+  if (Object.prototype.hasOwnProperty.call(incoming, "numberOfScenarios")) {
+    if (typeof incoming.numberOfScenarios !== "number") {
+      return res
+        .status(400)
+        .json({ error: "Invalid numberOfScenarios format" });
+    }
+    allowed.numberOfScenarios = incoming.numberOfScenarios;
+  }
+
+  if (Object.keys(allowed).length === 0) {
+    return res.status(400).json({ error: "No valid fields provided" });
+  }
+
+  fs.readFile(configPath, "utf8", (readErr, data) => {
+    if (readErr && readErr.code !== "ENOENT") {
+      console.error("Error reading existing config:", readErr);
+      return res.status(500).json({ error: "Failed to read existing config" });
+    }
+
+    let existing = {};
+    if (!readErr) {
+      try {
+        existing = JSON.parse(data);
+      } catch (e) {
+        console.error("Invalid JSON in existing config:", e);
+      }
+    }
+
+    const merged = { ...existing, ...allowed };
+
+    fs.writeFile(configPath, JSON.stringify(merged, null, 2), (err) => {
+      if (err) {
+        console.error("Error writing appConfig.json:", err);
+        return res.status(500).json({ error: "Failed to write config file" });
+      }
+
+      res.json({ success: true });
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

@@ -56,33 +56,45 @@ const ThankYou = () => {
 
   if (submitted) {
     return (
-      <div style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", fontFamily: "sans-serif", color: "#333" }}>
-        Thank you for your feedback!
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+        <p className="text-2xl font-semibold text-gray-800">
+          Thank you for your feedback!
+        </p>
       </div>
     );
   }
 
   if (!config) {
-    return <div style={{ padding: "40px", fontFamily: "sans-serif" }}>Loading survey...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      </div>
+    );
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", fontFamily: "sans-serif", padding: "40px 20px", backgroundColor: "#f9f9f9" }}>
-      <div style={{ background: "#fff", padding: "30px", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", maxWidth: "500px", width: "100%" }}>
-        <h2 style={{ marginTop: 0 }}>Final Survey</h2>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-lg">
+        <h2 className="mb-6 text-2xl font-semibold text-gray-800">Final Survey</h2>
 
-        {(config.survey || []).map(field => (
-          <div key={field.name} style={{ marginBottom: "20px" }}>
-            <label style={{ display: "block", marginBottom: "6px" }}>{field.name}:</label>
+        {(config.survey || []).map((field) => (
+          <div key={field.name} className="mb-5">
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              {field.name}:
+            </label>
             {field.type === "select" ? (
               <select
                 value={responses[field.name] || ""}
                 onChange={(e) => handleChange(field.name, e.target.value)}
-                style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="" disabled>Select an option</option>
-                {(field.options || []).map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
+                <option value="" disabled>
+                  Select an option
+                </option>
+                {(field.options || []).map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             ) : (
@@ -90,7 +102,7 @@ const ThankYou = () => {
                 type={field.type}
                 value={responses[field.name] || ""}
                 onChange={(e) => handleChange(field.name, e.target.value)}
-                style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             )}
           </div>
@@ -98,12 +110,14 @@ const ThankYou = () => {
 
         <button
           onClick={handleSubmit}
-          style={{ padding: "10px 16px", backgroundColor: "#1452EE", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", width: "100%" }}
+          className="w-full rounded-md bg-blue-600 px-4 py-2 font-semibold text-white shadow transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Submit
         </button>
 
-        {error && <p style={{ color: "red", marginTop: "12px" }}>{error}</p>}
+        {error && (
+          <p className="mt-4 text-center text-sm text-red-600">{error}</p>
+        )}
       </div>
     </div>
   );

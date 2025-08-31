@@ -59,8 +59,39 @@
     },
     {
       "name": "age",
+      "type": "number"
+    },
+    {
+      "name": "gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female",
+        "Non-binary",
+        "Prefer not to say"
+      ]
+    },
+    {
+      "name": "primaryTransport",
+      "type": "select",
+      "options": [
+        "Walking",
+        "Biking",
+        "Public Transit",
+        "Car",
+        "Other"
+      ]
+    },
+    {
+      "name": "comfortNight",
+      "type": "range",
+      "min": 1,
+      "max": 5
+    },
+    {
+      "name": "feedback",
       "type": "text"
     }
   ],
-  "consentText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. ..."
+  "consentText": "By completing this survey you agree to take part in a research study about navigation preferences. Participation is voluntary, the survey takes about five minutes, and your responses will remain anonymous. You may skip any question or stop at any time before submitting. By continuing you confirm that you are at least 18 years old and consent to participate."
 }

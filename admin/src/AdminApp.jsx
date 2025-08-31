@@ -58,10 +58,14 @@ export default function AdminApp() {
     setSaving(true);
     setError("");
     try {
+      // Only send fields managed by the admin UI to avoid overwriting
+      // manual edits in the config file (e.g., consent text).
+      const { consentText, ...payload } = config || {};
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Failed to save (${res.status})`);
       // Re-fetch to confirm what the server persisted

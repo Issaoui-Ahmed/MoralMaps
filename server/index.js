@@ -103,23 +103,41 @@ app.get("/api/route-endpoints", (req, res) => {
 
 // 🔹 POST: Save new config
 app.post("/api/route-endpoints", (req, res) => {
-  const config = req.body;
+  const incoming = req.body;
 
   if (
-    !Array.isArray(config.start) ||
-    !Array.isArray(config.end) ||
-    typeof config.routes !== "object"
+    !Array.isArray(incoming.start) ||
+    !Array.isArray(incoming.end) ||
+    typeof incoming.routes !== "object"
   ) {
     return res.status(400).json({ error: "Invalid config structure" });
   }
 
-  fs.writeFile(configPath, JSON.stringify(config, null, 2), (err) => {
-    if (err) {
-      console.error("Error writing appConfig.json:", err);
-      return res.status(500).json({ error: "Failed to write config file" });
+  fs.readFile(configPath, "utf8", (readErr, data) => {
+    if (readErr && readErr.code !== "ENOENT") {
+      console.error("Error reading existing config:", readErr);
+      return res.status(500).json({ error: "Failed to read existing config" });
     }
 
-    res.json({ success: true });
+    let existing = {};
+    if (!readErr) {
+      try {
+        existing = JSON.parse(data);
+      } catch (e) {
+        console.error("Invalid JSON in existing config:", e);
+      }
+    }
+
+    const merged = { ...existing, ...incoming };
+
+    fs.writeFile(configPath, JSON.stringify(merged, null, 2), (err) => {
+      if (err) {
+        console.error("Error writing appConfig.json:", err);
+        return res.status(500).json({ error: "Failed to write config file" });
+      }
+
+      res.json({ success: true });
+    });
   });
 });
 

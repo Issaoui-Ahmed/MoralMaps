@@ -95,17 +95,19 @@ const MapRoute = () => {
     }
   };
 
-  if (error) return <div>{error}</div>;
-  if (!routeConfig || scenarios.length === 0) return <div>Loading route data...</div>;
-
-  const { start, end, routes: routeDict, consentText } = routeConfig;
+  const { start, end, routes: routeDict, consentText } = routeConfig || {};
   const currentScenario = scenarios[scenarioIndex];
-  const defaultTime = routeDict.default.totalTimeMinutes;
+  const defaultTime = routeDict?.default?.totalTimeMinutes;
   const bounds = useMemo(() => {
+    if (!start || !end) return null;
     const pts = [start, end];
     if (currentScenario?.middle) pts.push(currentScenario.middle);
     return L.latLngBounds(pts);
   }, [start, end, currentScenario]);
+
+  if (error) return <div>{error}</div>;
+  if (!routeConfig || scenarios.length === 0 || !bounds)
+    return <div>Loading route data...</div>;
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>

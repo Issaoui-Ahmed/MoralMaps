@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
+import L from "leaflet";
 import Routing from "./Routing";
 import RoutingLabels from "./RoutingLabels";
 import OnboardingModal from "./OnboardingModal";
@@ -100,6 +101,11 @@ const MapRoute = () => {
   const { start, end, routes: routeDict, consentText } = routeConfig;
   const currentScenario = scenarios[scenarioIndex];
   const defaultTime = routeDict.default.totalTimeMinutes;
+  const bounds = useMemo(() => {
+    const pts = [start, end];
+    if (currentScenario?.middle) pts.push(currentScenario.middle);
+    return L.latLngBounds(pts);
+  }, [start, end, currentScenario]);
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
@@ -107,8 +113,8 @@ const MapRoute = () => {
         <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length} />
       )}
       <MapContainer
-        center={start}
-        zoom={13}
+        bounds={bounds}
+        boundsOptions={{ padding: [50, 50], maxZoom: 15 }}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={false}
         doubleClickZoom={false}

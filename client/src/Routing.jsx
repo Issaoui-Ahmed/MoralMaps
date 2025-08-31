@@ -128,9 +128,18 @@ const Routing = ({
 
   useEffect(() => {
     const selectedIndex = selectedLabel === "default" ? 0 : 1;
-    const selectedPolyline = polylineRefs.current[selectedIndex];
-    if (selectedPolyline?.bringToFront) {
-      selectedPolyline.bringToFront();
+    const bringToFront = () => {
+      const selectedPolyline = polylineRefs.current[selectedIndex];
+      if (selectedPolyline?.bringToFront) {
+        selectedPolyline.bringToFront();
+      }
+    };
+
+    // Defer ordering to ensure polylines are mounted before adjusting z-index
+    if (typeof window !== "undefined" && window.requestAnimationFrame) {
+      window.requestAnimationFrame(bringToFront);
+    } else {
+      setTimeout(bringToFront, 0);
     }
   }, [selectedLabel, localRoutes]);
 

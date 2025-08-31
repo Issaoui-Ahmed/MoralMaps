@@ -47,7 +47,7 @@
   },
   "survey": [
     {
-      "name": "navFrequency",
+      "name": "Navigation App Usage Frequency",
       "type": "select",
       "options": [
         "Never",
@@ -58,11 +58,11 @@
       ]
     },
     {
-      "name": "age",
+      "name": "Age",
       "type": "number"
     },
     {
-      "name": "gender",
+      "name": "Gender",
       "type": "select",
       "options": [
         "Male",
@@ -72,7 +72,7 @@
       ]
     },
     {
-      "name": "primaryTransport",
+      "name": "Primary Mode of Transportation",
       "type": "select",
       "options": [
         "Walking",
@@ -83,15 +83,15 @@
       ]
     },
     {
-      "name": "comfortNight",
+      "name": "Comfort When Traveling at Night",
       "type": "range",
       "min": 1,
       "max": 5
     },
     {
-      "name": "feedback",
+      "name": "Additional Comments or Feedback",
       "type": "text"
     }
   ],
-  "consentText": "By completing this survey you agree to take part in a research study about navigation preferences. Participation is voluntary, the survey takes about five minutes, and your responses will remain anonymous. You may skip any question or stop at any time before submitting. By continuing you confirm that you are at least 18 years old and consent to participate."
+  "consentText": "Thank you for considering participation in this research study examining how people choose routes during navigation. The survey will ask you about your background and preferences in urban travel.\n\nYour participation is voluntary and should take approximately five minutes. You may decline to answer any question and can exit the survey at any time prior to submission.\n\nNo personally identifiable information will be collected, and responses will be stored securely and analyzed in aggregate. By continuing, you confirm that you are at least 18 years old and consent to the collection of your responses for research purposes. If you have any questions about this study, please contact the research team at research@example.edu."
 }

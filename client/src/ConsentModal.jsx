@@ -1,13 +1,30 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const ConsentModal = ({
   consentText,
   checkboxChecked,
   setCheckboxChecked,
-  scrolledToBottom,
-  handleScroll,
   onSubmit,
 }) => {
+  const textRef = useRef(null);
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+
+  useEffect(() => {
+    if (textRef.current) {
+      const { scrollHeight, clientHeight } = textRef.current;
+      if (scrollHeight <= clientHeight) {
+        setScrolledToBottom(true);
+      }
+    }
+  }, [consentText]);
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    if (scrollTop + clientHeight >= scrollHeight - 5) {
+      setScrolledToBottom(true);
+    }
+  };
+
   return (
     <div
       style={{
@@ -39,9 +56,10 @@ const ConsentModal = ({
       >
         <h2>Consent Form</h2>
         <div
+          ref={textRef}
           onScroll={handleScroll}
           style={{
-            overflowY: "scroll",
+            overflowY: "auto",
             flex: "1 1 auto",
             marginBottom: "12px",
             border: "1px solid #ccc",

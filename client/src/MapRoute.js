@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 const MapRoute = () => {
   const [routeConfig, setRouteConfig] = useState(null);
   const [consentGiven, setConsentGiven] = useState(false);
-  const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
@@ -95,11 +94,6 @@ const MapRoute = () => {
     }
   };
 
-  const handleScroll = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    if (scrollTop + clientHeight >= scrollHeight - 5) setScrolledToBottom(true);
-  };
-
   if (error) return <div>{error}</div>;
   if (!routeConfig || scenarios.length === 0) return <div>Loading route data...</div>;
 
@@ -163,8 +157,6 @@ const MapRoute = () => {
           consentText={consentText}
           checkboxChecked={checkboxChecked}
           setCheckboxChecked={setCheckboxChecked}
-          scrolledToBottom={scrolledToBottom}
-          handleScroll={handleScroll}
           onSubmit={() => {
             setConsentGiven(true);
             setShowOnboarding(true);

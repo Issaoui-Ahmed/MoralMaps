@@ -1,10 +1,9 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 
 const ThankYou = () => {
-  const location = useLocation();
-const sessionIdFromState = location.state?.sessionId;
-const sessionId = sessionIdFromState || localStorage.getItem("sessionId");
+  const sessionId = typeof window !== "undefined" ? localStorage.getItem("sessionId") : null;
 
 
   const [config, setConfig] = useState(null);

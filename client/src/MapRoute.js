@@ -63,7 +63,11 @@ const MapRoute = () => {
     }
 
     const shuffled = variants.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, config.numberOfScenarios);
+    const maxScenarios =
+      typeof config.numberOfScenarios === "number" && config.numberOfScenarios > 0
+        ? config.numberOfScenarios
+        : variants.length;
+    return shuffled.slice(0, Math.min(maxScenarios, variants.length));
   };
 
   const handleChoice = async (label) => {

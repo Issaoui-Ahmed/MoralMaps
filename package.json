@@ -5,9 +5,13 @@
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && node index.js",
     "client": "cd client && npm start",
-    "admin": "cd admin && npm start"
+    "admin": "cd admin && npm start",
+    "build": "npm --prefix client run build && npm --prefix admin run build",
+    "webflow:dev": "npx @webflow/cli@latest dev",
+    "webflow:deploy": "npx @webflow/cli@latest deploy"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.0",
+    "@webflow/cli": "^0.0.0"
   }
 }

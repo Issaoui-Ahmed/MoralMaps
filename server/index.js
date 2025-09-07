@@ -11,11 +11,29 @@ const PORT = 5000;
 app.use(cors());
 app.use(bodyParser.json());
 
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "admin";
+
+function requireAdmin(req, res, next) {
+  const header = req.headers.authorization || "";
+  const [type, encoded] = header.split(" ");
+  if (type === "Basic") {
+    const [user, pass] = Buffer.from(encoded, "base64").toString().split(":");
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      return next();
+    }
+  }
+  res.set("WWW-Authenticate", 'Basic realm="admin"');
+  return res.status(401).send("Authentication required.");
+}
+
 const configPath = path.join(__dirname, "appConfig.json");
 const dataPath = path.join(__dirname, "user_data.jsonl");
 
 // Session tracking
 const sessions = new Map();
+
+app.use("/api/route-endpoints", requireAdmin);
 
 // 🔹 POST: Log route choices
 app.post("/api/log-choice", (req, res) => {

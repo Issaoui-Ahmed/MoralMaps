@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState, useMemo, createContext, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from "react-router-dom";
 import RoutesEditor from "./RoutesEditor";

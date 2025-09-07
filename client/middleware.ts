@@ -2,18 +2,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const auth = req.headers.get("authorization") || "";
-  const [type, encoded] = auth.split(" ");
-  if (type === "Basic") {
-    const [user, pass] = Buffer.from(encoded, "base64").toString().split(":");
-    if (user === "admin" && pass === "admin") {
-      return NextResponse.next();
-    }
+  const { pathname } = req.nextUrl;
+  if (pathname === "/admin/login") {
+    return NextResponse.next();
   }
-  return new NextResponse("Authentication required.", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="admin"' },
-  });
+  const authed = req.cookies.get("adminAuth")?.value === "1";
+  if (authed) {
+    return NextResponse.next();
+  }
+  const url = req.nextUrl.clone();
+  url.pathname = "/admin/login";
+  return NextResponse.redirect(url);
 }
 
 export const config = {

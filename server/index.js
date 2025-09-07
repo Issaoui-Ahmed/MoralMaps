@@ -33,8 +33,6 @@ const dataPath = path.join(__dirname, "user_data.jsonl");
 // Session tracking
 const sessions = new Map();
 
-app.use("/api/route-endpoints", requireAdmin);
-
 // 🔹 POST: Log route choices
 app.post("/api/log-choice", (req, res) => {
   const { sessionId, scenarioIndex, choice, tts, defaultTime } = req.body;
@@ -120,7 +118,7 @@ app.get("/api/route-endpoints", (req, res) => {
 });
 
 // 🔹 POST: Save new config
-app.post("/api/route-endpoints", (req, res) => {
+app.post("/api/route-endpoints", requireAdmin, (req, res) => {
   const incoming = req.body;
 
   if (
@@ -160,7 +158,7 @@ app.post("/api/route-endpoints", (req, res) => {
 });
 
 // 🔹 PATCH: Update specific config fields
-app.patch("/api/route-endpoints", (req, res) => {
+app.patch("/api/route-endpoints", requireAdmin, (req, res) => {
   const incoming = req.body || {};
   const allowed = {};
 

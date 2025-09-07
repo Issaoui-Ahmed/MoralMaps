@@ -17,6 +17,7 @@ export const useConfig = () => {
 const API_URL = "http://localhost:5000/api/route-endpoints";
 
 export default function AdminApp() {
+  const authHeader = "Basic " + btoa("admin:admin");
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,7 +45,9 @@ export default function AdminApp() {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
+      const res = await fetch(API_URL, {
+        headers: { Authorization: authHeader },
+      });
       if (!res.ok) throw new Error(`Failed to load config (${res.status})`);
       const data = await res.json();
       setConfig(data);
@@ -72,7 +75,10 @@ export default function AdminApp() {
 
       const res = await fetch(API_URL, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authHeader,
+        },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Failed to save (${res.status})`);

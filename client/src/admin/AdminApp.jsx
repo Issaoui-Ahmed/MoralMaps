@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, createContext, useContext } from "react";
-import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from "react-router-dom";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import RoutesEditor from "./RoutesEditor";
 import SurveyEditor from "./SurveyEditor";
 
@@ -92,39 +93,46 @@ export default function AdminApp() {
   };
 
   const ctxValue = useMemo(() => ({ config, setConfig, setDirty }), [config]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const section = pathname.split("/").pop();
+
+  useEffect(() => {
+    if (!section || (section !== "routes" && section !== "survey")) {
+      router.replace("/admin/routes");
+    }
+  }, [section, router]);
+
+  const linkClass = (slug) =>
+    `px-2 py-1 rounded ${section === slug ? "bg-white border" : "hover:underline"}`;
 
   if (loading) return <div className="p-6 text-sm text-gray-600">Loading…</div>;
 
   return (
     <ConfigContext.Provider value={ctxValue}>
-      <Router>
-        <header className="flex items-center justify-between p-4 border-b bg-gray-50">
-          <nav className="flex gap-4">
-            <NavLink to="/routes" className={({ isActive }) => `px-2 py-1 rounded ${isActive ? "bg-white border" : "hover:underline"}`}>Routes</NavLink>
-            <NavLink to="/survey" className={({ isActive }) => `px-2 py-1 rounded ${isActive ? "bg-white border" : "hover:underline"}`}>Survey</NavLink>
-          </nav>
-          <div className="flex items-center gap-3">
-            {dirty && <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Unsaved changes</span>}
-            {lastSavedAt && !dirty && (
-              <span className="text-xs text-gray-500">Last saved: {lastSavedAt.toLocaleString()}</span>
-            )}
-            <button onClick={discard} className="border px-3 py-1 rounded">Discard</button>
-            <button onClick={save} disabled={!dirty || saving} className="bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-50">
-              {saving ? "Saving…" : "Save"}
-            </button>
-          </div>
-        </header>
-        {error && (
-          <div className="m-4 border rounded p-3 text-sm bg-red-50 border-red-200 text-red-800">{error}</div>
-        )}
-        <main className="p-4">
-          <Routes>
-            <Route path="/routes" element={<RoutesEditor />} />
-            <Route path="/survey" element={<SurveyEditor />} />
-            <Route path="*" element={<Navigate to="/routes" replace />} />
-          </Routes>
-        </main>
-      </Router>
+      <header className="flex items-center justify-between p-4 border-b bg-gray-50">
+        <nav className="flex gap-4">
+          <Link href="/admin/routes" className={linkClass("routes")}>Routes</Link>
+          <Link href="/admin/survey" className={linkClass("survey")}>Survey</Link>
+        </nav>
+        <div className="flex items-center gap-3">
+          {dirty && <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Unsaved changes</span>}
+          {lastSavedAt && !dirty && (
+            <span className="text-xs text-gray-500">Last saved: {lastSavedAt.toLocaleString()}</span>
+          )}
+          <button onClick={discard} className="border px-3 py-1 rounded">Discard</button>
+          <button onClick={save} disabled={!dirty || saving} className="bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-50">
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </header>
+      {error && (
+        <div className="m-4 border rounded p-3 text-sm bg-red-50 border-red-200 text-red-800">{error}</div>
+      )}
+      <main className="p-4">
+        {section === "routes" && <RoutesEditor />}
+        {section === "survey" && <SurveyEditor />}
+      </main>
     </ConfigContext.Provider>
   );
 }

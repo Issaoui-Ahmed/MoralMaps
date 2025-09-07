@@ -8,24 +8,46 @@ const { v4: uuidv4 } = require("uuid");
 const app = express();
 const PORT = 5000;
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "admin";
 
+function parseCookies(req) {
+  const list = {};
+  const rc = req.headers.cookie;
+  if (!rc) return list;
+  rc.split(";").forEach((cookie) => {
+    const parts = cookie.split("=");
+    const key = parts.shift().trim();
+    const value = decodeURIComponent(parts.join("="));
+    list[key] = value;
+  });
+  return list;
+}
+
 function requireAdmin(req, res, next) {
-  const header = req.headers.authorization || "";
-  const [type, encoded] = header.split(" ");
-  if (type === "Basic") {
-    const [user, pass] = Buffer.from(encoded, "base64").toString().split(":");
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      return next();
-    }
+  const cookies = parseCookies(req);
+  if (cookies.adminAuth === "1") {
+    return next();
   }
-  res.set("WWW-Authenticate", 'Basic realm="admin"');
   return res.status(401).send("Authentication required.");
 }
+
+app.post("/api/admin/login", (req, res) => {
+  const { username, password } = req.body || {};
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    res.setHeader("Set-Cookie", "adminAuth=1; Path=/; HttpOnly");
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ success: false });
+});
+
+app.post("/api/admin/logout", (req, res) => {
+  res.setHeader("Set-Cookie", "adminAuth=; Path=/; HttpOnly; Max-Age=0");
+  res.json({ success: true });
+});
 
 const configPath = path.join(__dirname, "appConfig.json");
 const dataPath = path.join(__dirname, "user_data.jsonl");

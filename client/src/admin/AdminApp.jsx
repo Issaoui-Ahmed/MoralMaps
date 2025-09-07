@@ -17,7 +17,6 @@ export const useConfig = () => {
 const API_URL = "http://localhost:5000/api/route-endpoints";
 
 export default function AdminApp() {
-  const authHeader = "Basic " + btoa("admin:admin");
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -46,7 +45,7 @@ export default function AdminApp() {
     setLoading(true);
     try {
       const res = await fetch(API_URL, {
-        headers: { Authorization: authHeader },
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`Failed to load config (${res.status})`);
       const data = await res.json();
@@ -77,8 +76,8 @@ export default function AdminApp() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: authHeader,
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Failed to save (${res.status})`);
@@ -112,6 +111,14 @@ export default function AdminApp() {
   const linkClass = (slug) =>
     `px-2 py-1 rounded ${section === slug ? "bg-white border" : "hover:underline"}`;
 
+  const logout = async () => {
+    await fetch("http://localhost:5000/api/admin/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    router.replace("/admin/login");
+  };
+
   if (loading) return <div className="p-6 text-sm text-gray-600">Loading…</div>;
 
   return (
@@ -130,6 +137,7 @@ export default function AdminApp() {
           <button onClick={save} disabled={!dirty || saving} className="bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-50">
             {saving ? "Saving…" : "Save"}
           </button>
+          <button onClick={logout} className="border px-3 py-1 rounded">Logout</button>
         </div>
       </header>
       {error && (

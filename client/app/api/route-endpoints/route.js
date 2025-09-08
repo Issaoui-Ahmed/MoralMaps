@@ -3,10 +3,16 @@ import fs from 'fs/promises';
 import path from 'path';
 import { requireAdmin } from '../_utils';
 
-const routesPath = path.join(process.cwd(), 'routesConfig.json');
-const textsPath = path.join(process.cwd(), 'textsConfig.json');
-const instructionsPath = path.join(process.cwd(), 'instructionsConfig.json');
-const surveyPath = path.join(process.cwd(), 'surveyConfig.json');
+// Config files live under the `config` directory. The previous implementation
+// attempted to load them from the project root which meant the API responded
+// with empty objects. Downstream consumers expected `routes.default` to exist
+// and crashed when it did not. Resolving the paths relative to `config`
+// ensures the full configuration is returned.
+const cfgDir = path.join(process.cwd(), 'config');
+const routesPath = path.join(cfgDir, 'routesConfig.json');
+const textsPath = path.join(cfgDir, 'textsConfig.json');
+const instructionsPath = path.join(cfgDir, 'instructionsConfig.json');
+const surveyPath = path.join(cfgDir, 'surveyConfig.json');
 
 async function readJson(p) {
   try {

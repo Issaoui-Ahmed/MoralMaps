@@ -44,10 +44,13 @@ const MapRoute = () => {
   }, []);
 
   const generateScenarios = (config) => {
-    const defaultTime = config.routes.default.totalTimeMinutes;
+    // When configuration files fail to load the routes object can be missing.
+    // Guard against undefined values so the UI fails gracefully instead of
+    // throwing a runtime TypeError.
+    const defaultTime = config.routes?.default?.totalTimeMinutes ?? 0;
     const variants = [];
 
-    for (const [routeName, routeData] of Object.entries(config.routes)) {
+    for (const [routeName, routeData] of Object.entries(config.routes || {})) {
       if (routeName === "default") continue;
       for (const variant of routeData.variants || []) {
         for (const tts of variant.tts) {

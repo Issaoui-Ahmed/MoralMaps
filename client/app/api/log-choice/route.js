@@ -8,7 +8,18 @@ import { loadSessions, saveSessions } from '../_sessionStore.js';
 // Resolve config relative to the project root so it loads consistently
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const configPath = path.join(__dirname, '..', '..', 'routesConfig.json');
+// Configuration files are stored under `config`. The previous relative path
+// pointed to `app/routesConfig.json`, which does not exist and resulted in the
+// server being unable to read experiment settings. Pointing to the proper
+// location allows session logging to include the configured number of scenarios.
+const configPath = path.join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'config',
+  'routesConfig.json'
+);
 
 export async function POST(req) {
   const { sessionId, scenarioIndex, choice, tts, defaultTime } = await req.json();

@@ -14,7 +14,7 @@ export const useConfig = () => {
   return ctx;
 };
 
-const API_URL = "http://localhost:5000/api/route-endpoints";
+const API_URL = "/api/route-endpoints";
 
 export default function AdminApp() {
   const [config, setConfig] = useState(null);
@@ -112,7 +112,7 @@ export default function AdminApp() {
     `px-2 py-1 rounded ${section === slug ? "bg-white border" : "hover:underline"}`;
 
   const logout = async () => {
-    await fetch("http://localhost:5000/api/admin/logout", {
+    await fetch("/api/admin/logout", {
       method: "POST",
       credentials: "include",
     });

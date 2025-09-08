@@ -12,7 +12,7 @@ export default function AdminLogin() {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    const res = await fetch("http://localhost:5000/api/admin/login", {
+    const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

@@ -3,15 +3,37 @@ import fs from 'fs/promises';
 import path from 'path';
 import { requireAdmin } from '../_utils';
 
-const configPath = path.join(process.cwd(), 'appConfig.json');
+const routesPath = path.join(process.cwd(), 'routesConfig.json');
+const textsPath = path.join(process.cwd(), 'textsConfig.json');
+const instructionsPath = path.join(process.cwd(), 'instructionsConfig.json');
+const surveyPath = path.join(process.cwd(), 'surveyConfig.json');
+
+async function readJson(p) {
+  try {
+    const data = await fs.readFile(p, 'utf8');
+    return JSON.parse(data);
+  } catch {
+    return {};
+  }
+}
 
 export async function GET() {
   try {
-    const data = await fs.readFile(configPath, 'utf8');
-    const config = JSON.parse(data);
-    return NextResponse.json(config);
+    const [routesCfg, textsCfg, instrCfg, surveyCfg] = await Promise.all([
+      readJson(routesPath),
+      readJson(textsPath),
+      readJson(instructionsPath),
+      readJson(surveyPath),
+    ]);
+    const merged = {
+      ...routesCfg,
+      ...textsCfg,
+      instructions: instrCfg.steps,
+      ...surveyCfg,
+    };
+    return NextResponse.json(merged);
   } catch (err) {
-    console.error('Error reading appConfig.json:', err);
+    console.error('Error reading config files:', err);
     return NextResponse.json({ error: 'Failed to read config file' }, { status: 500 });
   }
 }
@@ -21,33 +43,62 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
   const incoming = await req.json();
+  const tasks = [];
 
-  if (
-    !Array.isArray(incoming.start) ||
-    !Array.isArray(incoming.end) ||
-    typeof incoming.routes !== 'object'
-  ) {
-    return NextResponse.json({ error: 'Invalid config structure' }, { status: 400 });
+  const routeFields = {};
+  if (Array.isArray(incoming.start)) routeFields.start = incoming.start;
+  if (Array.isArray(incoming.end)) routeFields.end = incoming.end;
+  if (typeof incoming.routes === 'object') routeFields.routes = incoming.routes;
+  if (typeof incoming.numberOfScenarios === 'number')
+    routeFields.numberOfScenarios = incoming.numberOfScenarios;
+  if (Object.keys(routeFields).length) {
+    const current = await readJson(routesPath);
+    tasks.push(
+      fs.writeFile(
+        routesPath,
+        JSON.stringify({ ...current, ...routeFields }, null, 2)
+      )
+    );
   }
 
-  let existing = {};
-  try {
-    const data = await fs.readFile(configPath, 'utf8');
-    existing = JSON.parse(data);
-  } catch (err) {
-    if (err.code !== 'ENOENT') {
-      console.error('Error reading existing config:', err);
-      return NextResponse.json({ error: 'Failed to read existing config' }, { status: 500 });
-    }
+  if (Object.prototype.hasOwnProperty.call(incoming, 'survey')) {
+    tasks.push(
+      fs.writeFile(
+        surveyPath,
+        JSON.stringify({ survey: incoming.survey || [] }, null, 2)
+      )
+    );
   }
 
-  const merged = { ...existing, ...incoming };
+  const textPatch = {};
+  if (Object.prototype.hasOwnProperty.call(incoming, 'consentText'))
+    textPatch.consentText = incoming.consentText;
+  if (Object.prototype.hasOwnProperty.call(incoming, 'scenarioText'))
+    textPatch.scenarioText = incoming.scenarioText;
+  if (Object.keys(textPatch).length) {
+    const current = await readJson(textsPath);
+    tasks.push(
+      fs.writeFile(
+        textsPath,
+        JSON.stringify({ ...current, ...textPatch }, null, 2)
+      )
+    );
+  }
+
+  if (Object.prototype.hasOwnProperty.call(incoming, 'instructions')) {
+    tasks.push(
+      fs.writeFile(
+        instructionsPath,
+        JSON.stringify({ steps: incoming.instructions || [] }, null, 2)
+      )
+    );
+  }
 
   try {
-    await fs.writeFile(configPath, JSON.stringify(merged, null, 2));
+    await Promise.all(tasks);
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('Error writing appConfig.json:', err);
+    console.error('Error writing config files:', err);
     return NextResponse.json({ error: 'Failed to write config file' }, { status: 500 });
   }
 }
@@ -57,55 +108,61 @@ export async function PATCH(req) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
   const incoming = await req.json();
-  const allowed = {};
+  const routePatch = {};
 
   if (Object.prototype.hasOwnProperty.call(incoming, 'start')) {
-    if (!Array.isArray(incoming.start)) {
+    if (!Array.isArray(incoming.start))
       return NextResponse.json({ error: 'Invalid start format' }, { status: 400 });
-    }
-    allowed.start = incoming.start;
+    routePatch.start = incoming.start;
   }
   if (Object.prototype.hasOwnProperty.call(incoming, 'end')) {
-    if (!Array.isArray(incoming.end)) {
+    if (!Array.isArray(incoming.end))
       return NextResponse.json({ error: 'Invalid end format' }, { status: 400 });
-    }
-    allowed.end = incoming.end;
+    routePatch.end = incoming.end;
   }
   if (Object.prototype.hasOwnProperty.call(incoming, 'routes')) {
-    if (typeof incoming.routes !== 'object') {
+    if (typeof incoming.routes !== 'object')
       return NextResponse.json({ error: 'Invalid routes format' }, { status: 400 });
-    }
-    allowed.routes = incoming.routes;
+    routePatch.routes = incoming.routes;
   }
   if (Object.prototype.hasOwnProperty.call(incoming, 'numberOfScenarios')) {
-    if (typeof incoming.numberOfScenarios !== 'number') {
+    if (typeof incoming.numberOfScenarios !== 'number')
       return NextResponse.json({ error: 'Invalid numberOfScenarios format' }, { status: 400 });
-    }
-    allowed.numberOfScenarios = incoming.numberOfScenarios;
+    routePatch.numberOfScenarios = incoming.numberOfScenarios;
   }
 
-  if (Object.keys(allowed).length === 0) {
+  const tasks = [];
+  if (Object.keys(routePatch).length) {
+    const current = await readJson(routesPath);
+    tasks.push(
+      fs.writeFile(
+        routesPath,
+        JSON.stringify({ ...current, ...routePatch }, null, 2)
+      )
+    );
+  }
+
+  if (Object.prototype.hasOwnProperty.call(incoming, 'survey')) {
+    tasks.push(
+      fs.writeFile(
+        surveyPath,
+        JSON.stringify({ survey: incoming.survey || [] }, null, 2)
+      )
+    );
+  }
+
+  if (
+    !Object.keys(routePatch).length &&
+    !Object.prototype.hasOwnProperty.call(incoming, 'survey')
+  ) {
     return NextResponse.json({ error: 'No valid fields provided' }, { status: 400 });
   }
 
-  let existing = {};
   try {
-    const data = await fs.readFile(configPath, 'utf8');
-    existing = JSON.parse(data);
-  } catch (err) {
-    if (err.code !== 'ENOENT') {
-      console.error('Error reading existing config:', err);
-      return NextResponse.json({ error: 'Failed to read existing config' }, { status: 500 });
-    }
-  }
-
-  const merged = { ...existing, ...allowed };
-
-  try {
-    await fs.writeFile(configPath, JSON.stringify(merged, null, 2));
+    await Promise.all(tasks);
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('Error writing appConfig.json:', err);
+    console.error('Error writing config files:', err);
     return NextResponse.json({ error: 'Failed to write config file' }, { status: 500 });
   }
 }

@@ -99,7 +99,7 @@ const MapRoute = () => {
     }
   };
 
-  const { start, end, routes: routeDict, consentText } = routeConfig || {};
+  const { start, end, routes: routeDict, consentText, scenarioText, instructions } = routeConfig || {};
   const currentScenario = scenarios[scenarioIndex];
   const defaultTime = routeDict?.default?.totalTimeMinutes;
   const bounds = useMemo(() => {
@@ -179,6 +179,7 @@ const MapRoute = () => {
       {showOnboarding && (
         <OnboardingModal
           step={onboardingStep}
+          instructions={instructions}
           onNext={() => setOnboardingStep((prev) => prev + 1)}
           onBack={() => setOnboardingStep((prev) => prev - 1)}
           onSkip={() => {
@@ -207,6 +208,7 @@ const MapRoute = () => {
           totalScenarios={scenarios.length}
           defaultTime={defaultTime}
           alternativeTime={currentScenario.totalTimeMinutes}
+          scenarioText={scenarioText}
         />
       )}
     </div>

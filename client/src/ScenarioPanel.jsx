@@ -10,20 +10,27 @@ const ScenarioPanel = ({
   totalScenarios,
   defaultTime,
   alternativeTime,
+  scenarioText,
 }) => {
   const isSelected = selectedLabel === label;
+
+  const line1 = scenarioText?.line1?.replace('{defaultTime}', defaultTime) ||
+    `The time-efficient route takes approximately ${defaultTime} minutes.`;
+  const line2 = scenarioText?.line2
+    ?.replace('{label}', label)
+    ?.replace('{alternativeTime}', alternativeTime) ||
+    `The ${label} route prioritizes safety and takes about ${alternativeTime} minutes.`;
+  const line3 = scenarioText?.line3
+    ?.replace('{label}', label.toLowerCase()) ||
+    `Use the toggle below to activate the ${label.toLowerCase()} route if you prefer safety over speed.`;
 
   return (
     <div className="absolute top-5 left-5 w-80 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
       <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
       <div className="mt-3 mb-6 p-4 bg-gray-100 rounded-md text-gray-700">
-        <p className="mb-2">
-          The <span className="font-medium">time-efficient route</span> takes approximately <span className="font-medium">{defaultTime} minutes</span>.
-        </p>
-        <p className="mb-2">
-          The <span className="font-medium">{label} route</span> prioritizes safety and takes about <span className="font-medium">{alternativeTime} minutes</span>.
-        </p>
-        <p className="text-sm">Use the toggle below to activate the {label.toLowerCase()} route if you prefer safety over speed.</p>
+        <p className="mb-2">{line1}</p>
+        <p className="mb-2">{line2}</p>
+        <p className="text-sm">{line3}</p>
       </div>
 
       <div className="space-y-6">

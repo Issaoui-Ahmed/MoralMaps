@@ -39,59 +39,9 @@ const ExampleButton = () => {
   );
 };
 
-const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
-  const steps = [
-    {
-      title: "Welcome",
-      content: (
-        <>
-          <p style={{ margin: "0 0 12px" }}>
-            We'll guide you through a few quick route choices.
-          </p>
-          <p style={{ margin: 0 }}>
-            Each scenario compares a <strong>default</strong> path with an
-            alternative. Pick the route you'd take today.
-          </p>
-        </>
-      ),
-    },
-    {
-      title: "Compare routes",
-      content: (
-        <>
-          <h3 style={{ margin: "0 0 12px", fontSize: "1rem" }}>
-            Use this switch in the panel to preview the alternative route before
-            deciding:
-          </h3>
-          <ExampleSwitch />
-
-        </>
-
-      ),
-    },
-    {
-      title: "Submit",
-      content: (
-        <>
-          <h3
-            style={{
-              margin: "0 0 12px",
-              fontSize: "1rem",
-              color: "#1452EE",
-              fontWeight: 500,
-            }}
-          >
-            Use the button below to confirm your choice:
-          </h3>
-          <ExampleButton />
-
-        </>
-
-      ),
-    },
-  ];
-
-  const isLast = step === steps.length - 1;
+const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish, instructions = [] }) => {
+  const current = instructions[step] || { title: "", lines: [], example: null };
+  const isLast = step === instructions.length - 1;
 
   return (
     <div
@@ -131,10 +81,16 @@ const OnboardingModal = ({ step, onNext, onBack, onSkip, onFinish }) => {
             fontWeight: 600,
           }}
         >
-          {steps[step].title}
+          {current.title}
         </h2>
         <div style={{ marginBottom: "24px", lineHeight: 1.6, fontSize: "1rem" }}>
-          {steps[step].content}
+          {current.lines.map((line, idx) => (
+            <p key={idx} style={{ margin: idx === current.lines.length - 1 ? 0 : "0 0 12px" }}>
+              {line}
+            </p>
+          ))}
+          {current.example === 'switch' && <ExampleSwitch />}
+          {current.example === 'button' && <ExampleButton />}
         </div>
 
 

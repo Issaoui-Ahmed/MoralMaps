@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import sessions from '../_sessions';
+import { fileURLToPath } from 'url';
+import { loadSessions, saveSessions } from '../_sessionStore';
 
-const configPath = path.join(process.cwd(), 'appConfig.json');
+// Resolve config relative to the project root so it loads consistently
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const configPath = path.join(__dirname, '..', '..', 'appConfig.json');
 
 export async function POST(req) {
   const { sessionId, scenarioIndex, choice, tts, defaultTime } = await req.json();
 
   if (
+    typeof sessionId !== 'string' ||
     typeof scenarioIndex !== 'number' ||
     typeof choice !== 'string' ||
     typeof tts !== 'number' ||
@@ -28,18 +33,21 @@ export async function POST(req) {
     console.warn('Could not read numberOfScenarios from config. Using fallback.');
   }
 
-  if (!sessions.has(sessionId)) {
-    sessions.set(sessionId, {
+  const sessions = loadSessions();
+
+  if (!sessions[sessionId]) {
+    sessions[sessionId] = {
       sessionId,
       timestamp: new Date().toISOString(),
       defaultTime,
       totalScenarios,
       choices: Array(totalScenarios).fill(undefined),
-    });
+    };
   }
 
-  const session = sessions.get(sessionId);
-  session.choices[scenarioIndex] = encoded;
+  sessions[sessionId].choices[scenarioIndex] = encoded;
+
+  saveSessions(sessions);
 
   return NextResponse.json({ success: true });
 }

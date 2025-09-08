@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import sessions from '../_sessions';
+import { fileURLToPath } from 'url';
+import { loadSessions, saveSessions } from '../_sessionStore';
 
-const dataPath = path.join(process.cwd(), 'user_data.jsonl');
+// Ensure we write to a stable path regardless of runtime cwd
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dataPath = path.join(__dirname, '..', '..', 'user_data.jsonl');
 
 export async function POST(req) {
   const { sessionId, responses } = await req.json();
@@ -12,7 +16,8 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
   }
 
-  const session = sessions.get(sessionId);
+  const sessions = loadSessions();
+  const session = sessions[sessionId];
   if (!session) {
     return NextResponse.json({ error: 'Session not found' }, { status: 400 });
   }
@@ -21,7 +26,8 @@ export async function POST(req) {
 
   try {
     fs.appendFileSync(dataPath, JSON.stringify(session) + '\n', 'utf8');
-    sessions.delete(sessionId);
+    delete sessions[sessionId];
+    saveSessions(sessions);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Error writing user data:', err);

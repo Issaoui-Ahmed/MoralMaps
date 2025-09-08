@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadSessions, saveSessions } from '../_sessionStore';
+
 
 // Resolve config relative to the project root so it loads consistently
 const __filename = fileURLToPath(import.meta.url);

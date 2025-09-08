@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadSessions, saveSessions } from '../_sessionStore';
+
 
 // Ensure we write to a stable path regardless of runtime cwd
 const __filename = fileURLToPath(import.meta.url);

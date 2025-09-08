@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const sessionsFile = path.join(__dirname, '..', '..', 'sessions.json');
 
+
 export function loadSessions() {
   try {
     const data = fs.readFileSync(sessionsFile, 'utf8');

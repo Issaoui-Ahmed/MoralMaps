@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { loadSessions, saveSessions } from '../_sessionStore';
+import { fileURLToPath } from 'url';
 
-const dataPath = path.join(process.cwd(), 'user_data.jsonl');
+
+// Ensure we write to a stable path regardless of runtime cwd
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dataPath = path.join(__dirname, '..', '..', 'user_data.jsonl');
 
 export async function POST(req) {
   const { sessionId, responses } = await req.json();

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { loadSessions, saveSessions } from '../_sessionStore';
+import { fileURLToPath } from 'url';
 
-const configPath = path.join(process.cwd(), 'appConfig.json');
+
+// Resolve config relative to the project root so it loads consistently
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const configPath = path.join(__dirname, '..', '..', 'appConfig.json');
 
 export async function POST(req) {
   const { sessionId, scenarioIndex, choice, tts, defaultTime } = await req.json();

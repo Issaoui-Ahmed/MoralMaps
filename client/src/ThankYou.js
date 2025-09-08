@@ -12,7 +12,7 @@ const ThankYou = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/route-endpoints")
+    fetch("/api/route-endpoints")
       .then((res) => res.json())
       .then((data) => {
         setConfig(data);
@@ -35,7 +35,7 @@ const ThankYou = () => {
   const handleSubmit = async () => {
   setError(null);
   try {
-    const res = await fetch("http://localhost:5000/api/log-survey", {
+    const res = await fetch("/api/log-survey", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId, responses }),

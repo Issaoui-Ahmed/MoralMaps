@@ -4,12 +4,12 @@ import React, { useEffect, useMemo, useState } from "react";
  * SurveyEditor
  *
  * Assumptions (adjust as needed):
- * - Loads full config from GET http://localhost:5000/api/route-endpoints
+ * - Loads full config from GET /api/route-endpoints
  * - Saves by POST-ing the full config back to the same URL with an updated `survey` array (server returns `{ success: true }`)
  *
  * If your server expects a different route or method, update API_URL or the fetch in handleSave().
  */
-const API_URL = "http://localhost:5000/api/route-endpoints";
+const API_URL = "/api/route-endpoints";
 
 const EMPTY_FIELD = () => ({ name: "question", type: "text", options: [] });
 const FIELD_TYPES = ["text", "number", "email", "date", "select"];

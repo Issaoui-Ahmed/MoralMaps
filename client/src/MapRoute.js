@@ -31,7 +31,7 @@ const MapRoute = () => {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/route-endpoints")
+    fetch("/api/route-endpoints")
       .then((res) => res.json())
       .then((data) => {
         setRouteConfig(data);
@@ -75,7 +75,7 @@ const MapRoute = () => {
     const defaultTime = routeConfig.routes.default.totalTimeMinutes;
 
     try {
-      await fetch("http://localhost:5000/api/log-choice", {
+      await fetch("/api/log-choice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

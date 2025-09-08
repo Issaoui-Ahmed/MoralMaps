@@ -1,0 +1,50 @@
+{
+  "survey": [
+    {
+      "name": "Navigation App Usage Frequency",
+      "type": "select",
+      "options": [
+        "Never",
+        "Rarely",
+        "Sometimes",
+        "Often",
+        "Always"
+      ]
+    },
+    {
+      "name": "Age",
+      "type": "number"
+    },
+    {
+      "name": "Gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female",
+        "Non-binary",
+        "Prefer not to say"
+      ]
+    },
+    {
+      "name": "Primary Mode of Transportation",
+      "type": "select",
+      "options": [
+        "Walking",
+        "Biking",
+        "Public Transit",
+        "Car",
+        "Other"
+      ]
+    },
+    {
+      "name": "Comfort When Traveling at Night",
+      "type": "range",
+      "min": 1,
+      "max": 5
+    },
+    {
+      "name": "Additional Comments or Feedback",
+      "type": "text"
+    }
+  ]
+}

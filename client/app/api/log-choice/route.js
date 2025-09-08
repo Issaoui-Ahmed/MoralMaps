@@ -8,7 +8,7 @@ import { loadSessions, saveSessions } from '../_sessionStore.js';
 // Resolve config relative to the project root so it loads consistently
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const configPath = path.join(__dirname, '..', '..', 'appConfig.json');
+const configPath = path.join(__dirname, '..', '..', 'routesConfig.json');
 
 export async function POST(req) {
   const { sessionId, scenarioIndex, choice, tts, defaultTime } = await req.json();

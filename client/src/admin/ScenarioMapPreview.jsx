@@ -28,7 +28,19 @@ function Routes({ scenario }) {
 
     const start = Array.isArray(scenario.start?.[0]) ? scenario.start[0] : null;
     const end = Array.isArray(scenario.end?.[0]) ? scenario.end[0] : null;
-    if (!start || !end) return;
+    // When a new scenario is created, default coordinates of [0, 0] are used
+    // for both the start and end points. Leaflet Routing Machine will emit a
+    // "Routing error" in the console when asked to route from or to these
+    // placeholder coordinates. Avoid creating the routing control until the
+    // admin has provided real coordinates.
+    if (
+      !start ||
+      !end ||
+      (start[0] === 0 && start[1] === 0) ||
+      (end[0] === 0 && end[1] === 0) ||
+      (start[0] === end[0] && start[1] === end[1])
+    )
+      return;
 
     const waypointSets = [
       [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],

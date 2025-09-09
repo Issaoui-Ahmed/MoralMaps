@@ -242,50 +242,53 @@ export default function ScenariosEditor() {
   const selected = scenarios[selectedKey];
 
   return (
-    <div className="flex h-[calc(100vh-6rem)]">
-      <aside className="w-60 border-r p-4 flex flex-col">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Scenarios</h2>
-          <button onClick={addScenario} className="text-xs px-2 py-1 border rounded">Add</button>
+    <div className="relative h-[calc(100vh-6rem)]">
+      {selected && (
+        <ScenarioMapPreview
+          scenario={selected}
+          onChange={(patch) => updateScenario(selectedKey, patch)}
+          className="absolute inset-0"
+        />
+      )}
+      <div className="absolute top-0 left-0 z-10 h-full w-[30rem] max-w-full overflow-y-auto bg-white p-4 space-y-6 shadow-md">
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold">Scenarios</h2>
+            <button onClick={addScenario} className="text-xs px-2 py-1 border rounded">Add</button>
+          </div>
+          <div className="max-h-40 overflow-y-auto mb-4">
+            {scenarioKeys.map((key) => (
+              <div key={key} className="flex items-center mb-1">
+                <button
+                  onClick={() => deleteScenario(key)}
+                  className="text-xs text-red-600 mr-2 px-1"
+                  aria-label={`Delete ${scenarios[key]?.scenario_name || key}`}
+                >
+                  ✕
+                </button>
+                <button
+                  onClick={() => setSelectedKey(key)}
+                  className={`flex-1 text-left px-2 py-1 rounded text-sm ${
+                    key === selectedKey ? "bg-indigo-100" : "hover:bg-gray-100"
+                  }`}
+                >
+                  {scenarios[key]?.scenario_name ? scenarios[key].scenario_name : key}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          {scenarioKeys.map((key) => (
-            <div key={key} className="flex items-center mb-1">
-              <button
-                onClick={() => deleteScenario(key)}
-                className="text-xs text-red-600 mr-2 px-1"
-                aria-label={`Delete ${scenarios[key]?.scenario_name || key}`}
-              >
-                ✕
-              </button>
-              <button
-                onClick={() => setSelectedKey(key)}
-                className={`flex-1 text-left px-2 py-1 rounded text-sm ${key === selectedKey ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
-              >
-                {scenarios[key]?.scenario_name ? scenarios[key].scenario_name : key}
-              </button>
-            </div>
-          ))}
-        </div>
-      </aside>
-      <main className="flex-1 p-4 overflow-y-auto space-y-6">
         <SettingsEditor />
         {selected ? (
-          <>
-            <ScenarioMapPreview
-              scenario={selected}
-              onChange={(patch) => updateScenario(selectedKey, patch)}
-            />
-            <ScenarioForm
-              scenario={selected}
-              scenarioKey={selectedKey}
-              onChange={(patch) => updateScenario(selectedKey, patch)}
-            />
-          </>
+          <ScenarioForm
+            scenario={selected}
+            scenarioKey={selectedKey}
+            onChange={(patch) => updateScenario(selectedKey, patch)}
+          />
         ) : (
           <p className="text-sm text-gray-500">No scenarios defined.</p>
         )}
-      </main>
+      </div>
     </div>
   );
 }

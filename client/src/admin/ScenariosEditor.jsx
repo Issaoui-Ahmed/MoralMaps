@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useConfig } from "./AdminApp";
 import SettingsEditor from "./SettingsEditor";
 import ScenarioMapPreview from "./ScenarioMapPreview";
@@ -84,11 +84,11 @@ function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
   );
 }
 
-function ScenarioForm({ scenario, onChange, onDelete, index }) {
+function ScenarioForm({ scenario, onChange, onDelete, name }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Scenario {index + 1}</h3>
+        <h3 className="text-lg font-semibold">{name}</h3>
         <button onClick={onDelete} className="text-sm text-red-600">Delete scenario</button>
       </div>
       <CoordPairInput
@@ -111,11 +111,11 @@ function ScenarioForm({ scenario, onChange, onDelete, index }) {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Name</label>
+        <label className="block text-sm font-medium mb-1">Value name</label>
         <input
           type="text"
-          value={scenario.name || ""}
-          onChange={(e) => onChange({ name: e.target.value })}
+          value={scenario.value_name || ""}
+          onChange={(e) => onChange({ value_name: e.target.value })}
           className="border rounded px-2 py-1 text-sm w-full"
         />
       </div>
@@ -176,8 +176,18 @@ function ScenarioForm({ scenario, onChange, onDelete, index }) {
 
 export default function ScenariosEditor() {
   const { config, setConfig, setDirty } = useConfig();
-  const scenarios = Array.isArray(config?.scenarios) ? config.scenarios : [];
-  const [selectedIdx, setSelectedIdx] = useState(0);
+  const scenarios =
+    typeof config?.scenarios === "object" && config.scenarios !== null
+      ? config.scenarios
+      : {};
+  const scenarioKeys = Object.keys(scenarios);
+  const [selectedKey, setSelectedKey] = useState(scenarioKeys[0] || "");
+
+  useEffect(() => {
+    if (!selectedKey && scenarioKeys.length > 0) {
+      setSelectedKey(scenarioKeys[0]);
+    }
+  }, [scenarioKeys, selectedKey]);
 
   const patchScenarios = (next) => {
     setConfig((prev) => ({ ...prev, scenarios: next }));
@@ -190,26 +200,27 @@ export default function ScenariosEditor() {
       end: [[0, 0]],
       default_route_time: [0],
       choice_list: [],
-      name: "",
+      value_name: "",
       description: "",
       randomly_preselect_route: false,
     };
-    patchScenarios([...scenarios, fresh]);
-    setSelectedIdx(scenarios.length);
+    const newKey = `scenario_${scenarioKeys.length + 1}`;
+    patchScenarios({ ...scenarios, [newKey]: fresh });
+    setSelectedKey(newKey);
   };
 
-  const updateScenario = (idx, patch) => {
-    const next = scenarios.map((sc, i) => (i === idx ? { ...sc, ...patch } : sc));
+  const updateScenario = (key, patch) => {
+    const next = { ...scenarios, [key]: { ...scenarios[key], ...patch } };
     patchScenarios(next);
   };
 
-  const deleteScenario = (idx) => {
-    const next = scenarios.filter((_, i) => i !== idx);
-    patchScenarios(next);
-    setSelectedIdx(0);
+  const deleteScenario = (key) => {
+    const { [key]: _, ...rest } = scenarios;
+    patchScenarios(rest);
+    setSelectedKey(Object.keys(rest)[0] || "");
   };
 
-  const selected = scenarios[selectedIdx];
+  const selected = scenarios[selectedKey];
 
   return (
     <div className="flex h-[calc(100vh-6rem)]">
@@ -219,13 +230,13 @@ export default function ScenariosEditor() {
           <button onClick={addScenario} className="text-xs px-2 py-1 border rounded">Add</button>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {scenarios.map((sc, i) => (
+          {scenarioKeys.map((key) => (
             <button
-              key={i}
-              onClick={() => setSelectedIdx(i)}
-              className={`block w-full text-left px-2 py-1 rounded mb-1 text-sm ${i === selectedIdx ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
+              key={key}
+              onClick={() => setSelectedKey(key)}
+              className={`block w-full text-left px-2 py-1 rounded mb-1 text-sm ${key === selectedKey ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
             >
-              {sc?.name ? sc.name : `Scenario ${i + 1}`}
+              {scenarios[key]?.value_name ? scenarios[key].value_name : key}
             </button>
           ))}
         </div>
@@ -236,13 +247,13 @@ export default function ScenariosEditor() {
           <>
             <ScenarioMapPreview
               scenario={selected}
-              onChange={(patch) => updateScenario(selectedIdx, patch)}
+              onChange={(patch) => updateScenario(selectedKey, patch)}
             />
             <ScenarioForm
               scenario={selected}
-              index={selectedIdx}
-              onChange={(patch) => updateScenario(selectedIdx, patch)}
-              onDelete={() => deleteScenario(selectedIdx)}
+              name={selectedKey}
+              onChange={(patch) => updateScenario(selectedKey, patch)}
+              onDelete={() => deleteScenario(selectedKey)}
             />
           </>
         ) : (

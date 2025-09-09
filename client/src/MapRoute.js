@@ -40,7 +40,7 @@ const MapRoute = () => {
             const pre = sc.choice_list.find((c) => c.preselected) || sc.choice_list[0];
             const tts = pre?.tts ?? 0;
             return {
-              name: sc.name,
+              label: sc.value_name,
               description: sc.description,
               start: sc.start,
               end: sc.end,
@@ -132,7 +132,7 @@ const MapRoute = () => {
           consentGiven={consentGiven}
           setMapPoints={setMapPoints}
           setRoutes={setRoutes}
-          scenarioLabel={currentScenario.name}
+          scenarioLabel={currentScenario.label}
         />
       </MapContainer>
 
@@ -183,12 +183,12 @@ const MapRoute = () => {
 
       {consentGiven && !showOnboarding && (
         <ScenarioPanel
-          label={currentScenario.name}
+          label={currentScenario.label}
           description={currentScenario.description}
           selectedLabel={selectedLabel}
           onToggle={() =>
             setSelectedLabel(
-              selectedLabel === currentScenario.name ? "default" : currentScenario.name
+              selectedLabel === currentScenario.label ? "default" : currentScenario.label
             )
           }
           onSubmit={() => handleChoice(selectedLabel)}

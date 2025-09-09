@@ -202,8 +202,7 @@ export default function ScenariosEditor() {
   };
 
   const addScenario = () => {
-    const lastKey = scenarioKeys[scenarioKeys.length - 1];
-    const prev = lastKey ? scenarios[lastKey] : {};
+    const prev = selectedKey ? scenarios[selectedKey] : {};
     const cloneCoords = (coords) =>
       Array.isArray(coords)
         ? coords.map((p) => (Array.isArray(p) ? [...p] : p))

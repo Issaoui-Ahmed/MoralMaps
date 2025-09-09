@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ScenariosEditor from "./ScenariosEditor";
 import SurveyEditor from "./SurveyEditor";
+import SettingsEditor from "./SettingsEditor";
+import InstructionsEditor from "./InstructionsEditor";
+import TextsEditor from "./TextsEditor";
 import { validateScenarioConfig } from "./validateScenarios";
 
 // ---- Config context
@@ -105,15 +108,18 @@ export default function AdminApp() {
   const router = useRouter();
   const pathname = usePathname();
   const section = pathname.split("/").pop();
+  const validSections = ["scenarios", "settings", "survey", "instructions", "texts"];
 
   useEffect(() => {
-    if (!section || !["scenarios", "survey"].includes(section)) {
+    if (!section || !validSections.includes(section)) {
       router.replace("/admin/scenarios");
     }
   }, [section, router]);
 
   const linkClass = (slug) =>
     `px-2 py-1 rounded ${section === slug ? "bg-white border" : "hover:underline"}`;
+
+  const canSave = ["scenarios", "settings"].includes(section);
 
   const logout = async () => {
     await fetch("/api/admin/logout", {
@@ -130,17 +136,30 @@ export default function AdminApp() {
       <header className="flex items-center justify-between p-4 border-b bg-gray-50">
         <nav className="flex gap-4">
           <Link href="/admin/scenarios" className={linkClass("scenarios")}>Scenarios</Link>
+          <Link href="/admin/settings" className={linkClass("settings")}>Settings</Link>
           <Link href="/admin/survey" className={linkClass("survey")}>Survey</Link>
+          <Link href="/admin/instructions" className={linkClass("instructions")}>Instructions</Link>
+          <Link href="/admin/texts" className={linkClass("texts")}>Texts</Link>
         </nav>
         <div className="flex items-center gap-3">
-          {dirty && <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Unsaved changes</span>}
-          {lastSavedAt && !dirty && (
+          {canSave && dirty && (
+            <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Unsaved changes</span>
+          )}
+          {canSave && lastSavedAt && !dirty && (
             <span className="text-xs text-gray-500">Last saved: {lastSavedAt.toLocaleString()}</span>
           )}
-          <button onClick={discard} className="border px-3 py-1 rounded">Discard</button>
-          <button onClick={save} disabled={!dirty || saving} className="bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-50">
-            {saving ? "Saving…" : "Save"}
-          </button>
+          {canSave && (
+            <>
+              <button onClick={discard} className="border px-3 py-1 rounded">Discard</button>
+              <button
+                onClick={save}
+                disabled={!dirty || saving}
+                className="bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-50"
+              >
+                {saving ? "Saving…" : "Save"}
+              </button>
+            </>
+          )}
           <button onClick={logout} className="border px-3 py-1 rounded">Logout</button>
         </div>
       </header>
@@ -149,7 +168,10 @@ export default function AdminApp() {
       )}
       <main className="p-4">
         {section === "scenarios" && <ScenariosEditor />}
+        {section === "settings" && <SettingsEditor />}
         {section === "survey" && <SurveyEditor />}
+        {section === "instructions" && <InstructionsEditor />}
+        {section === "texts" && <TextsEditor />}
       </main>
     </ConfigContext.Provider>
   );

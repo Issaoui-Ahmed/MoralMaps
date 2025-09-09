@@ -5,6 +5,19 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet
 import L from "leaflet";
 import "leaflet-routing-machine";
 
+// Ensure Leaflet marker icons are loaded correctly in bundlers like Next.js
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+// Fix for missing marker icons by explicitly setting their image URLs
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x.src || markerIcon2x,
+  iconUrl: markerIcon.src || markerIcon,
+  shadowUrl: markerShadow.src || markerShadow,
+});
+
 function Routes({ scenario }) {
   const map = useMap();
   const [routes, setRoutes] = useState([]);

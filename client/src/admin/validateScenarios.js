@@ -64,6 +64,10 @@ export function validateScenarioConfig(config) {
       errors.push(prefix + "default_route_time must contain positive integers");
     }
 
+    if (!validString(sc?.scenario_name)) {
+      errors.push(prefix + "scenario_name must be a non-empty string");
+    }
+
     if (!validString(sc?.value_name)) {
       errors.push(prefix + "value_name must be a non-empty string");
     }

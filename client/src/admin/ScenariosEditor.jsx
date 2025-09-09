@@ -84,11 +84,17 @@ function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
   );
 }
 
-function ScenarioForm({ scenario, onChange, onDelete, name }) {
+function ScenarioForm({ scenario, onChange, onDelete, scenarioKey }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">{name}</h3>
+        <input
+          type="text"
+          value={scenario.scenario_name || ""}
+          onChange={(e) => onChange({ scenario_name: e.target.value })}
+          placeholder={scenarioKey}
+          className="flex-1 text-lg font-semibold border-b border-transparent focus:border-gray-300 outline-none mr-2"
+        />
         <button onClick={onDelete} className="text-sm text-red-600">Delete scenario</button>
       </div>
       <CoordPairInput
@@ -108,15 +114,6 @@ function ScenarioForm({ scenario, onChange, onDelete, name }) {
           value={Array.isArray(scenario.default_route_time) ? scenario.default_route_time[0] : 0}
           onChange={(e) => onChange({ default_route_time: [Number(e.target.value)] })}
           className="border rounded px-2 py-1 text-sm w-32"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Scenario name</label>
-        <input
-          type="text"
-          value={scenario.scenario_name || ""}
-          onChange={(e) => onChange({ scenario_name: e.target.value })}
-          className="border rounded px-2 py-1 text-sm w-full"
         />
       </div>
       <div>
@@ -261,7 +258,7 @@ export default function ScenariosEditor() {
             />
             <ScenarioForm
               scenario={selected}
-              name={selectedKey}
+              scenarioKey={selectedKey}
               onChange={(patch) => updateScenario(selectedKey, patch)}
               onDelete={() => deleteScenario(selectedKey)}
             />

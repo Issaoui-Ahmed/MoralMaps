@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ScenariosEditor from "./ScenariosEditor";
 import SurveyEditor from "./SurveyEditor";
-import SettingsEditor from "./SettingsEditor";
 import { validateScenarioConfig } from "./validateScenarios";
 
 // ---- Config context
@@ -108,8 +107,8 @@ export default function AdminApp() {
   const section = pathname.split("/").pop();
 
   useEffect(() => {
-    if (!section || !["settings", "scenarios", "survey"].includes(section)) {
-      router.replace("/admin/settings");
+    if (!section || !["scenarios", "survey"].includes(section)) {
+      router.replace("/admin/scenarios");
     }
   }, [section, router]);
 
@@ -130,7 +129,6 @@ export default function AdminApp() {
     <ConfigContext.Provider value={ctxValue}>
       <header className="flex items-center justify-between p-4 border-b bg-gray-50">
         <nav className="flex gap-4">
-          <Link href="/admin/settings" className={linkClass("settings")}>Settings</Link>
           <Link href="/admin/scenarios" className={linkClass("scenarios")}>Scenarios</Link>
           <Link href="/admin/survey" className={linkClass("survey")}>Survey</Link>
         </nav>
@@ -150,7 +148,6 @@ export default function AdminApp() {
         <div className="m-4 border rounded p-3 text-sm bg-red-50 border-red-200 text-red-800">{error}</div>
       )}
       <main className="p-4">
-        {section === "settings" && <SettingsEditor />}
         {section === "scenarios" && <ScenariosEditor />}
         {section === "survey" && <SurveyEditor />}
       </main>

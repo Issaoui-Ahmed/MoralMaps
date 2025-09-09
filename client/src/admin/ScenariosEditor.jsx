@@ -202,22 +202,27 @@ export default function ScenariosEditor() {
   };
 
   const addScenario = () => {
-    const prev = selectedKey ? scenarios[selectedKey] : {};
-    const cloneCoords = (coords) =>
-      Array.isArray(coords)
-        ? coords.map((p) => (Array.isArray(p) ? [...p] : p))
-        : [[0, 0]];
+    const prev = selectedKey ? scenarios[selectedKey] : null;
     const nextIndex = scenarioKeys.length + 1;
-    const fresh = {
-      start: prev.start ? cloneCoords(prev.start) : [[0, 0]],
-      end: prev.end ? cloneCoords(prev.end) : [[0, 0]],
-      default_route_time: [0],
-      choice_list: [],
-      scenario_name: `Scenario ${nextIndex}`,
-      value_name: "",
-      description: "",
-      randomly_preselect_route: false,
-    };
+
+    const cloneScenario = (sc) =>
+      typeof structuredClone === "function"
+        ? structuredClone(sc)
+        : JSON.parse(JSON.stringify(sc));
+
+    const fresh = prev
+      ? { ...cloneScenario(prev), scenario_name: `Scenario ${nextIndex}` }
+      : {
+          start: [[0, 0]],
+          end: [[0, 0]],
+          default_route_time: [0],
+          choice_list: [],
+          scenario_name: `Scenario ${nextIndex}`,
+          value_name: "",
+          description: "",
+          randomly_preselect_route: false,
+        };
+
     const newKey = `scenario_${nextIndex}`;
     patchScenarios({ ...scenarios, [newKey]: fresh });
     setSelectedKey(newKey);

@@ -18,7 +18,7 @@ const configPath = path.join(
   '..',
   '..',
   'config',
-  'routesConfig.json'
+  'scenariosConfig.json'
 );
 
 export async function POST(req) {
@@ -40,9 +40,12 @@ export async function POST(req) {
   let totalScenarios = 0;
   try {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    totalScenarios = config.numberOfScenarios || totalScenarios;
+    const scenarios = Array.isArray(config.scenarios) ? config.scenarios.length : 0;
+    const settings = config.settings || {};
+    const desired = typeof settings.number_of_scenarios === 'number' ? settings.number_of_scenarios : scenarios;
+    totalScenarios = Math.min(desired, scenarios);
   } catch (err) {
-    console.warn('Could not read numberOfScenarios from config. Using fallback.');
+    console.warn('Could not read scenario settings from config. Using fallback.');
   }
 
   const sessions = loadSessions();

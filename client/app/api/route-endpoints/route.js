@@ -9,7 +9,7 @@ import { requireAdmin } from '../_utils';
 // and crashed when it did not. Resolving the paths relative to `config`
 // ensures the full configuration is returned.
 const cfgDir = path.join(process.cwd(), 'config');
-const routesPath = path.join(cfgDir, 'routesConfig.json');
+const scenariosPath = path.join(cfgDir, 'scenariosConfig.json');
 const textsPath = path.join(cfgDir, 'textsConfig.json');
 const instructionsPath = path.join(cfgDir, 'instructionsConfig.json');
 const surveyPath = path.join(cfgDir, 'surveyConfig.json');
@@ -23,16 +23,75 @@ async function readJson(p) {
   }
 }
 
+function pickOne(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function buildScenarios(cfg) {
+  const allScenarios = Array.isArray(cfg.scenarios) ? cfg.scenarios : [];
+  const settings = cfg.settings || {};
+  const desired =
+    typeof settings.number_of_scenarios === 'number'
+      ? settings.number_of_scenarios
+      : allScenarios.length;
+  const count = Math.min(desired, allScenarios.length);
+
+  let chosen = allScenarios.slice();
+  if (count < allScenarios.length) {
+    chosen = chosen.sort(() => Math.random() - 0.5).slice(0, count);
+  }
+  if (settings.scenario_shuffle) {
+    chosen = chosen.sort(() => Math.random() - 0.5);
+  }
+
+  return chosen.map((sc) => {
+    const scenario = {
+      start: pickOne(sc.start),
+      end: pickOne(sc.end),
+      default_route_time: pickOne(sc.default_route_time),
+      name: pickOne(sc.name),
+      description: pickOne(sc.description),
+      choice_list: (sc.choice_list || []).map((route) => ({
+        middle_point: pickOne(route.middle_point),
+        tts: pickOne(route.tts),
+        preselected: route.preselected,
+      })),
+      randomly_preselect_route: sc.randomly_preselect_route,
+    };
+
+    if (scenario.randomly_preselect_route) {
+      const idx = Math.floor(Math.random() * scenario.choice_list.length);
+      scenario.choice_list = scenario.choice_list.map((r, i) => ({
+        ...r,
+        preselected: i === idx,
+      }));
+    } else {
+      let found = false;
+      scenario.choice_list = scenario.choice_list.map((r) => {
+        if (r.preselected && !found) {
+          found = true;
+          return r;
+        }
+        return { ...r, preselected: false };
+      });
+    }
+
+    delete scenario.randomly_preselect_route;
+    return scenario;
+  });
+}
+
 export async function GET() {
   try {
-    const [routesCfg, textsCfg, instrCfg, surveyCfg] = await Promise.all([
-      readJson(routesPath),
+    const [scenarioCfg, textsCfg, instrCfg, surveyCfg] = await Promise.all([
+      readJson(scenariosPath),
       readJson(textsPath),
       readJson(instructionsPath),
       readJson(surveyPath),
     ]);
     const merged = {
-      ...routesCfg,
+      scenarios: buildScenarios(scenarioCfg),
       ...textsCfg,
       instructions: instrCfg.steps,
       ...surveyCfg,
@@ -58,10 +117,10 @@ export async function POST(req) {
   if (typeof incoming.numberOfScenarios === 'number')
     routeFields.numberOfScenarios = incoming.numberOfScenarios;
   if (Object.keys(routeFields).length) {
-    const current = await readJson(routesPath);
+    const current = await readJson(scenariosPath);
     tasks.push(
       fs.writeFile(
-        routesPath,
+        scenariosPath,
         JSON.stringify({ ...current, ...routeFields }, null, 2)
       )
     );
@@ -139,10 +198,10 @@ export async function PATCH(req) {
 
   const tasks = [];
   if (Object.keys(routePatch).length) {
-    const current = await readJson(routesPath);
+    const current = await readJson(scenariosPath);
     tasks.push(
       fs.writeFile(
-        routesPath,
+        scenariosPath,
         JSON.stringify({ ...current, ...routePatch }, null, 2)
       )
     );

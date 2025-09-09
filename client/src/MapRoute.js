@@ -35,7 +35,22 @@ const MapRoute = () => {
       .then((res) => res.json())
       .then((data) => {
         setRouteConfig(data);
-        setScenarios(generateScenarios(data));
+        setScenarios(
+          (data.scenarios || []).map((sc) => {
+            const pre = sc.choice_list.find((c) => c.preselected) || sc.choice_list[0];
+            const tts = pre?.tts ?? 0;
+            return {
+              name: sc.name,
+              description: sc.description,
+              start: sc.start,
+              end: sc.end,
+              middle: pre?.middle_point,
+              tts,
+              defaultTime: sc.default_route_time,
+              totalTimeMinutes: sc.default_route_time + tts,
+            };
+          })
+        );
       })
       .catch((err) => {
         console.error("Failed to load route config:", err);
@@ -43,39 +58,9 @@ const MapRoute = () => {
       });
   }, []);
 
-  const generateScenarios = (config) => {
-    // When configuration files fail to load the routes object can be missing.
-    // Guard against undefined values so the UI fails gracefully instead of
-    // throwing a runtime TypeError.
-    const defaultTime = config.routes?.default?.totalTimeMinutes ?? 0;
-    const variants = [];
-
-    for (const [routeName, routeData] of Object.entries(config.routes || {})) {
-      if (routeName === "default") continue;
-      for (const variant of routeData.variants || []) {
-        for (const tts of variant.tts) {
-          variants.push({
-            label: `${routeName}`,
-            routeName,
-            middle: variant.middle,
-            tts,
-            totalTimeMinutes: defaultTime + tts,
-          });
-        }
-      }
-    }
-
-    const shuffled = variants.sort(() => Math.random() - 0.5);
-    const maxScenarios =
-      typeof config.numberOfScenarios === "number" && config.numberOfScenarios > 0
-        ? config.numberOfScenarios
-        : variants.length;
-    return shuffled.slice(0, Math.min(maxScenarios, variants.length));
-  };
-
   const handleChoice = async (label) => {
     const scenario = scenarios[scenarioIndex];
-    const defaultTime = routeConfig.routes.default.totalTimeMinutes;
+    const defaultTime = scenario.defaultTime;
 
     try {
       await fetch("/api/log-choice", {
@@ -90,9 +75,9 @@ const MapRoute = () => {
         }),
       });
 
-        if (scenarioIndex + 1 >= scenarios.length) {
-          router.push("/thank-you");
-        } else {
+      if (scenarioIndex + 1 >= scenarios.length) {
+        router.push("/thank-you");
+      } else {
         setScenarioIndex((prev) => prev + 1);
         setSelectedLabel("default");
       }
@@ -102,15 +87,15 @@ const MapRoute = () => {
     }
   };
 
-  const { start, end, routes: routeDict, consentText, scenarioText, instructions } = routeConfig || {};
+  const { consentText, scenarioText, instructions } = routeConfig || {};
   const currentScenario = scenarios[scenarioIndex];
-  const defaultTime = routeDict?.default?.totalTimeMinutes;
+  const defaultTime = currentScenario?.defaultTime;
   const bounds = useMemo(() => {
-    if (!start || !end) return null;
-    const pts = [start, end];
-    if (currentScenario?.middle) pts.push(currentScenario.middle);
+    if (!currentScenario) return null;
+    const pts = [currentScenario.start, currentScenario.end];
+    if (currentScenario.middle) pts.push(currentScenario.middle);
     return L.latLngBounds(pts);
-  }, [start, end, currentScenario]);
+  }, [currentScenario]);
 
   if (error) return <div>{error}</div>;
   if (!routeConfig || scenarios.length === 0 || !bounds)
@@ -137,8 +122,8 @@ const MapRoute = () => {
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
         <Routing
-          from={start}
-          to={end}
+          from={currentScenario.start}
+          to={currentScenario.end}
           middle={currentScenario.middle}
           totalTimeMinutes={currentScenario.totalTimeMinutes}
           defaultTimeMinutes={defaultTime}
@@ -147,7 +132,7 @@ const MapRoute = () => {
           consentGiven={consentGiven}
           setMapPoints={setMapPoints}
           setRoutes={setRoutes}
-          scenarioLabel={currentScenario.label}
+          scenarioLabel={currentScenario.name}
         />
       </MapContainer>
 
@@ -198,12 +183,12 @@ const MapRoute = () => {
 
       {consentGiven && !showOnboarding && (
         <ScenarioPanel
-          label={currentScenario.label}
-          description={routeDict[currentScenario.routeName].description}
+          label={currentScenario.name}
+          description={currentScenario.description}
           selectedLabel={selectedLabel}
           onToggle={() =>
             setSelectedLabel(
-              selectedLabel === currentScenario.label ? "default" : currentScenario.label
+              selectedLabel === currentScenario.name ? "default" : currentScenario.name
             )
           }
           onSubmit={() => handleChoice(selectedLabel)}

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useConfig } from "./AdminApp";
+import SettingsEditor from "./SettingsEditor";
+import ScenarioMapPreview from "./ScenarioMapPreview";
 
 function CoordPairInput({ label, value, onChange }) {
   const pair = Array.isArray(value) && Array.isArray(value[0]) ? value[0] : [0, 0];
@@ -222,14 +224,18 @@ export default function ScenariosEditor() {
           ))}
         </div>
       </aside>
-      <main className="flex-1 p-4 overflow-y-auto">
+      <main className="flex-1 p-4 overflow-y-auto space-y-6">
+        <SettingsEditor />
         {selected ? (
-          <ScenarioForm
-            scenario={selected}
-            index={selectedIdx}
-            onChange={(patch) => updateScenario(selectedIdx, patch)}
-            onDelete={() => deleteScenario(selectedIdx)}
-          />
+          <>
+            <ScenarioMapPreview scenario={selected} />
+            <ScenarioForm
+              scenario={selected}
+              index={selectedIdx}
+              onChange={(patch) => updateScenario(selectedIdx, patch)}
+              onDelete={() => deleteScenario(selectedIdx)}
+            />
+          </>
         ) : (
           <p className="text-sm text-gray-500">No scenarios defined.</p>
         )}

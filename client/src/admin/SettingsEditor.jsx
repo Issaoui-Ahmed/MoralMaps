@@ -3,9 +3,12 @@ import { useConfig } from "./AdminApp";
 
 export default function SettingsEditor() {
   const { config, setConfig, setDirty } = useConfig();
-  const scenarios = Array.isArray(config?.scenarios) ? config.scenarios : [];
+  const scenarios =
+    typeof config?.scenarios === "object" && config.scenarios !== null
+      ? config.scenarios
+      : {};
   const settings = config?.settings || {};
-  const max = scenarios.length > 0 ? scenarios.length : 1;
+  const max = Object.keys(scenarios).length > 0 ? Object.keys(scenarios).length : 1;
   const number = settings.number_of_scenarios || 1;
 
   const patch = (patchObj) => {

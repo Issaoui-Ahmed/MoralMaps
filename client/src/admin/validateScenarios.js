@@ -1,14 +1,22 @@
 export function validateScenarioConfig(config) {
   const errors = [];
-  const scenarios = Array.isArray(config?.scenarios) ? config.scenarios : [];
+  const scenariosObj =
+    typeof config?.scenarios === "object" && config.scenarios !== null
+      ? config.scenarios
+      : {};
+  const scenarioEntries = Object.entries(scenariosObj);
   const settings = config?.settings || {};
 
-  if (!Array.isArray(scenarios) || scenarios.length === 0) {
+  if (scenarioEntries.length === 0) {
     errors.push("At least one scenario must be defined");
   }
 
   const numScenarios = settings.number_of_scenarios;
-  if (!Number.isInteger(numScenarios) || numScenarios < 1 || numScenarios > scenarios.length) {
+  if (
+    !Number.isInteger(numScenarios) ||
+    numScenarios < 1 ||
+    numScenarios > scenarioEntries.length
+  ) {
     errors.push("number_of_scenarios must be between 1 and the number of scenarios");
   }
 
@@ -30,8 +38,8 @@ export function validateScenarioConfig(config) {
 
   const validString = (s) => typeof s === "string" && s.trim() !== "";
 
-  scenarios.forEach((sc, i) => {
-    const prefix = `Scenario ${i + 1}: `;
+  scenarioEntries.forEach(([key, sc], i) => {
+    const prefix = `${key}: `;
     const routes = Array.isArray(sc?.choice_list) ? sc.choice_list : [];
 
     if (!sc.randomly_preselect_route) {
@@ -56,8 +64,8 @@ export function validateScenarioConfig(config) {
       errors.push(prefix + "default_route_time must contain positive integers");
     }
 
-    if (!validString(sc?.name)) {
-      errors.push(prefix + "name must be a non-empty string");
+    if (!validString(sc?.value_name)) {
+      errors.push(prefix + "value_name must be a non-empty string");
     }
     if (!validString(sc?.description)) {
       errors.push(prefix + "description must be a non-empty string");

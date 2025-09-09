@@ -40,10 +40,17 @@ export async function POST(req) {
   let totalScenarios = 0;
   try {
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const scenarios = Array.isArray(config.scenarios) ? config.scenarios.length : 0;
+    const scenariosObj =
+      typeof config.scenarios === 'object' && config.scenarios !== null
+        ? config.scenarios
+        : {};
+    const scenariosCount = Object.keys(scenariosObj).length;
     const settings = config.settings || {};
-    const desired = typeof settings.number_of_scenarios === 'number' ? settings.number_of_scenarios : scenarios;
-    totalScenarios = Math.min(desired, scenarios);
+    const desired =
+      typeof settings.number_of_scenarios === 'number'
+        ? settings.number_of_scenarios
+        : scenariosCount;
+    totalScenarios = Math.min(desired, scenariosCount);
   } catch (err) {
     console.warn('Could not read scenario settings from config. Using fallback.');
   }

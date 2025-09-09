@@ -29,28 +29,32 @@ function pickOne(arr) {
 }
 
 function buildScenarios(cfg) {
-  const allScenarios = Array.isArray(cfg.scenarios) ? cfg.scenarios : [];
+  const allEntries =
+    typeof cfg.scenarios === 'object' && cfg.scenarios !== null
+      ? Object.entries(cfg.scenarios)
+      : [];
   const settings = cfg.settings || {};
   const desired =
     typeof settings.number_of_scenarios === 'number'
       ? settings.number_of_scenarios
-      : allScenarios.length;
-  const count = Math.min(desired, allScenarios.length);
+      : allEntries.length;
+  const count = Math.min(desired, allEntries.length);
 
-  let chosen = allScenarios.slice();
-  if (count < allScenarios.length) {
+  let chosen = allEntries.slice();
+  if (count < allEntries.length) {
     chosen = chosen.sort(() => Math.random() - 0.5).slice(0, count);
   }
   if (settings.scenario_shuffle) {
     chosen = chosen.sort(() => Math.random() - 0.5);
   }
 
-  return chosen.map((sc) => {
+  return chosen.map(([scenarioName, sc]) => {
     const scenario = {
       start: pickOne(sc.start),
       end: pickOne(sc.end),
       default_route_time: pickOne(sc.default_route_time),
-      name: Array.isArray(sc.name) ? pickOne(sc.name) : sc.name,
+      scenario_name: scenarioName,
+      value_name: Array.isArray(sc.value_name) ? pickOne(sc.value_name) : sc.value_name,
       description: Array.isArray(sc.description) ? pickOne(sc.description) : sc.description,
       choice_list: (sc.choice_list || []).map((route) => ({
         middle_point: pickOne(route.middle_point),

@@ -1,174 +1,86 @@
 {
-  "scenarios": [
-    {
+  "scenarios": {
+    "scenario_1": {
       "start": [
-        [
-          45.44133515211266,
-          -75.60859929166942
-        ],
-        [
-          45.45,
-          -75.62
-        ]
+        [45.44133515211266, -75.60859929166942],
+        [45.45, -75.62]
       ],
       "end": [
-        [
-          45.298074993041894,
-          -75.93887282992091
-        ],
-        [
-          45.31,
-          -75.95
-        ]
+        [45.298074993041894, -75.93887282992091],
+        [45.31, -75.95]
       ],
-      "default_route_time": [
-        1500
-      ],
+      "default_route_time": [1500],
       "choice_list": [
         {
           "middle_point": [
-            [
-              45.37434260639422,
-              -75.69853482150437
-            ],
-            [
-              45.38,
-              -75.71
-            ]
+            [45.37434260639422, -75.69853482150437],
+            [45.38, -75.71]
           ],
-          "tts": [
-            4,
-            7,
-            12
-          ],
+          "tts": [4, 7, 12],
           "preselected": false
         },
         {
           "middle_point": [
-            [
-              45.33042787045188,
-              -75.76378154531083
-            ],
-            [
-              45.335,
-              -75.77
-            ]
+            [45.33042787045188, -75.76378154531083],
+            [45.335, -75.77]
           ],
-          "tts": [
-            6,
-            9,
-            14
-          ],
+          "tts": [6, 9, 14],
           "preselected": false
         },
         {
           "middle_point": [
-            [
-              45.34537358598173,
-              -75.66420688040428
-            ],
-            [
-              45.35,
-              -75.67
-            ]
+            [45.34537358598173, -75.66420688040428],
+            [45.35, -75.67]
           ],
-          "tts": [
-            10,
-            13,
-            18
-          ],
+          "tts": [10, 13, 18],
           "preselected": false
         }
       ],
-      "name": "drivers safety",
+      "value_name": "drivers safety",
       "description": "This route prioritizes safer streets with better lighting and lower traffic.",
       "randomly_preselect_route": false
     },
-    {
+    "scenario_2": {
       "start": [
-        [
-          45.5001,
-          -75.6001
-        ],
-        [
-          45.505,
-          -75.61
-        ]
+        [45.5001, -75.6001],
+        [45.505, -75.61]
       ],
       "end": [
-        [
-          45.2605,
-          -75.9205
-        ],
-        [
-          45.27,
-          -75.93
-        ]
+        [45.2605, -75.9205],
+        [45.27, -75.93]
       ],
-      "default_route_time": [
-        1320
-      ],
+      "default_route_time": [1320],
       "choice_list": [
         {
           "middle_point": [
-            [
-              45.42,
-              -75.7
-            ],
-            [
-              45.425,
-              -75.705
-            ]
+            [45.42, -75.7],
+            [45.425, -75.705]
           ],
-          "tts": [
-            5,
-            8,
-            11
-          ],
+          "tts": [5, 8, 11],
           "preselected": false
         },
         {
           "middle_point": [
-            [
-              45.36,
-              -75.74
-            ],
-            [
-              45.365,
-              -75.745
-            ]
+            [45.36, -75.74],
+            [45.365, -75.745]
           ],
-          "tts": [
-            7,
-            10,
-            15
-          ],
+          "tts": [7, 10, 15],
           "preselected": false
         },
         {
           "middle_point": [
-            [
-              45.32,
-              -75.68
-            ],
-            [
-              45.325,
-              -75.685
-            ]
+            [45.32, -75.68],
+            [45.325, -75.685]
           ],
-          "tts": [
-            9,
-            12,
-            16
-          ],
+          "tts": [9, 12, 16],
           "preselected": false
         }
       ],
-      "name": "time-efficient safety",
+      "value_name": "time-efficient safety",
       "description": "Optimizes for protected intersections, wider lanes, and signalized crossings while keeping travel times reasonable.",
       "randomly_preselect_route": false
     }
-  ],
+  },
   "settings": {
     "scenario_shuffle": false,
     "number_of_scenarios": 2

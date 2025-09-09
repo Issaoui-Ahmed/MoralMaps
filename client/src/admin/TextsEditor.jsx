@@ -4,7 +4,7 @@ const API_URL = "/api/route-endpoints";
 
 export default function TextsEditor() {
   const [consentText, setConsentText] = useState("");
-  const [scenarioText, setScenarioText] = useState({ line1: "", line2: "", line3: "" });
+  const [scenarioText, setScenarioText] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -18,7 +18,8 @@ export default function TextsEditor() {
       })
       .then((data) => {
         setConsentText(data.consentText || "");
-        setScenarioText(data.scenarioText || { line1: "", line2: "", line3: "" });
+        const st = data.scenarioText || { line1: "", line2: "", line3: "" };
+        setScenarioText([st.line1, st.line2, st.line3].filter(Boolean).join("\n"));
         setError("");
       })
       .catch((e) => setError(e.message))
@@ -29,11 +30,17 @@ export default function TextsEditor() {
     setSaving(true);
     setError("");
     try {
+      const lines = scenarioText.split("\n");
+      const scenarioObj = {
+        line1: lines[0] || "",
+        line2: lines[1] || "",
+        line3: lines[2] || "",
+      };
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ consentText, scenarioText }),
+        body: JSON.stringify({ consentText, scenarioText: scenarioObj }),
       });
       if (!res.ok) throw new Error(`Failed to save (${res.status})`);
     } catch (e) {
@@ -49,7 +56,8 @@ export default function TextsEditor() {
       .then((r) => r.json())
       .then((data) => {
         setConsentText(data.consentText || "");
-        setScenarioText(data.scenarioText || { line1: "", line2: "", line3: "" });
+        const st = data.scenarioText || { line1: "", line2: "", line3: "" };
+        setScenarioText([st.line1, st.line2, st.line3].filter(Boolean).join("\n"));
       })
       .finally(() => setLoading(false));
   };
@@ -69,35 +77,13 @@ export default function TextsEditor() {
           className="w-full border rounded px-2 py-1 text-sm h-48"
         />
       </div>
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Scenario text</h2>
-        <div>
-          <label className="block text-sm font-medium mb-1">Line 1</label>
-          <input
-            type="text"
-            value={scenarioText.line1 || ""}
-            onChange={(e) => setScenarioText((s) => ({ ...s, line1: e.target.value }))}
-            className="w-full border rounded px-2 py-1 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Line 2</label>
-          <input
-            type="text"
-            value={scenarioText.line2 || ""}
-            onChange={(e) => setScenarioText((s) => ({ ...s, line2: e.target.value }))}
-            className="w-full border rounded px-2 py-1 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Line 3</label>
-          <input
-            type="text"
-            value={scenarioText.line3 || ""}
-            onChange={(e) => setScenarioText((s) => ({ ...s, line3: e.target.value }))}
-            className="w-full border rounded px-2 py-1 text-sm"
-          />
-        </div>
+      <div>
+        <h2 className="text-lg font-semibold mb-1">Scenario text</h2>
+        <textarea
+          value={scenarioText}
+          onChange={(e) => setScenarioText(e.target.value)}
+          className="w-full border rounded px-2 py-1 text-sm h-32"
+        />
       </div>
       <div className="flex gap-2">
         <button onClick={discard} className="px-3 py-1.5 border rounded-xl">Discard</button>

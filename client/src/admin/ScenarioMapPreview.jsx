@@ -59,7 +59,17 @@ function Routes({ scenario }) {
     });
 
     const controls = [];
-    const newRoutes = [];
+    const results = [];
+
+    const updateAndFit = () => {
+      const defined = results.filter(Boolean);
+      setRoutes([...results]);
+      const allCoords = defined.flat();
+      if (allCoords.length) {
+        const bounds = L.latLngBounds(allCoords);
+        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
+      }
+    };
 
     waypointSets.forEach((wps, idx) => {
       const control = L.Routing.control({
@@ -74,15 +84,13 @@ function Routes({ scenario }) {
       }).addTo(map);
 
       control.on("routesfound", (e) => {
-        newRoutes[idx] = e.routes[0].coordinates.map((c) => [c.lat, c.lng]);
-        if (newRoutes.filter(Boolean).length === waypointSets.length) {
-          setRoutes([...newRoutes]);
-          const allCoords = newRoutes.flatMap((r) => (r ? r : []));
-          if (allCoords.length) {
-            const bounds = L.latLngBounds(allCoords);
-            map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
-          }
-        }
+        results[idx] = e.routes[0].coordinates.map((c) => [c.lat, c.lng]);
+        updateAndFit();
+      });
+
+      control.on("routingerror", () => {
+        results[idx] = null;
+        updateAndFit();
       });
 
       controls.push(control);

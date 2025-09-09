@@ -110,13 +110,20 @@ export default function ScenarioMapPreview({
   const handleDrag = (type, idx) => (e) => {
     const { lat, lng } = e.target.getLatLng();
     if (type === "start") {
-      onChange({ start: [[lat, lng]] });
+      const arr = Array.isArray(scenario.start) ? [...scenario.start] : [];
+      arr[0] = [lat, lng];
+      onChange({ start: arr });
     } else if (type === "end") {
-      onChange({ end: [[lat, lng]] });
+      const arr = Array.isArray(scenario.end) ? [...scenario.end] : [];
+      arr[0] = [lat, lng];
+      onChange({ end: arr });
     } else if (type === "mid") {
-      const next = alternatives.map((r, i) =>
-        i === idx ? { ...r, middle_point: [[lat, lng]] } : r
-      );
+      const next = alternatives.map((r, i) => {
+        if (i !== idx) return r;
+        const arr = Array.isArray(r.middle_point) ? [...r.middle_point] : [];
+        arr[0] = [lat, lng];
+        return { ...r, middle_point: arr };
+      });
       onChange({ choice_list: next });
     }
   };

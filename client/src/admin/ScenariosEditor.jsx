@@ -3,74 +3,118 @@ import { useConfig } from "./AdminApp";
 import SettingsEditor from "./SettingsEditor";
 import ScenarioMapPreview from "./ScenarioMapPreview";
 
-function CoordPairInput({ label, value, onChange }) {
-  const pair = Array.isArray(value) && Array.isArray(value[0]) ? value[0] : [0, 0];
-  const [lat, lng] = pair;
+function CoordListInput({ label, values = [], onChange }) {
+  const coords = Array.isArray(values) ? values : [];
+
+  const update = (idx, lat, lng) => {
+    const next = coords.map((p, i) => (i === idx ? [lat, lng] : p));
+    onChange(next);
+  };
+
+  const add = () => {
+    onChange([...coords, [0, 0]]);
+  };
+
+  const remove = (idx) => {
+    onChange(coords.filter((_, i) => i !== idx));
+  };
+
   return (
     <div className="mb-3">
       <label className="block text-sm font-medium mb-1">{label}</label>
-      <div className="flex gap-2">
-        <input
-          type="number"
-          step="any"
-          value={lat}
-          onChange={(e) => onChange([[Number(e.target.value), lng]])}
-          className="w-1/2 border rounded px-2 py-1 text-sm"
-        />
-        <input
-          type="number"
-          step="any"
-          value={lng}
-          onChange={(e) => onChange([[lat, Number(e.target.value)]])}
-          className="w-1/2 border rounded px-2 py-1 text-sm"
-        />
-      </div>
+      {coords.map((pair, i) => (
+        <div key={i} className="flex items-center gap-2 mb-1">
+          <input
+            type="number"
+            step="any"
+            value={pair[0]}
+            onChange={(e) => update(i, Number(e.target.value), pair[1])}
+            className="w-1/2 border rounded px-2 py-1 text-sm"
+          />
+          <input
+            type="number"
+            step="any"
+            value={pair[1]}
+            onChange={(e) => update(i, pair[0], Number(e.target.value))}
+            className="w-1/2 border rounded px-2 py-1 text-sm"
+          />
+          {coords.length > 1 && (
+            <button
+              onClick={() => remove(i)}
+              className="text-xs text-red-600"
+              aria-label="Remove coordinate"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+      <button onClick={add} className="text-xs px-2 py-1 border rounded">
+        Add
+      </button>
+    </div>
+  );
+}
+
+function NumberListInput({ label, values = [], onChange }) {
+  const nums = Array.isArray(values) ? values : [];
+
+  const update = (idx, val) => {
+    const next = nums.map((n, i) => (i === idx ? val : n));
+    onChange(next);
+  };
+
+  const add = () => onChange([...nums, 0]);
+  const remove = (idx) => onChange(nums.filter((_, i) => i !== idx));
+
+  return (
+    <div className="mb-3">
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      {nums.map((n, i) => (
+        <div key={i} className="flex items-center gap-2 mb-1">
+          <input
+            type="number"
+            value={n}
+            onChange={(e) => update(i, Number(e.target.value))}
+            className="border rounded px-2 py-1 text-sm w-32"
+          />
+          {nums.length > 1 && (
+            <button
+              onClick={() => remove(i)}
+              className="text-xs text-red-600"
+              aria-label="Remove value"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+      <button onClick={add} className="text-xs px-2 py-1 border rounded">
+        Add
+      </button>
     </div>
   );
 }
 
 function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
-  const pair = Array.isArray(route?.middle_point) && Array.isArray(route.middle_point[0])
-    ? route.middle_point[0]
-    : [0, 0];
-  const [lat, lng] = pair;
-  const ttsString = Array.isArray(route?.tts) ? route.tts.join(",") : "";
   return (
     <div className="border rounded p-3 mb-3">
       <div className="flex justify-between items-center mb-2">
         <h4 className="text-sm font-semibold">Alternative route {index + 1}</h4>
-        <button onClick={onDelete} className="text-xs text-red-600">Delete</button>
+        <button onClick={onDelete} className="text-xs text-red-600">
+          Delete
+        </button>
       </div>
-      <div className="mb-2">
-        <label className="block text-xs mb-1">Middle point</label>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            step="any"
-            value={lat}
-            onChange={(e) => onChange({ middle_point: [[Number(e.target.value), lng]] })}
-            className="w-1/2 border rounded px-2 py-1 text-sm"
-          />
-          <input
-            type="number"
-            step="any"
-            value={lng}
-            onChange={(e) => onChange({ middle_point: [[lat, Number(e.target.value)]] })}
-            className="w-1/2 border rounded px-2 py-1 text-sm"
-          />
-        </div>
-      </div>
-      <div className="mb-2">
-        <label className="block text-xs mb-1">TTS (comma separated)</label>
-        <input
-          type="text"
-          value={ttsString}
-          onChange={(e) =>
-            onChange({ tts: e.target.value.split(',').map((s) => Number(s.trim())).filter((n) => !isNaN(n)) })
-          }
-          className="w-full border rounded px-2 py-1 text-sm"
-        />
-      </div>
+      <CoordListInput
+        label="Middle points"
+        values={route.middle_point}
+        onChange={(val) => onChange({ middle_point: val })}
+      />
+      <NumberListInput
+        label="TTS"
+        values={route.tts}
+        onChange={(val) => onChange({ tts: val })}
+      />
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -89,25 +133,21 @@ function ScenarioForm({ scenario, onChange, name }) {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{name}</h3>
 
-      <CoordPairInput
+      <CoordListInput
         label="Start"
-        value={scenario.start}
+        values={scenario.start}
         onChange={(val) => onChange({ start: val })}
       />
-      <CoordPairInput
+      <CoordListInput
         label="End"
-        value={scenario.end}
+        values={scenario.end}
         onChange={(val) => onChange({ end: val })}
       />
-      <div>
-        <label className="block text-sm font-medium mb-1">Default route time (min)</label>
-        <input
-          type="number"
-          value={Array.isArray(scenario.default_route_time) ? scenario.default_route_time[0] : 0}
-          onChange={(e) => onChange({ default_route_time: [Number(e.target.value)] })}
-          className="border rounded px-2 py-1 text-sm w-32"
-        />
-      </div>
+      <NumberListInput
+        label="Default route time (min)"
+        values={scenario.default_route_time}
+        onChange={(val) => onChange({ default_route_time: val })}
+      />
       <div>
         <label className="block text-sm font-medium mb-1">Value name</label>
         <input
@@ -148,7 +188,7 @@ function ScenarioForm({ scenario, onChange, name }) {
               onChange({
                 choice_list: [
                   ...(scenario.choice_list || []),
-                  { middle_point: [mid], tts: [], preselected: false },
+                  { middle_point: [mid], tts: [0], preselected: false },
                 ],
               });
             }}

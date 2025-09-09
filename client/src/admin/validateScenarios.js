@@ -32,10 +32,10 @@ export function validateScenarioConfig(config) {
 
   scenarios.forEach((sc, i) => {
     const prefix = `Scenario ${i + 1}: `;
-    const choiceList = Array.isArray(sc?.choice_list) ? sc.choice_list : [];
+    const routes = Array.isArray(sc?.choice_list) ? sc.choice_list : [];
 
     if (!sc.randomly_preselect_route) {
-      const pre = choiceList.filter((c) => c.preselected).length;
+      const pre = routes.filter((c) => c.preselected).length;
       if (pre === 0) {
         errors.push(prefix + "must have a preselected route or randomly_preselect_route=true");
       }
@@ -63,12 +63,12 @@ export function validateScenarioConfig(config) {
       errors.push(prefix + "description must have at least one string");
     }
 
-    if (choiceList.length === 0) {
-      errors.push(prefix + "choice_list must not be empty");
+    if (routes.length === 0) {
+      errors.push(prefix + "Alternative routes must not be empty");
     }
 
-    choiceList.forEach((ch, j) => {
-      const cPrefix = `${prefix}Choice ${j + 1}: `;
+    routes.forEach((ch, j) => {
+      const cPrefix = `${prefix}Alternative route ${j + 1}: `;
       if (!validCoordArray(ch?.middle_point)) {
         errors.push(cPrefix + "middle_point must contain valid coordinates");
       }

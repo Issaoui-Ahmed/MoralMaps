@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet-routing-machine";
+import { startIcon, endIcon } from "../markerIcons";
 
 // Ensure Leaflet marker icons are loaded correctly in bundlers like Next.js
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -151,6 +152,7 @@ export default function ScenarioMapPreview({ scenario, onChange = () => {} }) {
           <Marker
             position={start}
             draggable
+            icon={startIcon}
             eventHandlers={{ dragend: handleDrag("start") }}
           />
         )}
@@ -158,6 +160,7 @@ export default function ScenarioMapPreview({ scenario, onChange = () => {} }) {
           <Marker
             position={end}
             draggable
+            icon={endIcon}
             eventHandlers={{ dragend: handleDrag("end") }}
           />
         )}

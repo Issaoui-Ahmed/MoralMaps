@@ -28,7 +28,7 @@ export function validateScenarioConfig(config) {
 
   const validCoordArray = (arr) => Array.isArray(arr) && arr.length > 0 && arr.every(validCoord);
 
-  const validStrings = (arr) => Array.isArray(arr) && arr.length > 0 && arr.every((s) => typeof s === "string" && s.trim() !== "");
+  const validString = (s) => typeof s === "string" && s.trim() !== "";
 
   scenarios.forEach((sc, i) => {
     const prefix = `Scenario ${i + 1}: `;
@@ -56,11 +56,11 @@ export function validateScenarioConfig(config) {
       errors.push(prefix + "default_route_time must contain positive integers");
     }
 
-    if (!validStrings(sc?.name)) {
-      errors.push(prefix + "name must have at least one string");
+    if (!validString(sc?.name)) {
+      errors.push(prefix + "name must be a non-empty string");
     }
-    if (!validStrings(sc?.description)) {
-      errors.push(prefix + "description must have at least one string");
+    if (!validString(sc?.description)) {
+      errors.push(prefix + "description must be a non-empty string");
     }
 
     if (choiceList.length === 0) {

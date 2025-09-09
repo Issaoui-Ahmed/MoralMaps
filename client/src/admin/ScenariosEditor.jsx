@@ -149,11 +149,20 @@ function ScenarioForm({ scenario, onChange, onDelete, name }) {
         <div className="flex justify-between items-center mb-2">
           <h4 className="text-sm font-semibold">Alternative routes</h4>
           <button
-            onClick={() =>
+            onClick={() => {
+              const start = Array.isArray(scenario.start?.[0]) ? scenario.start[0] : [0, 0];
+              const end = Array.isArray(scenario.end?.[0]) ? scenario.end[0] : [0, 0];
+              const mid = [
+                (start[0] + end[0]) / 2,
+                (start[1] + end[1]) / 2,
+              ];
               onChange({
-                choice_list: [...(scenario.choice_list || []), { middle_point: [[0, 0]], tts: [], preselected: false }],
-              })
-            }
+                choice_list: [
+                  ...(scenario.choice_list || []),
+                  { middle_point: [mid], tts: [], preselected: false },
+                ],
+              });
+            }}
             className="text-xs px-2 py-1 border rounded"
           >
             Add alternative route
@@ -204,9 +213,15 @@ export default function ScenariosEditor() {
   };
 
   const addScenario = () => {
+    const lastKey = scenarioKeys[scenarioKeys.length - 1];
+    const prev = lastKey ? scenarios[lastKey] : {};
+    const cloneCoords = (coords) =>
+      Array.isArray(coords)
+        ? coords.map((p) => (Array.isArray(p) ? [...p] : p))
+        : [[0, 0]];
     const fresh = {
-      start: [[0, 0]],
-      end: [[0, 0]],
+      start: prev.start ? cloneCoords(prev.start) : [[0, 0]],
+      end: prev.end ? cloneCoords(prev.end) : [[0, 0]],
       default_route_time: [0],
       choice_list: [],
       scenario_name: "",

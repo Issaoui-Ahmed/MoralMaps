@@ -11,6 +11,7 @@ import ScenarioPanel from "./ScenarioPanel";
 import ProgressBar from "./ProgressBar";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
+import { buildScenarios } from "./utils/buildScenarios";
 
 const MapRoute = () => {
   const [routeConfig, setRouteConfig] = useState(null);
@@ -35,8 +36,11 @@ const MapRoute = () => {
       .then((res) => res.json())
       .then((data) => {
         setRouteConfig(data);
+        const builtScenarios = Array.isArray(data.scenarios)
+          ? data.scenarios
+          : buildScenarios({ scenarios: data.scenarios, settings: data.settings });
         setScenarios(
-          (data.scenarios || []).map((sc) => {
+          builtScenarios.map((sc) => {
             const pre = sc.choice_list.find((c) => c.preselected) || sc.choice_list[0];
             const tts = pre?.tts ?? 0;
             return {

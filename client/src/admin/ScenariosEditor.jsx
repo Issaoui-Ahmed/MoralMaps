@@ -29,16 +29,16 @@ function CoordPairInput({ label, value, onChange }) {
   );
 }
 
-function ChoiceEditor({ choice, onChange, onDelete, index }) {
-  const pair = Array.isArray(choice?.middle_point) && Array.isArray(choice.middle_point[0])
-    ? choice.middle_point[0]
+function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
+  const pair = Array.isArray(route?.middle_point) && Array.isArray(route.middle_point[0])
+    ? route.middle_point[0]
     : [0, 0];
   const [lat, lng] = pair;
-  const ttsString = Array.isArray(choice?.tts) ? choice.tts.join(",") : "";
+  const ttsString = Array.isArray(route?.tts) ? route.tts.join(",") : "";
   return (
     <div className="border rounded p-3 mb-3">
       <div className="flex justify-between items-center mb-2">
-        <h4 className="text-sm font-semibold">Choice {index + 1}</h4>
+        <h4 className="text-sm font-semibold">Alternative route {index + 1}</h4>
         <button onClick={onDelete} className="text-xs text-red-600">Delete</button>
       </div>
       <div className="mb-2">
@@ -65,14 +65,16 @@ function ChoiceEditor({ choice, onChange, onDelete, index }) {
         <input
           type="text"
           value={ttsString}
-          onChange={(e) => onChange({ tts: e.target.value.split(',').map(s => Number(s.trim())).filter(n => !isNaN(n)) })}
+          onChange={(e) =>
+            onChange({ tts: e.target.value.split(',').map((s) => Number(s.trim())).filter((n) => !isNaN(n)) })
+          }
           className="w-full border rounded px-2 py-1 text-sm"
         />
       </div>
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
-          checked={!!choice?.preselected}
+          checked={!!route?.preselected}
           onChange={(e) => onChange({ preselected: e.target.checked })}
           className="h-4 w-4"
         />
@@ -136,22 +138,26 @@ function ScenarioForm({ scenario, onChange, onDelete, index }) {
       </div>
       <div>
         <div className="flex justify-between items-center mb-2">
-          <h4 className="text-sm font-semibold">Choices</h4>
+          <h4 className="text-sm font-semibold">Alternative routes</h4>
           <button
-            onClick={() => onChange({ choice_list: [...(scenario.choice_list || []), { middle_point: [[0,0]], tts: [], preselected: false }] })}
+            onClick={() =>
+              onChange({
+                choice_list: [...(scenario.choice_list || []), { middle_point: [[0, 0]], tts: [], preselected: false }],
+              })
+            }
             className="text-xs px-2 py-1 border rounded"
           >
-            Add choice
+            Add alternative route
           </button>
         </div>
         {Array.isArray(scenario.choice_list) && scenario.choice_list.length > 0 ? (
           scenario.choice_list.map((ch, i) => (
-            <ChoiceEditor
+            <AlternativeRouteEditor
               key={i}
-              choice={ch}
+              route={ch}
               index={i}
               onChange={(patch) => {
-                const next = scenario.choice_list.map((c, idx) => idx === i ? { ...c, ...patch } : c);
+                const next = scenario.choice_list.map((c, idx) => (idx === i ? { ...c, ...patch } : c));
                 onChange({ choice_list: next });
               }}
               onDelete={() => {
@@ -161,7 +167,7 @@ function ScenarioForm({ scenario, onChange, onDelete, index }) {
             />
           ))
         ) : (
-          <p className="text-xs text-gray-500">No choices defined.</p>
+          <p className="text-xs text-gray-500">No alternative routes defined.</p>
         )}
       </div>
     </div>
@@ -228,7 +234,10 @@ export default function ScenariosEditor() {
         <SettingsEditor />
         {selected ? (
           <>
-            <ScenarioMapPreview scenario={selected} />
+            <ScenarioMapPreview
+              scenario={selected}
+              onChange={(patch) => updateScenario(selectedIdx, patch)}
+            />
             <ScenarioForm
               scenario={selected}
               index={selectedIdx}

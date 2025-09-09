@@ -20,8 +20,8 @@ function Routes({ scenario }) {
       [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
     ];
 
-    const choices = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
-    choices.forEach((ch) => {
+    const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
+    alternatives.forEach((ch) => {
       const mid = Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null;
       if (mid) {
         waypointSets.push([
@@ -74,13 +74,8 @@ function Routes({ scenario }) {
     };
   }, [map, scenario]);
 
-  const start = Array.isArray(scenario.start?.[0]) ? scenario.start[0] : null;
-  const end = Array.isArray(scenario.end?.[0]) ? scenario.end[0] : null;
-
   return (
     <>
-      {start && <Marker position={start} />}
-      {end && <Marker position={end} />}
       {routes.map(
         (coords, i) =>
           coords && (
@@ -99,10 +94,26 @@ function Routes({ scenario }) {
   );
 }
 
-export default function ScenarioMapPreview({ scenario }) {
+export default function ScenarioMapPreview({ scenario, onChange = () => {} }) {
   const start = Array.isArray(scenario?.start?.[0]) ? scenario.start[0] : null;
   const end = Array.isArray(scenario?.end?.[0]) ? scenario.end[0] : null;
   if (!start || !end) return null;
+
+  const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
+
+  const handleDrag = (type, idx) => (e) => {
+    const { lat, lng } = e.target.getLatLng();
+    if (type === "start") {
+      onChange({ start: [[lat, lng]] });
+    } else if (type === "end") {
+      onChange({ end: [[lat, lng]] });
+    } else if (type === "mid") {
+      const next = alternatives.map((r, i) =>
+        i === idx ? { ...r, middle_point: [[lat, lng]] } : r
+      );
+      onChange({ choice_list: next });
+    }
+  };
 
   const bounds = L.latLngBounds([start, end]);
 
@@ -123,6 +134,33 @@ export default function ScenarioMapPreview({ scenario }) {
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
+        {start && (
+          <Marker
+            position={start}
+            draggable
+            eventHandlers={{ dragend: handleDrag("start") }}
+          />
+        )}
+        {end && (
+          <Marker
+            position={end}
+            draggable
+            eventHandlers={{ dragend: handleDrag("end") }}
+          />
+        )}
+        {alternatives.map((ch, i) => {
+          const mid = Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null;
+          return (
+            mid && (
+              <Marker
+                key={i}
+                position={mid}
+                draggable
+                eventHandlers={{ dragend: handleDrag("mid", i) }}
+              />
+            )
+          );
+        })}
         <Routes scenario={scenario} />
       </MapContainer>
     </div>

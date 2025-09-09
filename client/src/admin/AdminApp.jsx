@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ScenariosEditor from "./ScenariosEditor";
 import SurveyEditor from "./SurveyEditor";
-import SettingsEditor from "./SettingsEditor";
 import InstructionsEditor from "./InstructionsEditor";
 import TextsEditor from "./TextsEditor";
 import { validateScenarioConfig } from "./validateScenarios";
@@ -108,7 +107,7 @@ export default function AdminApp() {
   const router = useRouter();
   const pathname = usePathname();
   const section = pathname.split("/").pop();
-  const validSections = ["scenarios", "settings", "survey", "instructions", "texts"];
+  const validSections = ["scenarios", "survey", "instructions", "texts"];
 
   useEffect(() => {
     if (!section || !validSections.includes(section)) {
@@ -119,7 +118,7 @@ export default function AdminApp() {
   const linkClass = (slug) =>
     `px-2 py-1 rounded ${section === slug ? "bg-white border" : "hover:underline"}`;
 
-  const canSave = ["scenarios", "settings"].includes(section);
+  const canSave = section === "scenarios";
 
   const logout = async () => {
     await fetch("/api/admin/logout", {
@@ -136,7 +135,6 @@ export default function AdminApp() {
       <header className="flex items-center justify-between p-4 border-b bg-gray-50">
         <nav className="flex gap-4">
           <Link href="/admin/scenarios" className={linkClass("scenarios")}>Scenarios</Link>
-          <Link href="/admin/settings" className={linkClass("settings")}>Settings</Link>
           <Link href="/admin/survey" className={linkClass("survey")}>Survey</Link>
           <Link href="/admin/instructions" className={linkClass("instructions")}>Instructions</Link>
           <Link href="/admin/texts" className={linkClass("texts")}>Texts</Link>
@@ -168,7 +166,6 @@ export default function AdminApp() {
       )}
       <main className="p-4">
         {section === "scenarios" && <ScenariosEditor />}
-        {section === "settings" && <SettingsEditor />}
         {section === "survey" && <SurveyEditor />}
         {section === "instructions" && <InstructionsEditor />}
         {section === "texts" && <TextsEditor />}

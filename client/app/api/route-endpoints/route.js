@@ -82,7 +82,7 @@ function buildScenarios(cfg) {
   });
 }
 
-export async function GET() {
+export async function GET(req) {
   try {
     const [scenarioCfg, textsCfg, instrCfg, surveyCfg] = await Promise.all([
       readJson(scenariosPath),
@@ -90,6 +90,19 @@ export async function GET() {
       readJson(instructionsPath),
       readJson(surveyPath),
     ]);
+
+    // When an admin is authenticated, return the raw configuration so that
+    // the dashboard can be pre-populated with the current config values.
+    if (requireAdmin(req)) {
+      const merged = {
+        ...scenarioCfg,
+        ...textsCfg,
+        instructions: instrCfg.steps,
+        ...surveyCfg,
+      };
+      return NextResponse.json(merged);
+    }
+
     const merged = {
       scenarios: buildScenarios(scenarioCfg),
       ...textsCfg,

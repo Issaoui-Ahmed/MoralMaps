@@ -168,15 +168,6 @@ export default function RoutesEditor() {
           />
         </Section>
 
-        {/* numberOfScenarios */}
-        <Section title="Scenarios">
-          <NumberInput
-            label="numberOfScenarios"
-            value={config?.numberOfScenarios || 0}
-            onChange={(n)=>patchConfig({ numberOfScenarios: n })}
-          />
-        </Section>
-
         {/* Second route basic fields */}
         <Section title="Second route">
           <TextInput

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import RoutesEditor from "./RoutesEditor";
 import SurveyEditor from "./SurveyEditor";
+import SettingsEditor from "./SettingsEditor";
+import { validateScenarioConfig } from "./validateScenarios";
 
 // ---- Config context
 const ConfigContext = createContext(null);
@@ -63,14 +65,18 @@ export default function AdminApp() {
     setSaving(true);
     setError("");
     try {
+      const validation = validateScenarioConfig(config);
+      if (!validation.ok) {
+        throw new Error(validation.errors.join("; "));
+      }
       // Send only the fields that the admin UI is allowed to modify
-      const { start, end, routes, numberOfScenarios } = config || {};
+      const { start, end, routes, scenarios, settings } = config || {};
       const payload = {};
       if (start !== undefined) payload.start = start;
       if (end !== undefined) payload.end = end;
       if (routes !== undefined) payload.routes = routes;
-      if (numberOfScenarios !== undefined)
-        payload.numberOfScenarios = numberOfScenarios;
+      if (scenarios !== undefined) payload.scenarios = scenarios;
+      if (settings !== undefined) payload.settings = settings;
 
       const res = await fetch(API_URL, {
         method: "PATCH",
@@ -103,8 +109,8 @@ export default function AdminApp() {
   const section = pathname.split("/").pop();
 
   useEffect(() => {
-    if (!section || (section !== "routes" && section !== "survey")) {
-      router.replace("/admin/routes");
+    if (!section || !["settings", "routes", "survey"].includes(section)) {
+      router.replace("/admin/settings");
     }
   }, [section, router]);
 
@@ -125,6 +131,7 @@ export default function AdminApp() {
     <ConfigContext.Provider value={ctxValue}>
       <header className="flex items-center justify-between p-4 border-b bg-gray-50">
         <nav className="flex gap-4">
+          <Link href="/admin/settings" className={linkClass("settings")}>Settings</Link>
           <Link href="/admin/routes" className={linkClass("routes")}>Routes</Link>
           <Link href="/admin/survey" className={linkClass("survey")}>Survey</Link>
         </nav>
@@ -144,6 +151,7 @@ export default function AdminApp() {
         <div className="m-4 border rounded p-3 text-sm bg-red-50 border-red-200 text-red-800">{error}</div>
       )}
       <main className="p-4">
+        {section === "settings" && <SettingsEditor />}
         {section === "routes" && <RoutesEditor />}
         {section === "survey" && <SurveyEditor />}
       </main>

@@ -131,7 +131,15 @@ export async function POST(req) {
   const tasks = [];
 
   const routeFields = {};
-  if (Array.isArray(incoming.scenarios)) routeFields.scenarios = incoming.scenarios;
+  if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
+    if (
+      typeof incoming.scenarios !== 'object' ||
+      incoming.scenarios === null ||
+      Array.isArray(incoming.scenarios)
+    )
+      return NextResponse.json({ error: 'Invalid scenarios format' }, { status: 400 });
+    routeFields.scenarios = incoming.scenarios;
+  }
   if (incoming.settings && typeof incoming.settings === 'object')
     routeFields.settings = incoming.settings;
   if (Object.keys(routeFields).length) {
@@ -194,7 +202,11 @@ export async function PATCH(req) {
   const routePatch = {};
 
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
-    if (!Array.isArray(incoming.scenarios))
+    if (
+      typeof incoming.scenarios !== 'object' ||
+      incoming.scenarios === null ||
+      Array.isArray(incoming.scenarios)
+    )
       return NextResponse.json({ error: 'Invalid scenarios format' }, { status: 400 });
     routePatch.scenarios = incoming.scenarios;
   }

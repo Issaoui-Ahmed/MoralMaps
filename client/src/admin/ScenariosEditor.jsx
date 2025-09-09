@@ -84,13 +84,10 @@ function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
   );
 }
 
-function ScenarioForm({ scenario, onChange, onDelete, name }) {
+function ScenarioForm({ scenario, onChange, name }) {
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <button onClick={onDelete} className="text-sm text-red-600">Delete scenario</button>
-      </div>
+      <h3 className="text-lg font-semibold">{name}</h3>
       <CoordPairInput
         label="Start"
         value={scenario.start}
@@ -241,13 +238,21 @@ export default function ScenariosEditor() {
         </div>
         <div className="flex-1 overflow-y-auto">
           {scenarioKeys.map((key) => (
-            <button
-              key={key}
-              onClick={() => setSelectedKey(key)}
-              className={`block w-full text-left px-2 py-1 rounded mb-1 text-sm ${key === selectedKey ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
-            >
-              {scenarios[key]?.scenario_name ? scenarios[key].scenario_name : key}
-            </button>
+            <div key={key} className="flex items-center mb-1">
+              <button
+                onClick={() => deleteScenario(key)}
+                className="text-xs text-red-600 mr-2 px-1"
+                aria-label={`Delete ${scenarios[key]?.scenario_name || key}`}
+              >
+                ✕
+              </button>
+              <button
+                onClick={() => setSelectedKey(key)}
+                className={`flex-1 text-left px-2 py-1 rounded text-sm ${key === selectedKey ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
+              >
+                {scenarios[key]?.scenario_name ? scenarios[key].scenario_name : key}
+              </button>
+            </div>
           ))}
         </div>
       </aside>
@@ -263,7 +268,6 @@ export default function ScenariosEditor() {
               scenario={selected}
               name={selectedKey}
               onChange={(patch) => updateScenario(selectedKey, patch)}
-              onDelete={() => deleteScenario(selectedKey)}
             />
           </>
         ) : (

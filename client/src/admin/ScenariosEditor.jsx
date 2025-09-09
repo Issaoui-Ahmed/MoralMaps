@@ -247,7 +247,7 @@ export default function ScenariosEditor() {
         <ScenarioMapPreview
           scenario={selected}
           onChange={(patch) => updateScenario(selectedKey, patch)}
-          className="absolute inset-0"
+          className="absolute inset-0 z-0"
         />
       )}
       <div className="absolute top-0 left-0 z-10 h-full w-[30rem] max-w-full overflow-y-auto bg-white p-4 space-y-6 shadow-md">

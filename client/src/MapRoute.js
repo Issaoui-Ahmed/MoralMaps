@@ -24,6 +24,7 @@ const MapRoute = () => {
   const [scenarios, setScenarios] = useState([]);
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState("default");
+  const [selectedRouteIndex, setSelectedRouteIndex] = useState(0); // 0 = default
   const [error, setError] = useState(null);
   const [sessionId] = useState(uuidv4());
   useEffect(() => {
@@ -41,17 +42,27 @@ const MapRoute = () => {
           : buildScenarios({ scenarios: data.scenarios, settings: data.settings });
         setScenarios(
           builtScenarios.map((sc) => {
-            const pre = sc.choice_list.find((c) => c.preselected) || sc.choice_list[0];
-            const tts = pre?.tts ?? 0;
+            const alternatives = (sc.choice_list || []).map((c) => {
+              const tts = c?.tts ?? 0;
+              return {
+                middle: c.middle_point,
+                tts,
+                totalTimeMinutes: sc.default_route_time + tts,
+                preselected: c.preselected,
+              };
+            });
+            const preIdx = Math.max(
+              0,
+              alternatives.findIndex((c) => c.preselected)
+            );
             return {
               label: sc.scenario_name,
               description: sc.description,
               start: sc.start,
               end: sc.end,
-              middle: pre?.middle_point,
-              tts,
               defaultTime: sc.default_route_time,
-              totalTimeMinutes: sc.default_route_time + tts,
+              alternatives,
+              preselectedIndex: preIdx,
             };
           })
         );
@@ -62,9 +73,13 @@ const MapRoute = () => {
       });
   }, []);
 
-  const handleChoice = async (label) => {
+  const handleChoice = async () => {
     const scenario = scenarios[scenarioIndex];
     const defaultTime = scenario.defaultTime;
+    const tts =
+      selectedRouteIndex === 0
+        ? 0
+        : scenario.alternatives[selectedRouteIndex - 1]?.tts ?? 0;
 
     try {
       await fetch("/api/log-choice", {
@@ -73,8 +88,8 @@ const MapRoute = () => {
         body: JSON.stringify({
           sessionId,
           scenarioIndex,
-          choice: label,
-          tts: scenario.tts,
+          choice: selectedLabel,
+          tts,
           defaultTime,
         }),
       });
@@ -84,6 +99,7 @@ const MapRoute = () => {
       } else {
         setScenarioIndex((prev) => prev + 1);
         setSelectedLabel("default");
+        setSelectedRouteIndex(0);
       }
     } catch (err) {
       console.error("Error sending choice:", err);
@@ -97,7 +113,9 @@ const MapRoute = () => {
   const bounds = useMemo(() => {
     if (!currentScenario) return null;
     const pts = [currentScenario.start, currentScenario.end];
-    if (currentScenario.middle) pts.push(currentScenario.middle);
+    currentScenario.alternatives.forEach((alt) => {
+      if (alt.middle) pts.push(alt.middle);
+    });
     return L.latLngBounds(pts);
   }, [currentScenario]);
 
@@ -128,15 +146,16 @@ const MapRoute = () => {
         <Routing
           from={currentScenario.start}
           to={currentScenario.end}
-          middle={currentScenario.middle}
-          totalTimeMinutes={currentScenario.totalTimeMinutes}
+          alternatives={currentScenario.alternatives}
           defaultTimeMinutes={defaultTime}
-          selectedLabel={selectedLabel}
-          setSelectedLabel={setSelectedLabel}
+          selectedIndex={selectedRouteIndex}
+          setSelectedIndex={(i) => {
+            setSelectedRouteIndex(i);
+            setSelectedLabel(i === 0 ? "default" : currentScenario.label);
+          }}
           consentGiven={consentGiven}
           setMapPoints={setMapPoints}
           setRoutes={setRoutes}
-          scenarioLabel={currentScenario.label}
         />
       </MapContainer>
 
@@ -189,17 +208,25 @@ const MapRoute = () => {
         <ScenarioPanel
           label={currentScenario.label}
           description={currentScenario.description}
-          selectedLabel={selectedLabel}
-          onToggle={() =>
-            setSelectedLabel(
-              selectedLabel === currentScenario.label ? "default" : currentScenario.label
-            )
-          }
-          onSubmit={() => handleChoice(selectedLabel)}
+          isSelected={selectedRouteIndex !== 0}
+          onToggle={() => {
+            if (selectedRouteIndex !== 0) {
+              setSelectedLabel("default");
+              setSelectedRouteIndex(0);
+            } else {
+              setSelectedLabel(currentScenario.label);
+              setSelectedRouteIndex(currentScenario.preselectedIndex + 1);
+            }
+          }}
+          onSubmit={handleChoice}
           scenarioNumber={scenarioIndex + 1}
           totalScenarios={scenarios.length}
           defaultTime={defaultTime}
-          alternativeTime={currentScenario.totalTimeMinutes}
+          alternativeTime={
+            selectedRouteIndex === 0
+              ? defaultTime
+              : currentScenario.alternatives[selectedRouteIndex - 1]?.totalTimeMinutes
+          }
           scenarioText={scenarioText}
         />
       )}

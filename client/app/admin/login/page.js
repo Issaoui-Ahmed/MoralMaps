@@ -19,7 +19,7 @@ export default function AdminLogin() {
       body: JSON.stringify({ username, password }),
     });
     if (res.ok) {
-      router.replace("/admin/routes");
+      router.replace("/admin/scenarios");
     } else {
       setError("Invalid credentials");
     }

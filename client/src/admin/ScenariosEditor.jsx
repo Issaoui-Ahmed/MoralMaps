@@ -208,17 +208,18 @@ export default function ScenariosEditor() {
       Array.isArray(coords)
         ? coords.map((p) => (Array.isArray(p) ? [...p] : p))
         : [[0, 0]];
+    const nextIndex = scenarioKeys.length + 1;
     const fresh = {
       start: prev.start ? cloneCoords(prev.start) : [[0, 0]],
       end: prev.end ? cloneCoords(prev.end) : [[0, 0]],
       default_route_time: [0],
       choice_list: [],
-      scenario_name: "",
+      scenario_name: `Scenario ${nextIndex}`,
       value_name: "",
       description: "",
       randomly_preselect_route: false,
     };
-    const newKey = `scenario_${scenarioKeys.length + 1}`;
+    const newKey = `scenario_${nextIndex}`;
     patchScenarios({ ...scenarios, [newKey]: fresh });
     setSelectedKey(newKey);
   };

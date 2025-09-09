@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
-import "leaflet-routing-machine";
 import { startIcon, endIcon } from "../markerIcons";
+import { fetchRoute } from "../utils/fetchRoute";
 
 // Ensure Leaflet marker icons are loaded correctly in bundlers like Next.js
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -28,11 +28,6 @@ function Routes({ scenario }) {
 
     const start = Array.isArray(scenario.start?.[0]) ? scenario.start[0] : null;
     const end = Array.isArray(scenario.end?.[0]) ? scenario.end[0] : null;
-    // When a new scenario is created, default coordinates of [0, 0] are used
-    // for both the start and end points. Leaflet Routing Machine will emit a
-    // "Routing error" in the console when asked to route from or to these
-    // placeholder coordinates. Avoid creating the routing control until the
-    // admin has provided real coordinates.
     if (
       !start ||
       !end ||
@@ -42,68 +37,31 @@ function Routes({ scenario }) {
     )
       return;
 
-    const waypointSets = [
-      [L.latLng(start[0], start[1]), L.latLng(end[0], end[1])],
-    ];
-
+    const waypointSets = [[start, end]];
     const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
     alternatives.forEach((ch) => {
       const mid = Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null;
-      if (mid) {
-        waypointSets.push([
-          L.latLng(start[0], start[1]),
-          L.latLng(mid[0], mid[1]),
-          L.latLng(end[0], end[1]),
-        ]);
-      }
+      if (mid) waypointSets.push([start, mid, end]);
     });
 
-    const controls = [];
-    const results = [];
+    const controller = new AbortController();
 
-    const updateAndFit = () => {
+    async function load() {
+      const tasks = waypointSets.map((wps) => fetchRoute(wps, controller.signal));
+      const results = await Promise.all(tasks.map((p) => p.catch(() => null)));
+      setRoutes(results);
       const defined = results.filter(Boolean);
-      setRoutes([...results]);
       const allCoords = defined.flat();
       if (allCoords.length) {
         const bounds = L.latLngBounds(allCoords);
         map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
       }
-    };
+    }
 
-    waypointSets.forEach((wps, idx) => {
-      const control = L.Routing.control({
-        waypoints: wps,
-        routeWhileDragging: false,
-        draggableWaypoints: false,
-        addWaypoints: false,
-        show: false,
-        fitSelectedRoutes: false,
-        createMarker: () => null,
-        lineOptions: { styles: [] },
-      }).addTo(map);
-
-      control.on("routesfound", (e) => {
-        results[idx] = e.routes[0].coordinates.map((c) => [c.lat, c.lng]);
-        updateAndFit();
-      });
-
-      control.on("routingerror", () => {
-        results[idx] = null;
-        updateAndFit();
-      });
-
-      controls.push(control);
-    });
+    load();
 
     return () => {
-      controls.forEach((ctrl) => {
-        ctrl.off();
-        if (ctrl.getRouter && typeof ctrl.getRouter().abort === "function") {
-          ctrl.getRouter().abort();
-        }
-        map.removeControl(ctrl);
-      });
+      controller.abort();
       setRoutes([]);
     };
   }, [map, scenario]);

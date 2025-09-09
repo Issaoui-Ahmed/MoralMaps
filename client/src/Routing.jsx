@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useMap, Polyline, Marker } from "react-leaflet";
 import L from "leaflet";
-import "leaflet-routing-machine";
 import { startIcon, endIcon } from "./markerIcons";
+import { fetchRoute } from "./utils/fetchRoute";
 
 const Routing = ({
   from,
@@ -24,64 +24,34 @@ const Routing = ({
   useEffect(() => {
     if (!map || !from || !to) return;
 
-    const defaultWaypoints = [
-      L.latLng(from[0], from[1]),
-      L.latLng(to[0], to[1])
-    ];
+    const controller = new AbortController();
 
-    const altWaypoints = [
-      L.latLng(from[0], from[1]),
-      L.latLng(middle[0], middle[1]),
-      L.latLng(to[0], to[1])
-    ];
+    async function loadRoutes() {
+      const tasks = [fetchRoute([from, to], controller.signal)];
+      if (middle) tasks.push(fetchRoute([from, middle, to], controller.signal));
 
-    const waypointsList = [defaultWaypoints, altWaypoints];
-    const timeList = [defaultTimeMinutes, totalTimeMinutes];
+      const results = await Promise.all(tasks);
+      const newRoutes = results.map((coords, idx) =>
+        coords
+          ? {
+              coords,
+              totalTimeMinutes: idx === 0 ? defaultTimeMinutes : totalTimeMinutes,
+            }
+          : null
+      );
 
-    const controls = [];
-    const newRoutes = [];
+      setLocalRoutes(newRoutes);
+      const allCoords = newRoutes.flatMap((r) => (r?.coords ? r.coords : []));
+      if (allCoords.length) {
+        const bounds = L.latLngBounds(allCoords);
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15, animate: false });
+      }
+    }
 
-    waypointsList.forEach((waypoints, index) => {
-      const control = L.Routing.control({
-        waypoints,
-        routeWhileDragging: false,
-        draggableWaypoints: false,
-        addWaypoints: false,
-        show: false,
-        fitSelectedRoutes: false,
-        createMarker: () => null,
-        lineOptions: { styles: [] },
-      }).addTo(map);
-
-      control.on("routesfound", (e) => {
-        const coords = e.routes[0].coordinates.map((c) => [c.lat, c.lng]);
-        newRoutes[index] = {
-          coords,
-          totalTimeMinutes: timeList[index] ?? 0,
-        };
-
-        if (newRoutes.filter(Boolean).length === waypointsList.length) {
-          setLocalRoutes([...newRoutes]);
-          const allCoords = newRoutes.flatMap((r) => (r?.coords ? r.coords : []));
-          if (allCoords.length) {
-            const bounds = L.latLngBounds(allCoords);
-            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15, animate: false });
-          }
-        }
-      });
-
-      controls.push(control);
-    });
+    loadRoutes();
 
     return () => {
-      controls.forEach((ctrl) => {
-        // Cancel any in-flight routing requests and detach listeners
-        ctrl.off();
-        if (ctrl.getRouter && typeof ctrl.getRouter().abort === "function") {
-          ctrl.getRouter().abort();
-        }
-        map.removeControl(ctrl);
-      });
+      controller.abort();
       setLocalRoutes([]);
     };
   }, [map, from, to, middle, totalTimeMinutes, defaultTimeMinutes]);

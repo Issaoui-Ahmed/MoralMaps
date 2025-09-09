@@ -44,11 +44,10 @@ export function validateScenarioConfig(config) {
 
     if (!sc.randomly_preselect_route) {
       const pre = routes.filter((c) => c.preselected).length;
-      if (pre === 0) {
-        errors.push(prefix + "must have a preselected route or randomly_preselect_route=true");
-      }
       if (pre > 1) {
-        errors.push(prefix + "cannot have multiple preselected routes when randomly_preselect_route=false");
+        errors.push(
+          prefix + "cannot have multiple preselected routes when randomly_preselect_route=false"
+        );
       }
     }
 

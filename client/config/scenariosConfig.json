@@ -9,7 +9,7 @@
         [45.298074993041894, -75.93887282992091],
         [45.31, -75.95]
       ],
-      "default_route_time": [1500],
+      "default_route_time": [25],
       "choice_list": [
         {
           "middle_point": [
@@ -50,7 +50,7 @@
         [45.2605, -75.9205],
         [45.27, -75.93]
       ],
-      "default_route_time": [1320],
+      "default_route_time": [22],
       "choice_list": [
         {
           "middle_point": [

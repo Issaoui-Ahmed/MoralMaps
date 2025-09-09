@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import RoutesEditor from "./RoutesEditor";
+import ScenariosEditor from "./ScenariosEditor";
 import SurveyEditor from "./SurveyEditor";
 import SettingsEditor from "./SettingsEditor";
 import { validateScenarioConfig } from "./validateScenarios";
@@ -70,11 +70,10 @@ export default function AdminApp() {
         throw new Error(validation.errors.join("; "));
       }
       // Send only the fields that the admin UI is allowed to modify
-      const { start, end, routes, scenarios, settings } = config || {};
+      const { start, end, scenarios, settings } = config || {};
       const payload = {};
       if (start !== undefined) payload.start = start;
       if (end !== undefined) payload.end = end;
-      if (routes !== undefined) payload.routes = routes;
       if (scenarios !== undefined) payload.scenarios = scenarios;
       if (settings !== undefined) payload.settings = settings;
 
@@ -109,7 +108,7 @@ export default function AdminApp() {
   const section = pathname.split("/").pop();
 
   useEffect(() => {
-    if (!section || !["settings", "routes", "survey"].includes(section)) {
+    if (!section || !["settings", "scenarios", "survey"].includes(section)) {
       router.replace("/admin/settings");
     }
   }, [section, router]);
@@ -132,7 +131,7 @@ export default function AdminApp() {
       <header className="flex items-center justify-between p-4 border-b bg-gray-50">
         <nav className="flex gap-4">
           <Link href="/admin/settings" className={linkClass("settings")}>Settings</Link>
-          <Link href="/admin/routes" className={linkClass("routes")}>Routes</Link>
+          <Link href="/admin/scenarios" className={linkClass("scenarios")}>Scenarios</Link>
           <Link href="/admin/survey" className={linkClass("survey")}>Survey</Link>
         </nav>
         <div className="flex items-center gap-3">
@@ -152,7 +151,7 @@ export default function AdminApp() {
       )}
       <main className="p-4">
         {section === "settings" && <SettingsEditor />}
-        {section === "routes" && <RoutesEditor />}
+        {section === "scenarios" && <ScenariosEditor />}
         {section === "survey" && <SurveyEditor />}
       </main>
     </ConfigContext.Provider>

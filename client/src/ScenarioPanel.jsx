@@ -3,7 +3,7 @@ import React from "react";
 const ScenarioPanel = ({
   label,
   description,
-  selectedLabel,
+  isSelected,
   onToggle,
   onSubmit,
   scenarioNumber,
@@ -12,7 +12,6 @@ const ScenarioPanel = ({
   alternativeTime,
   scenarioText,
 }) => {
-  const isSelected = selectedLabel === label;
 
   const line1 = scenarioText?.line1?.replace('{defaultTime}', defaultTime) ||
     `The time-efficient route takes approximately ${defaultTime} minutes.`;

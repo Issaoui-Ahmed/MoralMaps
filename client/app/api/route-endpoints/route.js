@@ -79,6 +79,9 @@ function buildScenarios(cfg) {
         }
         return { ...r, preselected: false };
       });
+      if (!found && scenario.choice_list.length > 0) {
+        scenario.choice_list[0].preselected = true;
+      }
     }
 
     delete scenario.randomly_preselect_route;

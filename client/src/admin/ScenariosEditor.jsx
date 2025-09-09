@@ -111,6 +111,15 @@ function ScenarioForm({ scenario, onChange, onDelete, name }) {
         />
       </div>
       <div>
+        <label className="block text-sm font-medium mb-1">Scenario name</label>
+        <input
+          type="text"
+          value={scenario.scenario_name || ""}
+          onChange={(e) => onChange({ scenario_name: e.target.value })}
+          className="border rounded px-2 py-1 text-sm w-full"
+        />
+      </div>
+      <div>
         <label className="block text-sm font-medium mb-1">Value name</label>
         <input
           type="text"
@@ -200,6 +209,7 @@ export default function ScenariosEditor() {
       end: [[0, 0]],
       default_route_time: [0],
       choice_list: [],
+      scenario_name: "",
       value_name: "",
       description: "",
       randomly_preselect_route: false,
@@ -236,7 +246,7 @@ export default function ScenariosEditor() {
               onClick={() => setSelectedKey(key)}
               className={`block w-full text-left px-2 py-1 rounded mb-1 text-sm ${key === selectedKey ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
             >
-              {scenarios[key]?.value_name ? scenarios[key].value_name : key}
+              {scenarios[key]?.scenario_name ? scenarios[key].scenario_name : key}
             </button>
           ))}
         </div>

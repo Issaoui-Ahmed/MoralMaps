@@ -40,7 +40,7 @@ const MapRoute = () => {
             const pre = sc.choice_list.find((c) => c.preselected) || sc.choice_list[0];
             const tts = pre?.tts ?? 0;
             return {
-              label: sc.value_name,
+              label: sc.scenario_name,
               description: sc.description,
               start: sc.start,
               end: sc.end,

@@ -48,12 +48,12 @@ function buildScenarios(cfg) {
     chosen = chosen.sort(() => Math.random() - 0.5);
   }
 
-  return chosen.map(([scenarioName, sc]) => {
+  return chosen.map(([, sc]) => {
     const scenario = {
       start: pickOne(sc.start),
       end: pickOne(sc.end),
       default_route_time: pickOne(sc.default_route_time),
-      scenario_name: scenarioName,
+      scenario_name: Array.isArray(sc.scenario_name) ? pickOne(sc.scenario_name) : sc.scenario_name,
       value_name: Array.isArray(sc.value_name) ? pickOne(sc.value_name) : sc.value_name,
       description: Array.isArray(sc.description) ? pickOne(sc.description) : sc.description,
       choice_list: (sc.choice_list || []).map((route) => ({

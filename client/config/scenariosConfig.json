@@ -36,6 +36,7 @@
           "preselected": false
         }
       ],
+      "scenario_name": "Scenario 1",
       "value_name": "drivers safety",
       "description": "This route prioritizes safer streets with better lighting and lower traffic.",
       "randomly_preselect_route": false
@@ -76,6 +77,7 @@
           "preselected": false
         }
       ],
+      "scenario_name": "Scenario 2",
       "value_name": "time-efficient safety",
       "description": "Optimizes for protected intersections, wider lanes, and signalized crossings while keeping travel times reasonable.",
       "randomly_preselect_route": false

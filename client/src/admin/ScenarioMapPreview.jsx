@@ -86,7 +86,11 @@ function Routes({ scenario }) {
   );
 }
 
-export default function ScenarioMapPreview({ scenario, onChange = () => {} }) {
+export default function ScenarioMapPreview({
+  scenario,
+  onChange = () => {},
+  className = "h-64 w-full",
+}) {
   const start = Array.isArray(scenario?.start?.[0]) ? scenario.start[0] : null;
   const end = Array.isArray(scenario?.end?.[0]) ? scenario.end[0] : null;
   if (!start || !end) return null;
@@ -110,7 +114,7 @@ export default function ScenarioMapPreview({ scenario, onChange = () => {} }) {
   const bounds = L.latLngBounds([start, end]);
 
   return (
-    <div className="h-64 w-full">
+    <div className={className}>
       <MapContainer
         bounds={bounds}
         boundsOptions={{ padding: [20, 20], maxZoom: 15 }}

@@ -45,22 +45,32 @@ function Routes({ scenario }) {
     });
 
     const controller = new AbortController();
+    let cancelled = false;
 
     async function load() {
       const tasks = waypointSets.map((wps) => fetchRoute(wps, controller.signal));
       const results = await Promise.all(tasks.map((p) => p.catch(() => null)));
+
+      if (cancelled) return;
+
       setRoutes(results);
+
       const defined = results.filter(Boolean);
       const allCoords = defined.flat();
       if (allCoords.length) {
         const bounds = L.latLngBounds(allCoords);
-        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
+        map.whenReady(() => {
+          if (!cancelled) {
+            map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
+          }
+        });
       }
     }
 
     load();
 
     return () => {
+      cancelled = true;
       controller.abort();
       setRoutes([]);
     };

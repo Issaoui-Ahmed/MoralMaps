@@ -124,11 +124,9 @@ export async function POST(req) {
   const tasks = [];
 
   const routeFields = {};
-  if (Array.isArray(incoming.start)) routeFields.start = incoming.start;
-  if (Array.isArray(incoming.end)) routeFields.end = incoming.end;
-  if (typeof incoming.routes === 'object') routeFields.routes = incoming.routes;
-  if (typeof incoming.numberOfScenarios === 'number')
-    routeFields.numberOfScenarios = incoming.numberOfScenarios;
+  if (Array.isArray(incoming.scenarios)) routeFields.scenarios = incoming.scenarios;
+  if (incoming.settings && typeof incoming.settings === 'object')
+    routeFields.settings = incoming.settings;
   if (Object.keys(routeFields).length) {
     const current = await readJson(scenariosPath);
     tasks.push(
@@ -188,25 +186,15 @@ export async function PATCH(req) {
   const incoming = await req.json();
   const routePatch = {};
 
-  if (Object.prototype.hasOwnProperty.call(incoming, 'start')) {
-    if (!Array.isArray(incoming.start))
-      return NextResponse.json({ error: 'Invalid start format' }, { status: 400 });
-    routePatch.start = incoming.start;
+  if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
+    if (!Array.isArray(incoming.scenarios))
+      return NextResponse.json({ error: 'Invalid scenarios format' }, { status: 400 });
+    routePatch.scenarios = incoming.scenarios;
   }
-  if (Object.prototype.hasOwnProperty.call(incoming, 'end')) {
-    if (!Array.isArray(incoming.end))
-      return NextResponse.json({ error: 'Invalid end format' }, { status: 400 });
-    routePatch.end = incoming.end;
-  }
-  if (Object.prototype.hasOwnProperty.call(incoming, 'routes')) {
-    if (typeof incoming.routes !== 'object')
-      return NextResponse.json({ error: 'Invalid routes format' }, { status: 400 });
-    routePatch.routes = incoming.routes;
-  }
-  if (Object.prototype.hasOwnProperty.call(incoming, 'numberOfScenarios')) {
-    if (typeof incoming.numberOfScenarios !== 'number')
-      return NextResponse.json({ error: 'Invalid numberOfScenarios format' }, { status: 400 });
-    routePatch.numberOfScenarios = incoming.numberOfScenarios;
+  if (Object.prototype.hasOwnProperty.call(incoming, 'settings')) {
+    if (typeof incoming.settings !== 'object' || incoming.settings === null)
+      return NextResponse.json({ error: 'Invalid settings format' }, { status: 400 });
+    routePatch.settings = incoming.settings;
   }
 
   const tasks = [];

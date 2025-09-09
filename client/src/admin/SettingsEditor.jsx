@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useConfig } from "./AdminApp";
 
 export default function SettingsEditor() {
@@ -17,6 +17,12 @@ export default function SettingsEditor() {
   };
 
   const boundedNumber = Math.min(Math.max(number, 1), max);
+
+  useEffect(() => {
+    if (number !== boundedNumber) {
+      patch({ number_of_scenarios: boundedNumber });
+    }
+  }, [number, boundedNumber]);
 
   return (
     <div className="max-w-xl space-y-6">

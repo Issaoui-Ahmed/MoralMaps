@@ -114,16 +114,16 @@ function ScenarioForm({ scenario, onChange, onDelete, index }) {
         <label className="block text-sm font-medium mb-1">Name</label>
         <input
           type="text"
-          value={Array.isArray(scenario.name) ? scenario.name[0] : ""}
-          onChange={(e) => onChange({ name: [e.target.value] })}
+          value={scenario.name || ""}
+          onChange={(e) => onChange({ name: e.target.value })}
           className="border rounded px-2 py-1 text-sm w-full"
         />
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">Description</label>
         <textarea
-          value={Array.isArray(scenario.description) ? scenario.description[0] : ""}
-          onChange={(e) => onChange({ description: [e.target.value] })}
+          value={scenario.description || ""}
+          onChange={(e) => onChange({ description: e.target.value })}
           className="border rounded px-2 py-1 text-sm w-full"
         />
       </div>
@@ -190,8 +190,8 @@ export default function ScenariosEditor() {
       end: [[0, 0]],
       default_route_time: [0],
       choice_list: [],
-      name: [""],
-      description: [""],
+      name: "",
+      description: "",
       randomly_preselect_route: false,
     };
     patchScenarios([...scenarios, fresh]);
@@ -225,7 +225,7 @@ export default function ScenariosEditor() {
               onClick={() => setSelectedIdx(i)}
               className={`block w-full text-left px-2 py-1 rounded mb-1 text-sm ${i === selectedIdx ? 'bg-indigo-100' : 'hover:bg-gray-100'}`}
             >
-              {Array.isArray(sc?.name) && sc.name[0] ? sc.name[0] : `Scenario ${i + 1}`}
+              {sc?.name ? sc.name : `Scenario ${i + 1}`}
             </button>
           ))}
         </div>

@@ -50,8 +50,8 @@ function buildScenarios(cfg) {
       start: pickOne(sc.start),
       end: pickOne(sc.end),
       default_route_time: pickOne(sc.default_route_time),
-      name: pickOne(sc.name),
-      description: pickOne(sc.description),
+      name: Array.isArray(sc.name) ? pickOne(sc.name) : sc.name,
+      description: Array.isArray(sc.description) ? pickOne(sc.description) : sc.description,
       choice_list: (sc.choice_list || []).map((route) => ({
         middle_point: pickOne(route.middle_point),
         tts: pickOne(route.tts),

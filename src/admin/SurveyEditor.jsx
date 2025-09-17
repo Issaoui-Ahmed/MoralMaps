@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { withBasePath } from "../utils/basePath";
 
 /**
  * SurveyEditor
@@ -9,7 +10,7 @@ import React, { useEffect, useMemo, useState } from "react";
  *
  * If your server expects a different route or method, update API_URL or the fetch in handleSave().
  */
-const API_URL = "/api/route-endpoints";
+const API_URL = withBasePath("/api/route-endpoints");
 
 const EMPTY_FIELD = () => ({ name: "question", type: "text", options: [] });
 const FIELD_TYPES = ["text", "number", "email", "date", "select"];

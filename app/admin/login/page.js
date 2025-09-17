@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { withBasePath } from "../../../src/utils/basePath";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -12,7 +13,7 @@ export default function AdminLogin() {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    const res = await fetch("/api/admin/login", {
+    const res = await fetch(withBasePath("/api/admin/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

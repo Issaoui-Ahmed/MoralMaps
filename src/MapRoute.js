@@ -12,6 +12,7 @@ import ProgressBar from "./ProgressBar";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 import { buildScenarios } from "./utils/buildScenarios";
+import { withBasePath } from "./utils/basePath";
 
 const MapRoute = () => {
   const [routeConfig, setRouteConfig] = useState(null);
@@ -33,7 +34,7 @@ const MapRoute = () => {
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/route-endpoints")
+    fetch(withBasePath("/api/route-endpoints"))
       .then((res) => res.json())
       .then((data) => {
         setRouteConfig(data);
@@ -82,7 +83,7 @@ const MapRoute = () => {
         : scenario.alternatives[selectedRouteIndex - 1]?.tts ?? 0;
 
     try {
-      await fetch("/api/log-choice", {
+      await fetch(withBasePath("/api/log-choice"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

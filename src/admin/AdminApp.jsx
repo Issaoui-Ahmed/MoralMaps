@@ -8,6 +8,7 @@ import SurveyEditor from "./SurveyEditor";
 import InstructionsEditor from "./InstructionsEditor";
 import TextsEditor from "./TextsEditor";
 import { validateScenarioConfig } from "./validateScenarios";
+import { withBasePath } from "../utils/basePath";
 
 // ---- Config context
 const ConfigContext = createContext(null);
@@ -17,7 +18,8 @@ export const useConfig = () => {
   return ctx;
 };
 
-const API_URL = "/api/route-endpoints";
+const API_URL = withBasePath("/api/route-endpoints");
+const LOGOUT_URL = withBasePath("/api/admin/logout");
 
 export default function AdminApp() {
   const [config, setConfig] = useState(null);
@@ -121,7 +123,7 @@ export default function AdminApp() {
   const canSave = section === "scenarios";
 
   const logout = async () => {
-    await fetch("/api/admin/logout", {
+    await fetch(LOGOUT_URL, {
       method: "POST",
       credentials: "include",
     });

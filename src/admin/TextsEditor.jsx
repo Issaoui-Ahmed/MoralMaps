@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { withBasePath } from "../utils/basePath";
 
-const API_URL = "/api/route-endpoints";
+const API_URL = withBasePath("/api/route-endpoints");
 
 export default function TextsEditor() {
   const [consentText, setConsentText] = useState("");

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { withBasePath } from "./utils/basePath";
 
 const ThankYou = () => {
   const sessionId = typeof window !== "undefined" ? localStorage.getItem("sessionId") : null;
@@ -12,7 +13,7 @@ const ThankYou = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("/api/route-endpoints")
+    fetch(withBasePath("/api/route-endpoints"))
       .then((res) => res.json())
       .then((data) => {
         setConfig(data);
@@ -33,25 +34,25 @@ const ThankYou = () => {
   };
 
   const handleSubmit = async () => {
-  setError(null);
-  try {
-    const res = await fetch("/api/log-survey", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId, responses }),
-    });
+    setError(null);
+    try {
+      const res = await fetch(withBasePath("/api/log-survey"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, responses }),
+      });
 
-    const payloadText = await res.text();
-    const payload = (() => { try { return JSON.parse(payloadText); } catch { return {}; } })();
+      const payloadText = await res.text();
+      const payload = (() => { try { return JSON.parse(payloadText); } catch { return {}; } })();
 
-    if (!res.ok || !payload?.success) {
-      throw new Error(payload?.error || "Submission failed");
+      if (!res.ok || !payload?.success) {
+        throw new Error(payload?.error || "Submission failed");
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Could not submit survey. Please try again.");
     }
-    setSubmitted(true);
-  } catch (err) {
-    setError(err.message || "Could not submit survey. Please try again.");
-  }
-};
+  };
 
 
   if (submitted) {

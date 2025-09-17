@@ -1,0 +1,136 @@
+.hero-nav {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: auto;
+
+  display: flex;
+  width: 90vw;
+  max-width: 1360px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media screen and (max-width: 767px) {
+  .hero-nav {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+}
+
+.button-icon-small {
+  z-index: 500;
+
+  display: flex;
+  padding: 12px 20px 12px 18px;
+  align-items: center;
+
+  border-style: none;
+  border-width: 2px;
+  border-color: hsla(0, 0.00%, 3.92%, 1.00);
+  border-radius: 8px;
+
+  background-color: #051118;
+
+  transition: all 400ms ease;
+
+  color: hsla(0, 0.00%, 100.00%, 1.00);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.button-icon-small:hover {
+  transform: translate(0px, -2px);
+  color: #df0;
+}
+
+@media screen and (max-width: 991px) {
+  .button-icon-small {
+    position: static;
+    top: 16px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .button-icon-small {
+    padding: 10px 16px 10px 14px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .button-icon-small {
+    top: 18px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+.button-icon-small.tool {
+  width: 100px;
+  height: 100px;
+  margin-bottom: -10px;
+  padding-bottom: 0px;
+
+  border-style: none;
+
+  background-color: hsla(0, 0.00%, 3.92%, 0.00);
+
+  transition-duration: 350ms;
+}
+
+.button-icon-small.tool:hover {
+  transform: translate(0px, -6px);
+}
+
+.button-icon-small.tool.highlight {
+  transition-property: none;
+}
+
+.button-icon-small.tool.highlight:hover {
+  transform: none;
+}
+
+.button-icon-small.tool.tool-deselect {
+  opacity: 0.45;
+  transition: all 350ms ease;
+}
+
+.button-icon-small.tool.tool-deselect:hover {
+  opacity: 1;
+}
+
+.crit-home-button {
+  font-family: 'Open Sans', sans-serif;
+  color: hsla(229, 0.00%, 84.00%, 1.00);
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.crit-home-button:hover {
+  color: #df0;
+}
+
+.hero-nav_button-wrapper {
+  display: flex;
+}
+
+.text-block-31 {
+  font-family: 'Open Sans', sans-serif;
+  color: hsla(229, 0.00%, 84.00%, 1.00);
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.text-block-31:hover {
+  color: #df0;
+}

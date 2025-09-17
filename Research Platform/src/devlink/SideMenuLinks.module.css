@@ -1,0 +1,15 @@
+.link {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-family: Poppins;
+  color: var(--new-craiedl-1);
+  font-size: 20px;
+}
+
+.link:hover {
+  color: var(--craiedl-colour-1);
+}
+
+.link:active {
+  color: var(--craiedl-colour-1);
+}

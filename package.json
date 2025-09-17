@@ -1,0 +1,30 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@opennextjs/cloudflare": "^1.6.5",
+    "leaflet": "^1.9.4",
+    "next": "^15.5.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.8.2",
+    "uuid": "^9.0.1"
+  },
+  "scripts": {
+    "start": "next dev",
+    "build": "next build",
+    "serve": "next start",
+    "test": "echo \"No tests\"",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.9.2",
+    "wrangler": "^4.37.1"
+  }
+}

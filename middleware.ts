@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { getBasePath } from "./src/utils/basePath";
-
-const basePath = getBasePath();
-const loginPath = basePath ? `${basePath}/admin/login` : "/admin/login";
+const loginPath = "/admin/login";
 
 function redirectToLogin(req: NextRequest) {
   const url = req.nextUrl.clone();
@@ -19,7 +16,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === "/admin/login") {
+  if (pathname === loginPath) {
     return NextResponse.next();
   }
 

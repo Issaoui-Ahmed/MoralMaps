@@ -1,38 +1,77 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+import scenariosDefaults from '../../../config/scenariosConfig.json' assert { type: 'json' };
+import textsDefaults from '../../../config/textsConfig.json' assert { type: 'json' };
+import instructionsDefaults from '../../../config/instructionsConfig.json' assert { type: 'json' };
+import surveyDefaults from '../../../config/surveyConfig.json' assert { type: 'json' };
 import { requireAdmin } from '../_utils';
-import { buildScenarios } from "../../../src/utils/buildScenarios";
+import { buildScenarios } from '../../../src/utils/buildScenarios';
 
-// Config files live under the `config` directory. The previous implementation
-// attempted to load them from the project root which meant the API responded
-// with empty objects. Downstream consumers expected `routes.default` to exist
-// and crashed when it did not. Resolving the paths relative to `config`
-// ensures the full configuration is returned.
-const cfgDir = path.join(process.cwd(), 'config');
-const scenariosPath = path.join(cfgDir, 'scenariosConfig.json');
-const textsPath = path.join(cfgDir, 'textsConfig.json');
-const instructionsPath = path.join(cfgDir, 'instructionsConfig.json');
-const surveyPath = path.join(cfgDir, 'surveyConfig.json');
+const CONFIG_KV_KEY = 'route-config';
 
-async function readJson(p) {
+function ensureObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function getConfigKv() {
   try {
-    const data = await fs.readFile(p, 'utf8');
-    return JSON.parse(data);
+    const { env } = getCloudflareContext();
+    return env?.ROUTE_CONFIG_KV;
   } catch {
+    return undefined;
+  }
+}
+
+async function readPersistedConfig(kv) {
+  if (!kv) return {};
+  try {
+    const stored = await kv.get(CONFIG_KV_KEY, { type: 'json' });
+    if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
+      return stored;
+    }
+    return {};
+  } catch (err) {
+    console.error('Failed to read route config from KV:', err);
     return {};
   }
+}
+
+function mergeWithDefaults(persisted = {}) {
+  const scenariosConfig = ensureObject(persisted.scenariosConfig);
+  const textsConfig = ensureObject(persisted.textsConfig);
+  const instructionsConfig = ensureObject(persisted.instructionsConfig);
+  const surveyConfig = ensureObject(persisted.surveyConfig);
+
+  return {
+    scenarioCfg: { ...scenariosDefaults, ...scenariosConfig },
+    textsCfg: { ...textsDefaults, ...textsConfig },
+    instructionsCfg: { ...instructionsDefaults, ...instructionsConfig },
+    surveyCfg: { ...surveyDefaults, ...surveyConfig },
+  };
+}
+
+async function persistConfig(mutator) {
+  const kv = getConfigKv();
+  if (!kv) {
+    throw new Error('ROUTE_CONFIG_KV binding is not configured');
+  }
+
+  const current = await readPersistedConfig(kv);
+  const nextState = mutator({ ...current });
+  if (!nextState || typeof nextState !== 'object' || Array.isArray(nextState)) {
+    throw new Error('Invalid config object produced by mutator');
+  }
+
+  await kv.put(CONFIG_KV_KEY, JSON.stringify(nextState));
+  return nextState;
 }
 
 
 export async function GET(req) {
   try {
-    const [scenarioCfg, textsCfg, instrCfg, surveyCfg] = await Promise.all([
-      readJson(scenariosPath),
-      readJson(textsPath),
-      readJson(instructionsPath),
-      readJson(surveyPath),
-    ]);
+    const persisted = await readPersistedConfig(getConfigKv());
+    const { scenarioCfg, textsCfg, instructionsCfg: instrCfg, surveyCfg } =
+      mergeWithDefaults(persisted);
 
     // When an admin is authenticated, return the raw configuration so that
     // the dashboard can be pre-populated with the current config values.
@@ -54,8 +93,8 @@ export async function GET(req) {
     };
     return NextResponse.json(merged);
   } catch (err) {
-    console.error('Error reading config files:', err);
-    return NextResponse.json({ error: 'Failed to read config file' }, { status: 500 });
+    console.error('Error loading route config:', err);
+    return NextResponse.json({ error: 'Failed to load config' }, { status: 500 });
   }
 }
 
@@ -64,7 +103,6 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
   const incoming = await req.json();
-  const tasks = [];
 
   const routeFields = {};
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
@@ -78,55 +116,54 @@ export async function POST(req) {
   }
   if (incoming.settings && typeof incoming.settings === 'object')
     routeFields.settings = incoming.settings;
-  if (Object.keys(routeFields).length) {
-    const current = await readJson(scenariosPath);
-    tasks.push(
-      fs.writeFile(
-        scenariosPath,
-        JSON.stringify({ ...current, ...routeFields }, null, 2)
-      )
-    );
-  }
-
-  if (Object.prototype.hasOwnProperty.call(incoming, 'survey')) {
-    tasks.push(
-      fs.writeFile(
-        surveyPath,
-        JSON.stringify({ survey: incoming.survey || [] }, null, 2)
-      )
-    );
-  }
 
   const textPatch = {};
   if (Object.prototype.hasOwnProperty.call(incoming, 'consentText'))
     textPatch.consentText = incoming.consentText;
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarioText'))
     textPatch.scenarioText = incoming.scenarioText;
-  if (Object.keys(textPatch).length) {
-    const current = await readJson(textsPath);
-    tasks.push(
-      fs.writeFile(
-        textsPath,
-        JSON.stringify({ ...current, ...textPatch }, null, 2)
-      )
-    );
-  }
-
-  if (Object.prototype.hasOwnProperty.call(incoming, 'instructions')) {
-    tasks.push(
-      fs.writeFile(
-        instructionsPath,
-        JSON.stringify({ steps: incoming.instructions || [] }, null, 2)
-      )
-    );
-  }
 
   try {
-    await Promise.all(tasks);
+    const hasRouteUpdate = Object.keys(routeFields).length > 0;
+    const hasSurveyUpdate = Object.prototype.hasOwnProperty.call(incoming, 'survey');
+    const hasTextUpdate = Object.keys(textPatch).length > 0;
+    const hasInstructionUpdate = Object.prototype.hasOwnProperty.call(incoming, 'instructions');
+
+    if (hasRouteUpdate || hasSurveyUpdate || hasTextUpdate || hasInstructionUpdate) {
+      await persistConfig((current) => {
+        const next = { ...current };
+
+        if (hasRouteUpdate) {
+          const existing = ensureObject(current.scenariosConfig);
+          next.scenariosConfig = { ...existing, ...routeFields };
+        }
+
+        if (hasSurveyUpdate) {
+          const existing = ensureObject(current.surveyConfig);
+          next.surveyConfig = { ...existing, survey: incoming.survey || [] };
+        }
+
+        if (hasTextUpdate) {
+          const existing = ensureObject(current.textsConfig);
+          next.textsConfig = { ...existing, ...textPatch };
+        }
+
+        if (hasInstructionUpdate) {
+          const existing = ensureObject(current.instructionsConfig);
+          next.instructionsConfig = {
+            ...existing,
+            steps: incoming.instructions || [],
+          };
+        }
+
+        return next;
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('Error writing config files:', err);
-    return NextResponse.json({ error: 'Failed to write config file' }, { status: 500 });
+    console.error('Error persisting config to KV:', err);
+    return NextResponse.json({ error: 'Failed to persist config' }, { status: 500 });
   }
 }
 
@@ -152,38 +189,31 @@ export async function PATCH(req) {
     routePatch.settings = incoming.settings;
   }
 
-  const tasks = [];
-  if (Object.keys(routePatch).length) {
-    const current = await readJson(scenariosPath);
-    tasks.push(
-      fs.writeFile(
-        scenariosPath,
-        JSON.stringify({ ...current, ...routePatch }, null, 2)
-      )
-    );
-  }
+  const hasSurveyUpdate = Object.prototype.hasOwnProperty.call(incoming, 'survey');
 
-  if (Object.prototype.hasOwnProperty.call(incoming, 'survey')) {
-    tasks.push(
-      fs.writeFile(
-        surveyPath,
-        JSON.stringify({ survey: incoming.survey || [] }, null, 2)
-      )
-    );
-  }
-
-  if (
-    !Object.keys(routePatch).length &&
-    !Object.prototype.hasOwnProperty.call(incoming, 'survey')
-  ) {
+  if (!Object.keys(routePatch).length && !hasSurveyUpdate) {
     return NextResponse.json({ error: 'No valid fields provided' }, { status: 400 });
   }
 
   try {
-    await Promise.all(tasks);
+    await persistConfig((current) => {
+      const next = { ...current };
+
+      if (Object.keys(routePatch).length) {
+        const existing = ensureObject(current.scenariosConfig);
+        next.scenariosConfig = { ...existing, ...routePatch };
+      }
+
+      if (hasSurveyUpdate) {
+        const existing = ensureObject(current.surveyConfig);
+        next.surveyConfig = { ...existing, survey: incoming.survey || [] };
+      }
+
+      return next;
+    });
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('Error writing config files:', err);
-    return NextResponse.json({ error: 'Failed to write config file' }, { status: 500 });
+    console.error('Error persisting config to KV:', err);
+    return NextResponse.json({ error: 'Failed to persist config' }, { status: 500 });
   }
 }

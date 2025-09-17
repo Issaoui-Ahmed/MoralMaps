@@ -17,7 +17,7 @@
     "build": "next build",
     "serve": "next start",
     "test": "echo \"No tests\"",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview"
+    "preview": "opennextjs-cloudflare build && node ./scripts/opennext-preview.mjs"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

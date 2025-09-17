@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCookieBasePath } from '../../../../src/utils/basePath';
 
-export const runtime = 'edge';
-
 function readAdminCredentials() {
   return {
     username:

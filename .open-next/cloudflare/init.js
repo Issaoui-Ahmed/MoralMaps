@@ -49,8 +49,8 @@ function initRuntime() {
   };
   Object.assign(globalThis, {
     Request: CustomRequest,
-    __BUILD_TIMESTAMP_MS__: 1756999663059,
-    __NEXT_BASE_PATH__: "/client",
+    __BUILD_TIMESTAMP_MS__: 1758137621157,
+    __NEXT_BASE_PATH__: "/app",
     __ASSETS_RUN_WORKER_FIRST__: false,
     // The external middleware will use the convertTo function of the `edge` converter
     // by default it will try to fetch the request, but since we are running everything in the same worker

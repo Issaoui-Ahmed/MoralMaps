@@ -13,7 +13,7 @@
     "typedRoutes": false,
     "distDir": ".next",
     "cleanDistDir": true,
-    "assetPrefix": "/client",
+    "assetPrefix": "/app",
     "cacheMaxMemorySize": 52428800,
     "configOrigin": "next.config.ts",
     "useFileSystemPublicRoutes": true,
@@ -47,7 +47,7 @@
         256,
         384
       ],
-      "path": "/client/_next/image",
+      "path": "/app/_next/image",
       "loader": "default",
       "loaderFile": "",
       "domains": [],
@@ -70,9 +70,9 @@
       "pagesBufferLength": 5
     },
     "amp": {
-      "canonicalBase": "/client"
+      "canonicalBase": "/app"
     },
-    "basePath": "/client",
+    "basePath": "/app",
     "sassOptions": {},
     "trailingSlash": false,
     "i18n": null,
@@ -90,7 +90,7 @@
     "compiler": {},
     "expireTime": 31536000,
     "staticPageGenerationTimeout": 60,
-    "output": "export",
+    "output": "standalone",
     "modularizeImports": {
       "@mui/icons-material": {
         "transform": "@mui/icons-material/{{member}}"
@@ -287,12 +287,125 @@
     "htmlLimitedBots": "[\\w-]+-Google|Google-[\\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight",
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
+    "transpilePackages": [
+      "react-router-dom"
+    ],
     "turbopack": {
       "root": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap"
-    }
+    },
+    "_originalRedirects": [
+      {
+        "source": "/",
+        "destination": "/app/",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/favicon.ico",
+        "destination": "/app/favicon.ico",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/manifest.json",
+        "destination": "/app/manifest.json",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/logo192.png",
+        "destination": "/app/logo192.png",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/logo512.png",
+        "destination": "/app/logo512.png",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/robots.txt",
+        "destination": "/app/robots.txt",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/%PUBLIC_URL%",
+        "destination": "/app/",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/app/%PUBLIC_URL%",
+        "destination": "/app/",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/%PUBLIC_URL%/favicon.ico",
+        "destination": "/app/favicon.ico",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/app/%PUBLIC_URL%/favicon.ico",
+        "destination": "/app/favicon.ico",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/%PUBLIC_URL%/manifest.json",
+        "destination": "/app/manifest.json",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/app/%PUBLIC_URL%/manifest.json",
+        "destination": "/app/manifest.json",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/%PUBLIC_URL%/logo192.png",
+        "destination": "/app/logo192.png",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/app/%PUBLIC_URL%/logo192.png",
+        "destination": "/app/logo192.png",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/%PUBLIC_URL%/logo512.png",
+        "destination": "/app/logo512.png",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/app/%PUBLIC_URL%/logo512.png",
+        "destination": "/app/logo512.png",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/%PUBLIC_URL%/robots.txt",
+        "destination": "/app/robots.txt",
+        "basePath": false,
+        "permanent": false
+      },
+      {
+        "source": "/app/%PUBLIC_URL%/robots.txt",
+        "destination": "/app/robots.txt",
+        "basePath": false,
+        "permanent": false
+      }
+    ]
   },
-  "appDir": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap\\client",
-  "relativeAppDir": "client",
+  "appDir": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap",
+  "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",
     ".next\\server\\pages-manifest.json",

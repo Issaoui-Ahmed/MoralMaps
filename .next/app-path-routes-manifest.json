@@ -1,5 +1,16 @@
 {
   "/_not-found/page": "/_not-found",
+  "/api/admin/login/route": "/api/admin/login",
+  "/api/admin/logout/route": "/api/admin/logout",
+  "/api/log-choice/route": "/api/log-choice",
+  "/api/route-endpoints/route": "/api/route-endpoints",
+  "/api/log-survey/route": "/api/log-survey",
+  "/admin/instructions/page": "/admin/instructions",
+  "/admin/texts/page": "/admin/texts",
+  "/admin/scenarios/page": "/admin/scenarios",
+  "/admin/page": "/admin",
+  "/thank-you/page": "/thank-you",
+  "/admin/login/page": "/admin/login",
   "/page": "/",
-  "/thank-you/page": "/thank-you"
+  "/admin/survey/page": "/admin/survey"
 }

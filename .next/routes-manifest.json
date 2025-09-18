@@ -2,15 +2,15 @@
   "version": 3,
   "pages404": true,
   "caseSensitive": false,
-  "basePath": "/client",
+  "basePath": "/app",
   "redirects": [
     {
-      "source": "/client/",
-      "destination": "/client",
+      "source": "/app/",
+      "destination": "/app",
       "basePath": false,
       "internal": true,
       "statusCode": 308,
-      "regex": "^/client/$"
+      "regex": "^/app/$"
     },
     {
       "source": "/:path+/",
@@ -18,6 +18,132 @@
       "internal": true,
       "statusCode": 308,
       "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/",
+      "destination": "/app/",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/(?:/)?$"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/app/favicon.ico",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/favicon\\.ico(?:/)?$"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/app/manifest.json",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/manifest\\.json(?:/)?$"
+    },
+    {
+      "source": "/logo192.png",
+      "destination": "/app/logo192.png",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/logo192\\.png(?:/)?$"
+    },
+    {
+      "source": "/logo512.png",
+      "destination": "/app/logo512.png",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/logo512\\.png(?:/)?$"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/app/robots.txt",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/robots\\.txt(?:/)?$"
+    },
+    {
+      "source": "/%PUBLIC_URL%",
+      "destination": "/app/",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/%PUBLIC_URL%(?:/)?$"
+    },
+    {
+      "source": "/app/%PUBLIC_URL%",
+      "destination": "/app/",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/app/%PUBLIC_URL%(?:/)?$"
+    },
+    {
+      "source": "/%PUBLIC_URL%/favicon.ico",
+      "destination": "/app/favicon.ico",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/%PUBLIC_URL%/favicon\\.ico(?:/)?$"
+    },
+    {
+      "source": "/app/%PUBLIC_URL%/favicon.ico",
+      "destination": "/app/favicon.ico",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/favicon\\.ico(?:/)?$"
+    },
+    {
+      "source": "/%PUBLIC_URL%/manifest.json",
+      "destination": "/app/manifest.json",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/%PUBLIC_URL%/manifest\\.json(?:/)?$"
+    },
+    {
+      "source": "/app/%PUBLIC_URL%/manifest.json",
+      "destination": "/app/manifest.json",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/manifest\\.json(?:/)?$"
+    },
+    {
+      "source": "/%PUBLIC_URL%/logo192.png",
+      "destination": "/app/logo192.png",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/%PUBLIC_URL%/logo192\\.png(?:/)?$"
+    },
+    {
+      "source": "/app/%PUBLIC_URL%/logo192.png",
+      "destination": "/app/logo192.png",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/logo192\\.png(?:/)?$"
+    },
+    {
+      "source": "/%PUBLIC_URL%/logo512.png",
+      "destination": "/app/logo512.png",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/%PUBLIC_URL%/logo512\\.png(?:/)?$"
+    },
+    {
+      "source": "/app/%PUBLIC_URL%/logo512.png",
+      "destination": "/app/logo512.png",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/logo512\\.png(?:/)?$"
+    },
+    {
+      "source": "/%PUBLIC_URL%/robots.txt",
+      "destination": "/app/robots.txt",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/%PUBLIC_URL%/robots\\.txt(?:/)?$"
+    },
+    {
+      "source": "/app/%PUBLIC_URL%/robots.txt",
+      "destination": "/app/robots.txt",
+      "basePath": false,
+      "statusCode": 307,
+      "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/robots\\.txt(?:/)?$"
     }
   ],
   "headers": [],
@@ -39,6 +165,42 @@
       "regex": "^/_not\\-found(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/instructions",
+      "regex": "^/admin/instructions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/instructions(?:/)?$"
+    },
+    {
+      "page": "/admin/login",
+      "regex": "^/admin/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/login(?:/)?$"
+    },
+    {
+      "page": "/admin/scenarios",
+      "regex": "^/admin/scenarios(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/scenarios(?:/)?$"
+    },
+    {
+      "page": "/admin/survey",
+      "regex": "^/admin/survey(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/survey(?:/)?$"
+    },
+    {
+      "page": "/admin/texts",
+      "regex": "^/admin/texts(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/texts(?:/)?$"
     },
     {
       "page": "/thank-you",

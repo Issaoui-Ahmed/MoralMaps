@@ -1,16 +1,55 @@
 {
-  "app\\page.js -> ../src/MapRoute": {
-    "id": 846,
+  "app\\admin\\instructions\\page.js -> ../../../src/admin/AdminApp": {
+    "id": 3133,
     "files": [
       "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/e9841c0d.8975cc553909dda0.js",
-      "static/chunks/846.6df57496180d652f.js"
+      "static/chunks/914.fff3aebaf9c7ffa3.js",
+      "static/chunks/133.3e2d737e03693d10.js"
+    ]
+  },
+  "app\\admin\\page.js -> ../../src/admin/AdminApp": {
+    "id": 3133,
+    "files": [
+      "static/chunks/d0deef33.cac6acee3fffe7af.js",
+      "static/chunks/914.fff3aebaf9c7ffa3.js",
+      "static/chunks/133.3e2d737e03693d10.js"
+    ]
+  },
+  "app\\admin\\scenarios\\page.js -> ../../../src/admin/AdminApp": {
+    "id": 3133,
+    "files": [
+      "static/chunks/d0deef33.cac6acee3fffe7af.js",
+      "static/chunks/914.fff3aebaf9c7ffa3.js",
+      "static/chunks/133.3e2d737e03693d10.js"
+    ]
+  },
+  "app\\admin\\survey\\page.js -> ../../../src/admin/AdminApp": {
+    "id": 3133,
+    "files": [
+      "static/chunks/d0deef33.cac6acee3fffe7af.js",
+      "static/chunks/914.fff3aebaf9c7ffa3.js",
+      "static/chunks/133.3e2d737e03693d10.js"
+    ]
+  },
+  "app\\admin\\texts\\page.js -> ../../../src/admin/AdminApp": {
+    "id": 3133,
+    "files": [
+      "static/chunks/d0deef33.cac6acee3fffe7af.js",
+      "static/chunks/914.fff3aebaf9c7ffa3.js",
+      "static/chunks/133.3e2d737e03693d10.js"
+    ]
+  },
+  "app\\page.js -> ../src/MapRoute": {
+    "id": 2602,
+    "files": [
+      "static/chunks/d0deef33.cac6acee3fffe7af.js",
+      "static/chunks/602.1f63a6e34078ed1e.js"
     ]
   },
   "app\\thank-you\\page.js -> ../../src/ThankYou": {
     "id": 1485,
     "files": [
-      "static/chunks/485.d60e4ae9fd264dd5.js"
+      "static/chunks/485.1b7b974c7333455b.js"
     ]
   },
   "node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {

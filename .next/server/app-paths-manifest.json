@@ -1,5 +1,16 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/admin/login/route": "app/api/admin/login/route.js",
+  "/api/admin/logout/route": "app/api/admin/logout/route.js",
+  "/api/log-choice/route": "app/api/log-choice/route.js",
+  "/api/route-endpoints/route": "app/api/route-endpoints/route.js",
+  "/api/log-survey/route": "app/api/log-survey/route.js",
+  "/admin/instructions/page": "app/admin/instructions/page.js",
+  "/admin/texts/page": "app/admin/texts/page.js",
+  "/admin/scenarios/page": "app/admin/scenarios/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/thank-you/page": "app/thank-you/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
   "/page": "app/page.js",
-  "/thank-you/page": "app/thank-you/page.js"
+  "/admin/survey/page": "app/admin/survey/page.js"
 }

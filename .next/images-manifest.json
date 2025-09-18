@@ -21,7 +21,7 @@
       256,
       384
     ],
-    "path": "/client/_next/image",
+    "path": "/app/_next/image",
     "loader": "default",
     "loaderFile": "",
     "domains": [],

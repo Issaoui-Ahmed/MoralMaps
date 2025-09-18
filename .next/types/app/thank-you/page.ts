@@ -1,4 +1,4 @@
-// File: C:\Users\aissa\OneDrive\Desktop\CRAiDEL\Summer\MoralMap\client\app\thank-you\page.js
+// File: C:\Users\aissa\OneDrive\Desktop\CRAiDEL\Summer\MoralMap\app\thank-you\page.js
 import * as entry from '../../../../app/thank-you/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

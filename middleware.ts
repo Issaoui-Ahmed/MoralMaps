@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  buildWwwAuthenticateHeader,
+  isValidAdminBasicAuth,
+} from "./src/utils/adminAuth";
 
-const loginPath = "/admin/login";
-
-function redirectToLogin(req: NextRequest) {
-  const url = req.nextUrl.clone();
-  url.pathname = loginPath;
-  return NextResponse.redirect(url);
+function unauthorized() {
+  return new NextResponse("Authentication required", {
+    status: 401,
+    headers: {
+      "WWW-Authenticate": buildWwwAuthenticateHeader(),
+    },
+  });
 }
 
 export function middleware(req: NextRequest) {
@@ -16,16 +21,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === loginPath) {
+  const authHeader = req.headers.get("authorization") ?? "";
+  if (isValidAdminBasicAuth(authHeader)) {
     return NextResponse.next();
   }
 
-  const authed = req.cookies.get("adminAuth")?.value === "1";
-  if (authed) {
-    return NextResponse.next();
-  }
-
-  return redirectToLogin(req);
+  return unauthorized();
 }
 
 export const config = {

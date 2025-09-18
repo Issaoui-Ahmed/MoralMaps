@@ -19,7 +19,6 @@ export const useConfig = () => {
 };
 
 const API_URL = withBasePath("/api/route-endpoints");
-const LOGOUT_URL = withBasePath("/api/admin/logout");
 
 export default function AdminApp() {
   const [config, setConfig] = useState(null);
@@ -122,12 +121,12 @@ export default function AdminApp() {
 
   const canSave = section === "scenarios";
 
-  const logout = async () => {
-    await fetch(LOGOUT_URL, {
-      method: "POST",
-      credentials: "include",
-    });
-    router.replace("/admin/login");
+  const logout = () => {
+    if (typeof window !== "undefined") {
+      window.alert(
+        "Authentication now uses a browser popup. Close this tab or clear the site's saved credentials to sign out."
+      );
+    }
   };
 
   if (loading) return <div className="p-6 text-sm text-gray-600">Loading…</div>;

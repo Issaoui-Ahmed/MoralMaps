@@ -1,25 +1,40 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { loadSessions, saveSessions } from '../_sessionStore.js';
+import { loadSession, saveSession } from '../_sessionStore.js';
+import {
+  ensureObject,
+  getConfigKv,
+  mergeWithDefaults,
+  readPersistedConfig,
+} from '../_configStore.js';
 
+function determineTotalScenarios(config) {
+  const scenarioCfg = ensureObject(config);
+  const scenarios = ensureObject(scenarioCfg.scenarios);
+  const scenariosCount = Object.keys(scenarios).length;
+  if (scenariosCount === 0) {
+    return 0;
+  }
 
-// Resolve config relative to the project root so it loads consistently
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-// Configuration files are stored under `config`. The previous relative path
-// pointed to `app/routesConfig.json`, which does not exist and resulted in the
-// server being unable to read experiment settings. Pointing to the proper
-// location allows session logging to include the configured number of scenarios.
-const configPath = path.join(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'config',
-  'scenariosConfig.json'
-);
+  const settings = ensureObject(scenarioCfg.settings);
+  const desired =
+    typeof settings.number_of_scenarios === 'number'
+      ? settings.number_of_scenarios
+      : scenariosCount;
+  return Math.min(desired, scenariosCount);
+}
+
+function normalizeChoices(existing, length) {
+  const base = Array.isArray(existing) ? [...existing] : [];
+  if (length <= 0) {
+    return [];
+  }
+
+  if (base.length >= length) {
+    return base.slice(0, length);
+  }
+
+  return base.concat(Array(length - base.length).fill(undefined));
+}
 
 export async function POST(req) {
   const { sessionId, scenarioIndex, choice, tts, defaultTime } = await req.json();
@@ -39,37 +54,29 @@ export async function POST(req) {
 
   let totalScenarios = 0;
   try {
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    const scenariosObj =
-      typeof config.scenarios === 'object' && config.scenarios !== null
-        ? config.scenarios
-        : {};
-    const scenariosCount = Object.keys(scenariosObj).length;
-    const settings = config.settings || {};
-    const desired =
-      typeof settings.number_of_scenarios === 'number'
-        ? settings.number_of_scenarios
-        : scenariosCount;
-    totalScenarios = Math.min(desired, scenariosCount);
+    const persisted = await readPersistedConfig(getConfigKv());
+    const { scenarioCfg } = mergeWithDefaults(persisted);
+    totalScenarios = determineTotalScenarios(scenarioCfg);
   } catch (err) {
     console.warn('Could not read scenario settings from config. Using fallback.');
   }
 
-  const sessions = loadSessions();
+  const requiredLength = Math.max(totalScenarios, scenarioIndex + 1);
+  const existingSession = await loadSession(sessionId);
+  const session =
+    existingSession && typeof existingSession === 'object'
+      ? { ...existingSession }
+      : {
+          sessionId,
+          timestamp: new Date().toISOString(),
+        };
 
-  if (!sessions[sessionId]) {
-    sessions[sessionId] = {
-      sessionId,
-      timestamp: new Date().toISOString(),
-      defaultTime,
-      totalScenarios,
-      choices: Array(totalScenarios).fill(undefined),
-    };
-  }
+  session.defaultTime = defaultTime;
+  session.totalScenarios = totalScenarios > 0 ? totalScenarios : requiredLength;
+  session.choices = normalizeChoices(session.choices, requiredLength);
+  session.choices[scenarioIndex] = encoded;
 
-  sessions[sessionId].choices[scenarioIndex] = encoded;
-
-  saveSessions(sessions);
+  await saveSession(sessionId, session);
 
   return NextResponse.json({ success: true });
 }

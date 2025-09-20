@@ -17,7 +17,8 @@
     "build": "next build",
     "serve": "next start",
     "test": "echo \"No tests\"",
-    "preview": "opennextjs-cloudflare build && node ./scripts/opennext-preview.mjs"
+    "preview": "opennextjs-cloudflare build && node ./scripts/opennext-preview.mjs",
+    "cf-typegen": "npx wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

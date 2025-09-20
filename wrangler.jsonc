@@ -7,9 +7,9 @@
         "nodejs_compat"
     ],
     "kv_namespaces": [
-        { "binding": "ROUTE_CONFIG_KV" },
-        { "binding": "SESSION_DATA_KV" },
-        { "binding": "USER_DATA_KV" }
+        { "binding": "ROUTE_CONFIG_KV" ,  "id": "1234567893"},
+        { "binding": "SESSION_DATA_KV", "id": "1234567890" },
+        { "binding": "USER_DATA_KV", "id": "1234567891"}
     ],
     "assets": {
         "binding": "ASSETS",

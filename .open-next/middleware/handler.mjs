@@ -1287,88 +1287,7 @@ var require_middleware = __commonJS({
     }, 521: (a) => {
       "use strict";
       a.exports = (init_node_async_hooks(), __toCommonJS(node_async_hooks_exports));
-    }, 663: (a) => {
-      (() => {
-        "use strict";
-        "undefined" != typeof __nccwpck_require__ && (__nccwpck_require__.ab = "//");
-        var b = {};
-        (() => {
-          b.parse = function(b2, c2) {
-            if ("string" != typeof b2) throw TypeError("argument str must be a string");
-            for (var e2 = {}, f = b2.split(d), g = (c2 || {}).decode || a2, h = 0; h < f.length; h++) {
-              var i = f[h], j = i.indexOf("=");
-              if (!(j < 0)) {
-                var k = i.substr(0, j).trim(), l = i.substr(++j, i.length).trim();
-                '"' == l[0] && (l = l.slice(1, -1)), void 0 == e2[k] && (e2[k] = function(a3, b3) {
-                  try {
-                    return b3(a3);
-                  } catch (b4) {
-                    return a3;
-                  }
-                }(l, g));
-              }
-            }
-            return e2;
-          }, b.serialize = function(a3, b2, d2) {
-            var f = d2 || {}, g = f.encode || c;
-            if ("function" != typeof g) throw TypeError("option encode is invalid");
-            if (!e.test(a3)) throw TypeError("argument name is invalid");
-            var h = g(b2);
-            if (h && !e.test(h)) throw TypeError("argument val is invalid");
-            var i = a3 + "=" + h;
-            if (null != f.maxAge) {
-              var j = f.maxAge - 0;
-              if (isNaN(j) || !isFinite(j)) throw TypeError("option maxAge is invalid");
-              i += "; Max-Age=" + Math.floor(j);
-            }
-            if (f.domain) {
-              if (!e.test(f.domain)) throw TypeError("option domain is invalid");
-              i += "; Domain=" + f.domain;
-            }
-            if (f.path) {
-              if (!e.test(f.path)) throw TypeError("option path is invalid");
-              i += "; Path=" + f.path;
-            }
-            if (f.expires) {
-              if ("function" != typeof f.expires.toUTCString) throw TypeError("option expires is invalid");
-              i += "; Expires=" + f.expires.toUTCString();
-            }
-            if (f.httpOnly && (i += "; HttpOnly"), f.secure && (i += "; Secure"), f.sameSite) switch ("string" == typeof f.sameSite ? f.sameSite.toLowerCase() : f.sameSite) {
-              case true:
-              case "strict":
-                i += "; SameSite=Strict";
-                break;
-              case "lax":
-                i += "; SameSite=Lax";
-                break;
-              case "none":
-                i += "; SameSite=None";
-                break;
-              default:
-                throw TypeError("option sameSite is invalid");
-            }
-            return i;
-          };
-          var a2 = decodeURIComponent, c = encodeURIComponent, d = /; */, e = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
-        })(), a.exports = b;
-      })();
-    }, 720: (a, b, c) => {
-      "use strict";
-      Object.defineProperty(b, "__esModule", { value: true }), !function(a2, b2) {
-        for (var c2 in b2) Object.defineProperty(a2, c2, { enumerable: true, get: b2[c2] });
-      }(b, { interceptTestApis: function() {
-        return f;
-      }, wrapRequestHandler: function() {
-        return g;
-      } });
-      let d = c(392), e = c(165);
-      function f() {
-        return (0, e.interceptFetch)(c.g.fetch);
-      }
-      function g(a2) {
-        return (b2, c2) => (0, d.withRequest)(b2, e.reader, () => a2(b2, c2));
-      }
-    }, 792: (a, b, c) => {
+    }, 594: (a, b, c) => {
       "use strict";
       let d;
       c.r(b), c.d(b, { default: () => by });
@@ -2544,12 +2463,34 @@ Learn More: https://nextjs.org/docs/messages/node-module-in-edge-runtime`;
       bl("\x1B[38;2;173;127;168m", "\x1B[39m"), bl("\x1B[36m", "\x1B[39m");
       let br = bl("\x1B[37m", "\x1B[39m");
       bl("\x1B[90m", "\x1B[39m"), bl("\x1B[40m", "\x1B[49m"), bl("\x1B[41m", "\x1B[49m"), bl("\x1B[42m", "\x1B[49m"), bl("\x1B[43m", "\x1B[49m"), bl("\x1B[44m", "\x1B[49m"), bl("\x1B[45m", "\x1B[49m"), bl("\x1B[46m", "\x1B[49m"), bl("\x1B[47m", "\x1B[49m"), br(bm("\u25CB")), bn(bm("\u2A2F")), bp(bm("\u26A0")), br(bm(" ")), bo(bm("\u2713")), bq(bm("\xBB")), new aT(1e4, (a10) => a10.length), /* @__PURE__ */ new WeakMap();
-      let bs = "/admin/login";
+      var bs = c(356).Buffer;
       function bt(a10) {
         let { pathname: b2 } = a10.nextUrl;
-        if (!b2.startsWith("/admin") || b2 === bs || a10.cookies.get("adminAuth")?.value === "1") return S.next();
-        let c2 = a10.nextUrl.clone();
-        return c2.pathname = bs, S.redirect(c2);
+        return !b2.startsWith("/admin") || function(a11) {
+          let b3 = function(a12) {
+            if (!a12 || "string" != typeof a12) return null;
+            let b4 = a12.split(" ");
+            if (b4.length < 2 || "basic" !== b4[0].toLowerCase()) return null;
+            let c3 = function(a13) {
+              if ("string" != typeof a13) return null;
+              try {
+                if ("function" == typeof atob) return atob(a13);
+              } catch (a14) {
+              }
+              if (void 0 !== bs) try {
+                return bs.from(a13, "base64").toString("utf-8");
+              } catch (a14) {
+              }
+              return null;
+            }(b4.slice(1).join(" ").trim());
+            if (!c3) return null;
+            let d2 = c3.indexOf(":");
+            return -1 === d2 ? null : { username: c3.slice(0, d2), password: c3.slice(d2 + 1) };
+          }(a11);
+          if (!b3) return false;
+          let c2 = { username: process.env.ADMIN_USERNAME ?? process.env.ADMIN_USER ?? process.env.NEXT_PUBLIC_ADMIN_USERNAME ?? "admin", password: process.env.ADMIN_PASSWORD ?? process.env.ADMIN_PASS ?? process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "admin" };
+          return b3.username === c2.username && b3.password === c2.password;
+        }(a10.headers.get("authorization") ?? "") ? S.next() : new S("Authentication required", { status: 401, headers: { "WWW-Authenticate": 'Basic realm="MoralMap Admin", charset="UTF-8"' } });
       }
       let bu = { matcher: ["/admin/:path*"] };
       Object.values({ NOT_FOUND: 404, FORBIDDEN: 403, UNAUTHORIZED: 401 });
@@ -2564,6 +2505,87 @@ Learn More: https://nextjs.org/docs/messages/node-module-in-edge-runtime`;
             throw await j(e2, { path: d2, method: b2.method, headers: Object.fromEntries(b2.headers.entries()) }, { routerKind: "Pages Router", routePath: "/middleware", routeType: "middleware", revalidateReason: void 0 }), e2;
           }
         } });
+      }
+    }, 663: (a) => {
+      (() => {
+        "use strict";
+        "undefined" != typeof __nccwpck_require__ && (__nccwpck_require__.ab = "//");
+        var b = {};
+        (() => {
+          b.parse = function(b2, c2) {
+            if ("string" != typeof b2) throw TypeError("argument str must be a string");
+            for (var e2 = {}, f = b2.split(d), g = (c2 || {}).decode || a2, h = 0; h < f.length; h++) {
+              var i = f[h], j = i.indexOf("=");
+              if (!(j < 0)) {
+                var k = i.substr(0, j).trim(), l = i.substr(++j, i.length).trim();
+                '"' == l[0] && (l = l.slice(1, -1)), void 0 == e2[k] && (e2[k] = function(a3, b3) {
+                  try {
+                    return b3(a3);
+                  } catch (b4) {
+                    return a3;
+                  }
+                }(l, g));
+              }
+            }
+            return e2;
+          }, b.serialize = function(a3, b2, d2) {
+            var f = d2 || {}, g = f.encode || c;
+            if ("function" != typeof g) throw TypeError("option encode is invalid");
+            if (!e.test(a3)) throw TypeError("argument name is invalid");
+            var h = g(b2);
+            if (h && !e.test(h)) throw TypeError("argument val is invalid");
+            var i = a3 + "=" + h;
+            if (null != f.maxAge) {
+              var j = f.maxAge - 0;
+              if (isNaN(j) || !isFinite(j)) throw TypeError("option maxAge is invalid");
+              i += "; Max-Age=" + Math.floor(j);
+            }
+            if (f.domain) {
+              if (!e.test(f.domain)) throw TypeError("option domain is invalid");
+              i += "; Domain=" + f.domain;
+            }
+            if (f.path) {
+              if (!e.test(f.path)) throw TypeError("option path is invalid");
+              i += "; Path=" + f.path;
+            }
+            if (f.expires) {
+              if ("function" != typeof f.expires.toUTCString) throw TypeError("option expires is invalid");
+              i += "; Expires=" + f.expires.toUTCString();
+            }
+            if (f.httpOnly && (i += "; HttpOnly"), f.secure && (i += "; Secure"), f.sameSite) switch ("string" == typeof f.sameSite ? f.sameSite.toLowerCase() : f.sameSite) {
+              case true:
+              case "strict":
+                i += "; SameSite=Strict";
+                break;
+              case "lax":
+                i += "; SameSite=Lax";
+                break;
+              case "none":
+                i += "; SameSite=None";
+                break;
+              default:
+                throw TypeError("option sameSite is invalid");
+            }
+            return i;
+          };
+          var a2 = decodeURIComponent, c = encodeURIComponent, d = /; */, e = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
+        })(), a.exports = b;
+      })();
+    }, 720: (a, b, c) => {
+      "use strict";
+      Object.defineProperty(b, "__esModule", { value: true }), !function(a2, b2) {
+        for (var c2 in b2) Object.defineProperty(a2, c2, { enumerable: true, get: b2[c2] });
+      }(b, { interceptTestApis: function() {
+        return f;
+      }, wrapRequestHandler: function() {
+        return g;
+      } });
+      let d = c(392), e = c(165);
+      function f() {
+        return (0, e.interceptFetch)(c.g.fetch);
+      }
+      function g(a2) {
+        return (b2, c2) => (0, d.withRequest)(b2, e.reader, () => a2(b2, c2));
       }
     }, 814: (a, b, c) => {
       "use strict";
@@ -3371,7 +3393,7 @@ Learn More: https://nextjs.org/docs/messages/node-module-in-edge-runtime`;
         })(), a.exports = f;
       })();
     } }, (a) => {
-      var b = a(a.s = 792);
+      var b = a(a.s = 594);
       (_ENTRIES = "undefined" == typeof _ENTRIES ? {} : _ENTRIES).middleware_middleware = b;
     }]);
   }
@@ -3562,12 +3584,12 @@ var NEXT_DIR = path.join(__dirname, ".next");
 var OPEN_NEXT_DIR = path.join(__dirname, ".open-next");
 debug({ NEXT_DIR, OPEN_NEXT_DIR });
 var NextConfig = { "env": {}, "webpack": null, "eslint": { "ignoreDuringBuilds": false }, "typescript": { "ignoreBuildErrors": false, "tsconfigPath": "tsconfig.json" }, "typedRoutes": false, "distDir": ".next", "cleanDistDir": true, "assetPrefix": "/app", "cacheMaxMemorySize": 52428800, "configOrigin": "next.config.ts", "useFileSystemPublicRoutes": true, "generateEtags": true, "pageExtensions": ["tsx", "ts", "jsx", "js"], "poweredByHeader": true, "compress": true, "images": { "deviceSizes": [640, 750, 828, 1080, 1200, 1920, 2048, 3840], "imageSizes": [16, 32, 48, 64, 96, 128, 256, 384], "path": "/app/_next/image", "loader": "default", "loaderFile": "", "domains": [], "disableStaticImages": false, "minimumCacheTTL": 60, "formats": ["image/webp"], "dangerouslyAllowSVG": false, "contentSecurityPolicy": "script-src 'none'; frame-src 'none'; sandbox;", "contentDispositionType": "attachment", "remotePatterns": [], "unoptimized": false }, "devIndicators": { "position": "bottom-left" }, "onDemandEntries": { "maxInactiveAge": 6e4, "pagesBufferLength": 5 }, "amp": { "canonicalBase": "/app" }, "basePath": "/app", "sassOptions": {}, "trailingSlash": false, "i18n": null, "productionBrowserSourceMaps": false, "excludeDefaultMomentLocales": true, "serverRuntimeConfig": {}, "publicRuntimeConfig": {}, "reactProductionProfiling": false, "reactStrictMode": null, "reactMaxHeadersLength": 6e3, "httpAgentOptions": { "keepAlive": true }, "logging": {}, "compiler": {}, "expireTime": 31536e3, "staticPageGenerationTimeout": 60, "output": "standalone", "modularizeImports": { "@mui/icons-material": { "transform": "@mui/icons-material/{{member}}" }, "lodash": { "transform": "lodash/{{member}}" } }, "outputFileTracingRoot": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap", "experimental": { "useSkewCookie": false, "cacheLife": { "default": { "stale": 300, "revalidate": 900, "expire": 4294967294 }, "seconds": { "stale": 30, "revalidate": 1, "expire": 60 }, "minutes": { "stale": 300, "revalidate": 60, "expire": 3600 }, "hours": { "stale": 300, "revalidate": 3600, "expire": 86400 }, "days": { "stale": 300, "revalidate": 86400, "expire": 604800 }, "weeks": { "stale": 300, "revalidate": 604800, "expire": 2592e3 }, "max": { "stale": 300, "revalidate": 2592e3, "expire": 4294967294 } }, "cacheHandlers": {}, "cssChunking": true, "multiZoneDraftMode": false, "appNavFailHandling": false, "prerenderEarlyExit": true, "serverMinification": true, "serverSourceMaps": false, "linkNoTouchStart": false, "caseSensitiveRoutes": false, "clientSegmentCache": false, "clientParamParsing": false, "dynamicOnHover": false, "preloadEntriesOnStart": true, "clientRouterFilter": true, "clientRouterFilterRedirects": false, "fetchCacheKeyPrefix": "", "middlewarePrefetch": "flexible", "optimisticClientCache": true, "manualClientBasePath": false, "cpus": 15, "memoryBasedWorkersCount": false, "imgOptConcurrency": null, "imgOptTimeoutInSeconds": 7, "imgOptMaxInputPixels": 268402689, "imgOptSequentialRead": null, "imgOptSkipMetadata": null, "isrFlushToDisk": true, "workerThreads": false, "optimizeCss": false, "nextScriptWorkers": false, "scrollRestoration": false, "externalDir": false, "disableOptimizedLoading": false, "gzipSize": true, "craCompat": false, "esmExternals": true, "fullySpecified": false, "swcTraceProfiling": false, "forceSwcTransforms": false, "largePageDataBytes": 128e3, "typedEnv": false, "parallelServerCompiles": false, "parallelServerBuildTraces": false, "ppr": false, "authInterrupts": false, "webpackMemoryOptimizations": false, "optimizeServerReact": true, "viewTransition": false, "routerBFCache": false, "removeUncaughtErrorAndRejectionListeners": false, "validateRSCRequestHeaders": false, "staleTimes": { "dynamic": 0, "static": 300 }, "serverComponentsHmrCache": true, "staticGenerationMaxConcurrency": 8, "staticGenerationMinPagesPerWorker": 25, "cacheComponents": false, "inlineCss": false, "useCache": false, "globalNotFound": false, "devtoolSegmentExplorer": true, "browserDebugInfoInTerminal": false, "optimizeRouterScrolling": false, "optimizePackageImports": ["lucide-react", "date-fns", "lodash-es", "ramda", "antd", "react-bootstrap", "ahooks", "@ant-design/icons", "@headlessui/react", "@headlessui-float/react", "@heroicons/react/20/solid", "@heroicons/react/24/solid", "@heroicons/react/24/outline", "@visx/visx", "@tremor/react", "rxjs", "@mui/material", "@mui/icons-material", "recharts", "react-use", "effect", "@effect/schema", "@effect/platform", "@effect/platform-node", "@effect/platform-browser", "@effect/platform-bun", "@effect/sql", "@effect/sql-mssql", "@effect/sql-mysql2", "@effect/sql-pg", "@effect/sql-sqlite-node", "@effect/sql-sqlite-bun", "@effect/sql-sqlite-wasm", "@effect/sql-sqlite-react-native", "@effect/rpc", "@effect/rpc-http", "@effect/typeclass", "@effect/experimental", "@effect/opentelemetry", "@material-ui/core", "@material-ui/icons", "@tabler/icons-react", "mui-core", "react-icons/ai", "react-icons/bi", "react-icons/bs", "react-icons/cg", "react-icons/ci", "react-icons/di", "react-icons/fa", "react-icons/fa6", "react-icons/fc", "react-icons/fi", "react-icons/gi", "react-icons/go", "react-icons/gr", "react-icons/hi", "react-icons/hi2", "react-icons/im", "react-icons/io", "react-icons/io5", "react-icons/lia", "react-icons/lib", "react-icons/lu", "react-icons/md", "react-icons/pi", "react-icons/ri", "react-icons/rx", "react-icons/si", "react-icons/sl", "react-icons/tb", "react-icons/tfi", "react-icons/ti", "react-icons/vsc", "react-icons/wi"], "trustHostHeader": false, "isExperimentalCompile": false }, "htmlLimitedBots": "[\\w-]+-Google|Google-[\\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight", "bundlePagesRouterDependencies": false, "configFileName": "next.config.ts", "transpilePackages": ["react-router-dom"], "turbopack": { "root": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap" }, "_originalRedirects": [{ "source": "/", "destination": "/app/", "basePath": false, "permanent": false }, { "source": "/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "permanent": false }, { "source": "/manifest.json", "destination": "/app/manifest.json", "basePath": false, "permanent": false }, { "source": "/logo192.png", "destination": "/app/logo192.png", "basePath": false, "permanent": false }, { "source": "/logo512.png", "destination": "/app/logo512.png", "basePath": false, "permanent": false }, { "source": "/robots.txt", "destination": "/app/robots.txt", "basePath": false, "permanent": false }, { "source": "/%PUBLIC_URL%", "destination": "/app/", "basePath": false, "permanent": false }, { "source": "/app/%PUBLIC_URL%", "destination": "/app/", "basePath": false, "permanent": false }, { "source": "/%PUBLIC_URL%/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "permanent": false }, { "source": "/app/%PUBLIC_URL%/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "permanent": false }, { "source": "/%PUBLIC_URL%/manifest.json", "destination": "/app/manifest.json", "basePath": false, "permanent": false }, { "source": "/app/%PUBLIC_URL%/manifest.json", "destination": "/app/manifest.json", "basePath": false, "permanent": false }, { "source": "/%PUBLIC_URL%/logo192.png", "destination": "/app/logo192.png", "basePath": false, "permanent": false }, { "source": "/app/%PUBLIC_URL%/logo192.png", "destination": "/app/logo192.png", "basePath": false, "permanent": false }, { "source": "/%PUBLIC_URL%/logo512.png", "destination": "/app/logo512.png", "basePath": false, "permanent": false }, { "source": "/app/%PUBLIC_URL%/logo512.png", "destination": "/app/logo512.png", "basePath": false, "permanent": false }, { "source": "/%PUBLIC_URL%/robots.txt", "destination": "/app/robots.txt", "basePath": false, "permanent": false }, { "source": "/app/%PUBLIC_URL%/robots.txt", "destination": "/app/robots.txt", "basePath": false, "permanent": false }] };
-var BuildId = "hEXE8928wDntDjKlsd-Yc";
-var RoutesManifest = { "basePath": "/app", "rewrites": { "beforeFiles": [], "afterFiles": [], "fallback": [] }, "redirects": [{ "source": "/app/", "destination": "/app", "basePath": false, "internal": true, "statusCode": 308, "regex": "^/app/$" }, { "source": "/:path+/", "destination": "/:path+", "internal": true, "statusCode": 308, "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$" }, { "source": "/", "destination": "/app/", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/(?:/)?$" }, { "source": "/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/favicon\\.ico(?:/)?$" }, { "source": "/manifest.json", "destination": "/app/manifest.json", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/manifest\\.json(?:/)?$" }, { "source": "/logo192.png", "destination": "/app/logo192.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/logo192\\.png(?:/)?$" }, { "source": "/logo512.png", "destination": "/app/logo512.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/logo512\\.png(?:/)?$" }, { "source": "/robots.txt", "destination": "/app/robots.txt", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/robots\\.txt(?:/)?$" }, { "source": "/%PUBLIC_URL%", "destination": "/app/", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%(?:/)?$" }, { "source": "/app/%PUBLIC_URL%", "destination": "/app/", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%(?:/)?$" }, { "source": "/%PUBLIC_URL%/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/favicon\\.ico(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/favicon\\.ico(?:/)?$" }, { "source": "/%PUBLIC_URL%/manifest.json", "destination": "/app/manifest.json", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/manifest\\.json(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/manifest.json", "destination": "/app/manifest.json", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/manifest\\.json(?:/)?$" }, { "source": "/%PUBLIC_URL%/logo192.png", "destination": "/app/logo192.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/logo192\\.png(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/logo192.png", "destination": "/app/logo192.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/logo192\\.png(?:/)?$" }, { "source": "/%PUBLIC_URL%/logo512.png", "destination": "/app/logo512.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/logo512\\.png(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/logo512.png", "destination": "/app/logo512.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/logo512\\.png(?:/)?$" }, { "source": "/%PUBLIC_URL%/robots.txt", "destination": "/app/robots.txt", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/robots\\.txt(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/robots.txt", "destination": "/app/robots.txt", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/robots\\.txt(?:/)?$" }], "routes": { "static": [{ "page": "/", "regex": "^/(?:/)?$", "routeKeys": {}, "namedRegex": "^/(?:/)?$" }, { "page": "/_not-found", "regex": "^/_not\\-found(?:/)?$", "routeKeys": {}, "namedRegex": "^/_not\\-found(?:/)?$" }, { "page": "/admin", "regex": "^/admin(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin(?:/)?$" }, { "page": "/admin/instructions", "regex": "^/admin/instructions(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/instructions(?:/)?$" }, { "page": "/admin/login", "regex": "^/admin/login(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/login(?:/)?$" }, { "page": "/admin/scenarios", "regex": "^/admin/scenarios(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/scenarios(?:/)?$" }, { "page": "/admin/survey", "regex": "^/admin/survey(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/survey(?:/)?$" }, { "page": "/admin/texts", "regex": "^/admin/texts(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/texts(?:/)?$" }, { "page": "/thank-you", "regex": "^/thank\\-you(?:/)?$", "routeKeys": {}, "namedRegex": "^/thank\\-you(?:/)?$" }], "dynamic": [], "data": { "static": [], "dynamic": [] } }, "locales": [] };
+var BuildId = "0H3xvsGhKv_9-N0OwqnEe";
+var RoutesManifest = { "basePath": "/app", "rewrites": { "beforeFiles": [], "afterFiles": [], "fallback": [] }, "redirects": [{ "source": "/app/", "destination": "/app", "basePath": false, "internal": true, "statusCode": 308, "regex": "^/app/$" }, { "source": "/:path+/", "destination": "/:path+", "internal": true, "statusCode": 308, "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$" }, { "source": "/", "destination": "/app/", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/(?:/)?$" }, { "source": "/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/favicon\\.ico(?:/)?$" }, { "source": "/manifest.json", "destination": "/app/manifest.json", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/manifest\\.json(?:/)?$" }, { "source": "/logo192.png", "destination": "/app/logo192.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/logo192\\.png(?:/)?$" }, { "source": "/logo512.png", "destination": "/app/logo512.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/logo512\\.png(?:/)?$" }, { "source": "/robots.txt", "destination": "/app/robots.txt", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/robots\\.txt(?:/)?$" }, { "source": "/%PUBLIC_URL%", "destination": "/app/", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%(?:/)?$" }, { "source": "/app/%PUBLIC_URL%", "destination": "/app/", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%(?:/)?$" }, { "source": "/%PUBLIC_URL%/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/favicon\\.ico(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/favicon.ico", "destination": "/app/favicon.ico", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/favicon\\.ico(?:/)?$" }, { "source": "/%PUBLIC_URL%/manifest.json", "destination": "/app/manifest.json", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/manifest\\.json(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/manifest.json", "destination": "/app/manifest.json", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/manifest\\.json(?:/)?$" }, { "source": "/%PUBLIC_URL%/logo192.png", "destination": "/app/logo192.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/logo192\\.png(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/logo192.png", "destination": "/app/logo192.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/logo192\\.png(?:/)?$" }, { "source": "/%PUBLIC_URL%/logo512.png", "destination": "/app/logo512.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/logo512\\.png(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/logo512.png", "destination": "/app/logo512.png", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/logo512\\.png(?:/)?$" }, { "source": "/%PUBLIC_URL%/robots.txt", "destination": "/app/robots.txt", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/%PUBLIC_URL%/robots\\.txt(?:/)?$" }, { "source": "/app/%PUBLIC_URL%/robots.txt", "destination": "/app/robots.txt", "basePath": false, "statusCode": 307, "regex": "^(?!/app/_next)/app/%PUBLIC_URL%/robots\\.txt(?:/)?$" }], "routes": { "static": [{ "page": "/", "regex": "^/(?:/)?$", "routeKeys": {}, "namedRegex": "^/(?:/)?$" }, { "page": "/_not-found", "regex": "^/_not\\-found(?:/)?$", "routeKeys": {}, "namedRegex": "^/_not\\-found(?:/)?$" }, { "page": "/admin", "regex": "^/admin(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin(?:/)?$" }, { "page": "/admin/instructions", "regex": "^/admin/instructions(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/instructions(?:/)?$" }, { "page": "/admin/scenarios", "regex": "^/admin/scenarios(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/scenarios(?:/)?$" }, { "page": "/admin/survey", "regex": "^/admin/survey(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/survey(?:/)?$" }, { "page": "/admin/texts", "regex": "^/admin/texts(?:/)?$", "routeKeys": {}, "namedRegex": "^/admin/texts(?:/)?$" }, { "page": "/thank-you", "regex": "^/thank\\-you(?:/)?$", "routeKeys": {}, "namedRegex": "^/thank\\-you(?:/)?$" }], "dynamic": [], "data": { "static": [], "dynamic": [] } }, "locales": [] };
 var ConfigHeaders = [];
-var PrerenderManifest = { "version": 4, "routes": { "/admin/instructions": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/instructions", "dataRoute": "/admin/instructions.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/texts": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/texts", "dataRoute": "/admin/texts.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/scenarios": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/scenarios", "dataRoute": "/admin/scenarios.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/survey": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/survey", "dataRoute": "/admin/survey.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/login": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/login", "dataRoute": "/admin/login.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/_not-found": { "initialStatus": 404, "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/_not-found", "dataRoute": "/_not-found.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/", "dataRoute": "/index.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/thank-you": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/thank-you", "dataRoute": "/thank-you.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin", "dataRoute": "/admin.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] } }, "dynamicRoutes": {}, "notFoundRoutes": [], "preview": { "previewModeId": "a8250829092db1278405c3f6229426e0", "previewModeSigningKey": "a24861704c80e7d7a8b5a05b33b5a1792f4afe682ae529b6daac0dc73f06d7de", "previewModeEncryptionKey": "2bf12499ad3d5ffb48492584a44697eded57752778f08f98ba0974b19dc58ade" } };
-var MiddlewareManifest = { "version": 3, "middleware": { "/": { "files": ["server/edge-runtime-webpack.js", "server/middleware.js"], "name": "middleware", "page": "/", "matchers": [{ "regexp": "^\\/app(?:\\/(_next\\/data\\/[^/]{1,}))?\\/admin(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\.json)?[\\/#\\?]?$", "originalSource": "/admin/:path*" }], "wasm": [], "assets": [], "env": { "__NEXT_BUILD_ID": "hEXE8928wDntDjKlsd-Yc", "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "nS0Ufx8dJRFOKUx6VwCCX2zCg0q3pmpOhuYJGVMnt0Y=", "__NEXT_PREVIEW_MODE_ID": "a8250829092db1278405c3f6229426e0", "__NEXT_PREVIEW_MODE_SIGNING_KEY": "a24861704c80e7d7a8b5a05b33b5a1792f4afe682ae529b6daac0dc73f06d7de", "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "2bf12499ad3d5ffb48492584a44697eded57752778f08f98ba0974b19dc58ade" } } }, "functions": {}, "sortedMiddleware": ["/"] };
-var AppPathRoutesManifest = { "/_not-found/page": "/_not-found", "/api/admin/login/route": "/api/admin/login", "/api/admin/logout/route": "/api/admin/logout", "/api/log-choice/route": "/api/log-choice", "/api/route-endpoints/route": "/api/route-endpoints", "/api/log-survey/route": "/api/log-survey", "/admin/instructions/page": "/admin/instructions", "/admin/texts/page": "/admin/texts", "/admin/scenarios/page": "/admin/scenarios", "/admin/page": "/admin", "/thank-you/page": "/thank-you", "/admin/login/page": "/admin/login", "/page": "/", "/admin/survey/page": "/admin/survey" };
+var PrerenderManifest = { "version": 4, "routes": { "/_not-found": { "initialStatus": 404, "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/_not-found", "dataRoute": "/_not-found.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/instructions": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/instructions", "dataRoute": "/admin/instructions.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/thank-you": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/thank-you", "dataRoute": "/thank-you.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/", "dataRoute": "/index.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/survey": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/survey", "dataRoute": "/admin/survey.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin", "dataRoute": "/admin.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/scenarios": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/scenarios", "dataRoute": "/admin/scenarios.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] }, "/admin/texts": { "experimentalBypassFor": [{ "type": "header", "key": "next-action" }, { "type": "header", "key": "content-type", "value": "multipart/form-data;.*" }], "initialRevalidateSeconds": false, "srcRoute": "/admin/texts", "dataRoute": "/admin/texts.rsc", "allowHeader": ["host", "x-matched-path", "x-prerender-revalidate", "x-prerender-revalidate-if-generated", "x-next-revalidated-tags", "x-next-revalidate-tag-token"] } }, "dynamicRoutes": {}, "notFoundRoutes": [], "preview": { "previewModeId": "a3ff917d29cec36ed9568e7ed53279da", "previewModeSigningKey": "0d384a2825f7fadf5bdb7732437dc77a3c0608dd32b0fc17e16ad3237c9ab694", "previewModeEncryptionKey": "6ecd020e6891f27c3bfa94d625b5606aaf15980936a6f5d875b52ce976026cc5" } };
+var MiddlewareManifest = { "version": 3, "middleware": { "/": { "files": ["server/edge-runtime-webpack.js", "server/middleware.js"], "name": "middleware", "page": "/", "matchers": [{ "regexp": "^\\/app(?:\\/(_next\\/data\\/[^/]{1,}))?\\/admin(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\.json)?[\\/#\\?]?$", "originalSource": "/admin/:path*" }], "wasm": [], "assets": [], "env": { "__NEXT_BUILD_ID": "0H3xvsGhKv_9-N0OwqnEe", "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "8j4+6lqqQZJ5GV4u1o5i136JMcjHHLcltzGaIncwCNc=", "__NEXT_PREVIEW_MODE_ID": "a3ff917d29cec36ed9568e7ed53279da", "__NEXT_PREVIEW_MODE_SIGNING_KEY": "0d384a2825f7fadf5bdb7732437dc77a3c0608dd32b0fc17e16ad3237c9ab694", "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "6ecd020e6891f27c3bfa94d625b5606aaf15980936a6f5d875b52ce976026cc5" } } }, "functions": {}, "sortedMiddleware": ["/"] };
+var AppPathRoutesManifest = { "/api/route-endpoints/route": "/api/route-endpoints", "/_not-found/page": "/_not-found", "/api/log-choice/route": "/api/log-choice", "/admin/page": "/admin", "/admin/texts/page": "/admin/texts", "/admin/survey/page": "/admin/survey", "/admin/scenarios/page": "/admin/scenarios", "/page": "/", "/admin/instructions/page": "/admin/instructions", "/thank-you/page": "/thank-you", "/api/log-survey/route": "/api/log-survey" };
 var FunctionsConfigManifest = { "version": 1, "functions": {} };
 var PagesManifest = { "/_app": "pages/_app.js", "/_error": "pages/_error.js", "/_document": "pages/_document.js", "/404": "pages/404.html" };
 process.env.NEXT_BUILD_ID = BuildId;

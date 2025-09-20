@@ -179,12 +179,6 @@
       "namedRegex": "^/admin/instructions(?:/)?$"
     },
     {
-      "page": "/admin/login",
-      "regex": "^/admin/login(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/admin/login(?:/)?$"
-    },
-    {
       "page": "/admin/scenarios",
       "regex": "^/admin/scenarios(?:/)?$",
       "routeKeys": {},

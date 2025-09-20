@@ -1,11 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import {
   isFileSystemAccessError,
   isFileSystemUnavailable,
   markFileSystemUnavailable,
 } from './_fsFallback.js';
+
+const SESSION_KV_PREFIX = 'session:';
 
 // Resolve the path relative to the project root so all routes reference
 // the same file regardless of their working directory.
@@ -34,7 +37,16 @@ function updateMemoryStore(sessions) {
   }
 }
 
-export function loadSessions() {
+function getSessionKv() {
+  try {
+    const { env } = getCloudflareContext();
+    return env?.SESSION_DATA_KV;
+  } catch {
+    return undefined;
+  }
+}
+
+function readSessionsFromFile() {
   if (isFileSystemUnavailable()) {
     return getMemoryStore();
   }
@@ -61,7 +73,7 @@ export function loadSessions() {
   }
 }
 
-export function saveSessions(sessions) {
+function writeSessionsToFile(sessions) {
   if (isFileSystemUnavailable()) {
     updateMemoryStore(sessions);
     return;
@@ -78,5 +90,103 @@ export function saveSessions(sessions) {
     }
 
     throw error;
+  }
+}
+
+function coerceSession(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
+}
+
+export async function loadSession(sessionId) {
+  if (typeof sessionId !== 'string' || !sessionId) {
+    return undefined;
+  }
+
+  const memory = getMemoryStore();
+  if (Object.prototype.hasOwnProperty.call(memory, sessionId)) {
+    return coerceSession(memory[sessionId]);
+  }
+
+  const kv = getSessionKv();
+  if (kv) {
+    try {
+      const stored = await kv.get(`${SESSION_KV_PREFIX}${sessionId}`, { type: 'json' });
+      const session = coerceSession(stored);
+      if (session) {
+        memory[sessionId] = session;
+        return session;
+      }
+      delete memory[sessionId];
+      return undefined;
+    } catch (err) {
+      console.error('Failed to load session from KV:', err);
+    }
+  }
+
+  const sessions = readSessionsFromFile();
+  const fallback = coerceSession(sessions[sessionId]);
+  if (fallback) {
+    memory[sessionId] = fallback;
+  } else {
+    delete memory[sessionId];
+  }
+  return fallback;
+}
+
+export async function saveSession(sessionId, session) {
+  if (typeof sessionId !== 'string' || !sessionId) {
+    return;
+  }
+  const normalized = coerceSession(session);
+  if (!normalized) {
+    return;
+  }
+
+  const kv = getSessionKv();
+  let persistedToKv = false;
+  if (kv) {
+    try {
+      await kv.put(`${SESSION_KV_PREFIX}${sessionId}`, JSON.stringify(normalized));
+      persistedToKv = true;
+    } catch (err) {
+      console.error('Failed to persist session to KV:', err);
+    }
+  }
+
+  const memory = getMemoryStore();
+  memory[sessionId] = normalized;
+
+  if (!persistedToKv) {
+    const sessions = readSessionsFromFile();
+    sessions[sessionId] = normalized;
+    writeSessionsToFile(sessions);
+  }
+}
+
+export async function deleteSession(sessionId) {
+  if (typeof sessionId !== 'string' || !sessionId) {
+    return;
+  }
+
+  const kv = getSessionKv();
+  let deletedFromKv = false;
+  if (kv) {
+    try {
+      await kv.delete(`${SESSION_KV_PREFIX}${sessionId}`);
+      deletedFromKv = true;
+    } catch (err) {
+      console.error('Failed to delete session from KV:', err);
+    }
+  }
+
+  const memory = getMemoryStore();
+  delete memory[sessionId];
+
+  if (!deletedFromKv) {
+    const sessions = readSessionsFromFile();
+    if (Object.prototype.hasOwnProperty.call(sessions, sessionId)) {
+      delete sessions[sessionId];
+      writeSessionsToFile(sessions);
+    }
   }
 }

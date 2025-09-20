@@ -6,6 +6,11 @@
     "compatibility_flags": [
         "nodejs_compat"
     ],
+    "kv_namespaces": [
+        { "binding": "ROUTE_CONFIG_KV" },
+        { "binding": "SESSION_DATA_KV" },
+        { "binding": "USER_DATA_KV" }
+    ],
     "assets": {
         "binding": "ASSETS",
         "directory": ".open-next/assets"

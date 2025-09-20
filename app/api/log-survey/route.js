@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadSessions, saveSessions } from '../_sessionStore.js';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { deleteSession, loadSession } from '../_sessionStore.js';
 import {
   isFileSystemAccessError,
   isFileSystemUnavailable,
   markFileSystemUnavailable,
 } from '../_fsFallback.js';
 
+const USER_DATA_KV_PREFIX = 'user-log:';
 
 // Ensure we write to a stable path regardless of runtime cwd
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +27,61 @@ function appendToMemoryLog(entry) {
   }
 }
 
+function getUserDataKv() {
+  try {
+    const { env } = getCloudflareContext();
+    return env?.USER_DATA_KV;
+  } catch {
+    return undefined;
+  }
+}
+
+function createUserLogKey(entry) {
+  const session = typeof entry.sessionId === 'string' ? entry.sessionId : 'session';
+  const timestamp = typeof entry.timestamp === 'string' ? entry.timestamp : new Date().toISOString();
+  const safeTimestamp = timestamp.replace(/[^0-9A-Za-zT:-]/g, '');
+  const randomUuid =
+    globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function'
+      ? globalThis.crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
+  return `${USER_DATA_KV_PREFIX}${session}:${safeTimestamp}:${randomUuid}`;
+}
+
+async function persistUserLog(entry, serializedEntry, jsonEntry) {
+  const kv = getUserDataKv();
+  let persisted = false;
+
+  if (kv) {
+    try {
+      const key = createUserLogKey(entry);
+      await kv.put(key, jsonEntry);
+      persisted = true;
+    } catch (err) {
+      console.error('Failed to persist user data to KV:', err);
+    }
+  }
+
+  if (persisted) {
+    return;
+  }
+
+  if (isFileSystemUnavailable()) {
+    appendToMemoryLog(entry);
+    return;
+  }
+
+  try {
+    fs.appendFileSync(dataPath, serializedEntry, 'utf8');
+  } catch (err) {
+    if (isFileSystemAccessError(err)) {
+      markFileSystemUnavailable(err, 'user data logging');
+      appendToMemoryLog(entry);
+      return;
+    }
+    throw err;
+  }
+}
+
 export async function POST(req) {
   const { sessionId, responses } = await req.json();
 
@@ -32,38 +89,23 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
   }
 
-  const sessions = loadSessions();
-  const session = sessions[sessionId];
+  const session = await loadSession(sessionId);
   if (!session) {
     return NextResponse.json({ error: 'Session not found' }, { status: 400 });
   }
-
-  session.responses = responses;
 
   const logEntry =
     typeof structuredClone === 'function'
       ? structuredClone(session)
       : JSON.parse(JSON.stringify(session));
-  const serializedEntry = `${JSON.stringify(logEntry)}\n`;
+  logEntry.responses = responses;
+
+  const jsonEntry = JSON.stringify(logEntry);
+  const serializedEntry = `${jsonEntry}\n`;
 
   try {
-    if (isFileSystemUnavailable()) {
-      appendToMemoryLog(logEntry);
-    } else {
-      try {
-        fs.appendFileSync(dataPath, serializedEntry, 'utf8');
-      } catch (err) {
-        if (isFileSystemAccessError(err)) {
-          markFileSystemUnavailable(err, 'user data logging');
-          appendToMemoryLog(logEntry);
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    delete sessions[sessionId];
-    saveSessions(sessions);
+    await persistUserLog(logEntry, serializedEntry, jsonEntry);
+    await deleteSession(sessionId);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Error writing user data:', err);

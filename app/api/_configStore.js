@@ -1,4 +1,3 @@
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 import scenariosDefaults from '../../config/scenariosConfig.json' assert { type: 'json' };
 import textsDefaults from '../../config/textsConfig.json' assert { type: 'json' };
 import instructionsDefaults from '../../config/instructionsConfig.json' assert { type: 'json' };
@@ -10,16 +9,11 @@ export function ensureObject(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 }
 
-export function getConfigKv() {
-  try {
-    const { env } = getCloudflareContext();
-    return env?.ROUTE_CONFIG_KV;
-  } catch {
-    return undefined;
-  }
+export function getConfigKv(env) {
+  return env?.ROUTE_CONFIG_KV;
 }
 
-export async function readPersistedConfig(kv = getConfigKv()) {
+export async function readPersistedConfig(kv) {
   if (!kv) return {};
   try {
     const stored = await kv.get(CONFIG_KV_KEY, { type: 'json' });
@@ -47,8 +41,7 @@ export function mergeWithDefaults(persisted = {}) {
   };
 }
 
-export async function persistConfig(mutator) {
-  const kv = getConfigKv();
+export async function persistConfig(mutator, kv) {
   if (!kv) {
     throw new Error('ROUTE_CONFIG_KV binding is not configured');
   }
@@ -63,7 +56,7 @@ export async function persistConfig(mutator) {
   return nextState;
 }
 
-export async function loadMergedConfig() {
-  const persisted = await readPersistedConfig(getConfigKv());
+export async function loadMergedConfig(kv) {
+  const persisted = await readPersistedConfig(kv);
   return mergeWithDefaults(persisted);
 }

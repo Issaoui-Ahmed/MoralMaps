@@ -1,3 +1,4 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextResponse } from 'next/server';
 import { loadSession, saveSession } from '../_sessionStore.js';
 import {
@@ -53,8 +54,16 @@ export async function POST(req) {
   const encoded = `${tts}-${isChosen}`;
 
   let totalScenarios = 0;
+  let env;
   try {
-    const persisted = await readPersistedConfig(getConfigKv());
+    env = getCloudflareContext().env;
+  } catch {
+    env = undefined;
+  }
+  const configKv = getConfigKv(env);
+  const sessionKv = env?.SESSION_DATA_KV;
+  try {
+    const persisted = await readPersistedConfig(configKv);
     const { scenarioCfg } = mergeWithDefaults(persisted);
     totalScenarios = determineTotalScenarios(scenarioCfg);
   } catch (err) {
@@ -62,7 +71,7 @@ export async function POST(req) {
   }
 
   const requiredLength = Math.max(totalScenarios, scenarioIndex + 1);
-  const existingSession = await loadSession(sessionId);
+  const existingSession = await loadSession(sessionId, sessionKv);
   const session =
     existingSession && typeof existingSession === 'object'
       ? { ...existingSession }
@@ -76,7 +85,7 @@ export async function POST(req) {
   session.choices = normalizeChoices(session.choices, requiredLength);
   session.choices[scenarioIndex] = encoded;
 
-  await saveSession(sessionId, session);
+  await saveSession(sessionId, session, sessionKv);
 
   return NextResponse.json({ success: true });
 }

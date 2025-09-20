@@ -1,3 +1,4 @@
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '../_utils';
 import { buildScenarios } from '../../../src/utils/buildScenarios';
@@ -10,8 +11,15 @@ import {
 } from '../_configStore.js';
 
 export async function GET(req) {
+  let env;
   try {
-    const persisted = await readPersistedConfig(getConfigKv());
+    env = getCloudflareContext().env;
+  } catch {
+    env = undefined;
+  }
+  const configKv = getConfigKv(env);
+  try {
+    const persisted = await readPersistedConfig(configKv);
     const { scenarioCfg, textsCfg, instructionsCfg: instrCfg, surveyCfg } =
       mergeWithDefaults(persisted);
 
@@ -46,6 +54,14 @@ export async function POST(req) {
   }
   const incoming = await req.json();
 
+  let env;
+  try {
+    env = getCloudflareContext().env;
+  } catch {
+    env = undefined;
+  }
+  const configKv = getConfigKv(env);
+
   const routeFields = {};
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
     if (
@@ -72,34 +88,37 @@ export async function POST(req) {
     const hasInstructionUpdate = Object.prototype.hasOwnProperty.call(incoming, 'instructions');
 
     if (hasRouteUpdate || hasSurveyUpdate || hasTextUpdate || hasInstructionUpdate) {
-      await persistConfig((current) => {
-        const next = { ...current };
+      await persistConfig(
+        (current) => {
+          const next = { ...current };
 
-        if (hasRouteUpdate) {
-          const existing = ensureObject(current.scenariosConfig);
-          next.scenariosConfig = { ...existing, ...routeFields };
-        }
+          if (hasRouteUpdate) {
+            const existing = ensureObject(current.scenariosConfig);
+            next.scenariosConfig = { ...existing, ...routeFields };
+          }
 
-        if (hasSurveyUpdate) {
-          const existing = ensureObject(current.surveyConfig);
-          next.surveyConfig = { ...existing, survey: incoming.survey || [] };
-        }
+          if (hasSurveyUpdate) {
+            const existing = ensureObject(current.surveyConfig);
+            next.surveyConfig = { ...existing, survey: incoming.survey || [] };
+          }
 
-        if (hasTextUpdate) {
-          const existing = ensureObject(current.textsConfig);
-          next.textsConfig = { ...existing, ...textPatch };
-        }
+          if (hasTextUpdate) {
+            const existing = ensureObject(current.textsConfig);
+            next.textsConfig = { ...existing, ...textPatch };
+          }
 
-        if (hasInstructionUpdate) {
-          const existing = ensureObject(current.instructionsConfig);
-          next.instructionsConfig = {
-            ...existing,
-            steps: incoming.instructions || [],
-          };
-        }
+          if (hasInstructionUpdate) {
+            const existing = ensureObject(current.instructionsConfig);
+            next.instructionsConfig = {
+              ...existing,
+              steps: incoming.instructions || [],
+            };
+          }
 
-        return next;
-      });
+          return next;
+        },
+        configKv,
+      );
     }
 
     return NextResponse.json({ success: true });
@@ -115,6 +134,14 @@ export async function PATCH(req) {
   }
   const incoming = await req.json();
   const routePatch = {};
+
+  let env;
+  try {
+    env = getCloudflareContext().env;
+  } catch {
+    env = undefined;
+  }
+  const configKv = getConfigKv(env);
 
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
     if (
@@ -138,21 +165,24 @@ export async function PATCH(req) {
   }
 
   try {
-    await persistConfig((current) => {
-      const next = { ...current };
+    await persistConfig(
+      (current) => {
+        const next = { ...current };
 
-      if (Object.keys(routePatch).length) {
-        const existing = ensureObject(current.scenariosConfig);
-        next.scenariosConfig = { ...existing, ...routePatch };
-      }
+        if (Object.keys(routePatch).length) {
+          const existing = ensureObject(current.scenariosConfig);
+          next.scenariosConfig = { ...existing, ...routePatch };
+        }
 
-      if (hasSurveyUpdate) {
-        const existing = ensureObject(current.surveyConfig);
-        next.surveyConfig = { ...existing, survey: incoming.survey || [] };
-      }
+        if (hasSurveyUpdate) {
+          const existing = ensureObject(current.surveyConfig);
+          next.surveyConfig = { ...existing, survey: incoming.survey || [] };
+        }
 
-      return next;
-    });
+        return next;
+      },
+      configKv,
+    );
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Error persisting config to KV:', err);

@@ -27,15 +27,6 @@ function appendToMemoryLog(entry) {
   }
 }
 
-function getUserDataKv() {
-  try {
-    const { env } = getCloudflareContext();
-    return env?.USER_DATA_KV;
-  } catch {
-    return undefined;
-  }
-}
-
 function createUserLogKey(entry) {
   const session = typeof entry.sessionId === 'string' ? entry.sessionId : 'session';
   const timestamp = typeof entry.timestamp === 'string' ? entry.timestamp : new Date().toISOString();
@@ -47,8 +38,7 @@ function createUserLogKey(entry) {
   return `${USER_DATA_KV_PREFIX}${session}:${safeTimestamp}:${randomUuid}`;
 }
 
-async function persistUserLog(entry, serializedEntry, jsonEntry) {
-  const kv = getUserDataKv();
+async function persistUserLog(entry, serializedEntry, jsonEntry, kv) {
   let persisted = false;
 
   if (kv) {
@@ -89,7 +79,16 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
   }
 
-  const session = await loadSession(sessionId);
+  let env;
+  try {
+    env = getCloudflareContext().env;
+  } catch {
+    env = undefined;
+  }
+  const sessionKv = env?.SESSION_DATA_KV;
+  const userLogKv = env?.USER_DATA_KV;
+
+  const session = await loadSession(sessionId, sessionKv);
   if (!session) {
     return NextResponse.json({ error: 'Session not found' }, { status: 400 });
   }
@@ -104,8 +103,8 @@ export async function POST(req) {
   const serializedEntry = `${jsonEntry}\n`;
 
   try {
-    await persistUserLog(logEntry, serializedEntry, jsonEntry);
-    await deleteSession(sessionId);
+    await persistUserLog(logEntry, serializedEntry, jsonEntry, userLogKv);
+    await deleteSession(sessionId, sessionKv);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Error writing user data:', err);

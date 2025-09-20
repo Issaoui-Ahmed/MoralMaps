@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 import {
   isFileSystemAccessError,
   isFileSystemUnavailable,
@@ -34,15 +33,6 @@ function updateMemoryStore(sessions) {
     globalThis[MEMORY_STORE_KEY] = sessions;
   } else {
     globalThis[MEMORY_STORE_KEY] = {};
-  }
-}
-
-function getSessionKv() {
-  try {
-    const { env } = getCloudflareContext();
-    return env?.SESSION_DATA_KV;
-  } catch {
-    return undefined;
   }
 }
 
@@ -97,7 +87,7 @@ function coerceSession(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
-export async function loadSession(sessionId) {
+export async function loadSession(sessionId, kv) {
   if (typeof sessionId !== 'string' || !sessionId) {
     return undefined;
   }
@@ -107,7 +97,6 @@ export async function loadSession(sessionId) {
     return coerceSession(memory[sessionId]);
   }
 
-  const kv = getSessionKv();
   if (kv) {
     try {
       const stored = await kv.get(`${SESSION_KV_PREFIX}${sessionId}`, { type: 'json' });
@@ -133,7 +122,7 @@ export async function loadSession(sessionId) {
   return fallback;
 }
 
-export async function saveSession(sessionId, session) {
+export async function saveSession(sessionId, session, kv) {
   if (typeof sessionId !== 'string' || !sessionId) {
     return;
   }
@@ -142,7 +131,6 @@ export async function saveSession(sessionId, session) {
     return;
   }
 
-  const kv = getSessionKv();
   let persistedToKv = false;
   if (kv) {
     try {
@@ -163,12 +151,11 @@ export async function saveSession(sessionId, session) {
   }
 }
 
-export async function deleteSession(sessionId) {
+export async function deleteSession(sessionId, kv) {
   if (typeof sessionId !== 'string' || !sessionId) {
     return;
   }
 
-  const kv = getSessionKv();
   let deletedFromKv = false;
   if (kv) {
     try {

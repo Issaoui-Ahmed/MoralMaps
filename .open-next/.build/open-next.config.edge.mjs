@@ -137,8 +137,8 @@ function isUserWorkerFirst(runWorkerFirst, pathname) {
 var asset_resolver_default = resolver;
 
 // node_modules/@opennextjs/cloudflare/dist/api/config.js
-function defineCloudflareConfig(config = {}) {
-  const { incrementalCache, tagCache, queue, cachePurge, enableCacheInterception = false, routePreloadingBehavior = "none" } = config;
+function defineCloudflareConfig(config2 = {}) {
+  const { incrementalCache, tagCache, queue, cachePurge, enableCacheInterception = false, routePreloadingBehavior = "none" } = config2;
   return {
     default: {
       override: {
@@ -200,7 +200,28 @@ function resolveCdnInvalidation(value = "dummy") {
 }
 
 // open-next.config.ts
-var open_next_config_default = defineCloudflareConfig({});
+var baseConfig = defineCloudflareConfig();
+var config = {
+  ...baseConfig,
+  workers: {
+    default: {
+      bindings: {
+        kvNamespaces: [
+          { binding: "ROUTE_CONFIG_KV", id: "1234567893" },
+          { binding: "SESSION_DATA_KV", id: "1234567890" },
+          { binding: "USER_DATA_KV", id: "1234567891" }
+        ],
+        assets: [
+          {
+            binding: "ASSETS",
+            directory: ".open-next/assets"
+          }
+        ]
+      }
+    }
+  }
+};
+var open_next_config_default = config;
 export {
   open_next_config_default as default
 };

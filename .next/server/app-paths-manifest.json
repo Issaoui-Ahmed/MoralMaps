@@ -1,13 +1,13 @@
 {
-  "/api/route-endpoints/route": "app/api/route-endpoints/route.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/api/log-choice/route": "app/api/log-choice/route.js",
-  "/admin/page": "app/admin/page.js",
+  "/api/route-endpoints/route": "app/api/route-endpoints/route.js",
+  "/api/log-survey/route": "app/api/log-survey/route.js",
+  "/admin/instructions/page": "app/admin/instructions/page.js",
   "/admin/texts/page": "app/admin/texts/page.js",
   "/admin/survey/page": "app/admin/survey/page.js",
   "/admin/scenarios/page": "app/admin/scenarios/page.js",
+  "/admin/page": "app/admin/page.js",
   "/page": "app/page.js",
-  "/admin/instructions/page": "app/admin/instructions/page.js",
-  "/thank-you/page": "app/thank-you/page.js",
-  "/api/log-survey/route": "app/api/log-survey/route.js"
+  "/thank-you/page": "app/thank-you/page.js"
 }

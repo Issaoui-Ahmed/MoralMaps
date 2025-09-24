@@ -1,30 +1,13 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { deleteSession, loadSession } from '../_sessionStore.js';
-import {
-  isFileSystemAccessError,
-  isFileSystemUnavailable,
-  markFileSystemUnavailable,
-} from '../_fsFallback.js';
-import { getKvBinding } from '../_kvBinding.js';
+import { kv } from '@vercel/kv';
+
+// Run on Edge so it coexists with the rest of your Edge-first API
+export const runtime = 'edge';
 
 const USER_DATA_KV_PREFIX = 'user-log:';
 
-// Ensure we write to a stable path regardless of runtime cwd
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dataPath = path.join(__dirname, '..', '..', '..', 'user_data.jsonl');
-
-const USER_DATA_MEMORY_KEY = Symbol.for('moralmap.userDataLog.memory');
-
-function appendToMemoryLog(entry) {
-  if (Array.isArray(globalThis[USER_DATA_MEMORY_KEY])) {
-    globalThis[USER_DATA_MEMORY_KEY].push(entry);
-  } else {
-    globalThis[USER_DATA_MEMORY_KEY] = [entry];
-  }
+function ensureObject(val) {
+  return val && typeof val === 'object' ? val : {};
 }
 
 function createUserLogKey(entry) {
@@ -38,70 +21,68 @@ function createUserLogKey(entry) {
   return `${USER_DATA_KV_PREFIX}${session}:${safeTimestamp}:${randomUuid}`;
 }
 
-async function persistUserLog(entry, serializedEntry, jsonEntry, kv) {
-  let persisted = false;
-
-  if (kv) {
-    try {
-      const key = createUserLogKey(entry);
-      await kv.set(key, jsonEntry);
-      persisted = true;
-    } catch (err) {
-      console.error('Failed to persist user data to KV:', err);
-    }
-  }
-
-  if (persisted) {
-    return;
-  }
-
-  if (isFileSystemUnavailable()) {
-    appendToMemoryLog(entry);
-    return;
-  }
-
+async function loadSession(sessionId) {
   try {
-    fs.appendFileSync(dataPath, serializedEntry, 'utf8');
+    return await kv.get(`session:${sessionId}`);
   } catch (err) {
-    if (isFileSystemAccessError(err)) {
-      markFileSystemUnavailable(err, 'user data logging');
-      appendToMemoryLog(entry);
-      return;
-    }
+    console.warn('KV get failed', err);
+    return null;
+  }
+}
+
+async function deleteSession(sessionId) {
+  try {
+    await kv.del(`session:${sessionId}`);
+  } catch (err) {
+    console.warn('KV del failed', err);
+  }
+}
+
+async function persistUserLog(entry) {
+  try {
+    const key = createUserLogKey(entry);
+    // Persist the full entry object; optionally set an expiry if desired (e.g., { ex: 60*60*24*365 })
+    await kv.set(key, entry);
+  } catch (err) {
+    console.error('Failed to persist user data to KV:', err);
     throw err;
   }
 }
 
 export async function POST(req) {
-  const { sessionId, responses } = await req.json();
+  let payload;
+  try {
+    payload = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
-  if (typeof sessionId !== 'string' || typeof responses !== 'object') {
+  const { sessionId, responses } = payload ?? {};
+
+  if (typeof sessionId !== 'string' || typeof responses !== 'object' || responses === null) {
     return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
   }
 
-  const sessionKv = getKvBinding();
-  const userLogKv = getKvBinding();
-
-  const session = await loadSession(sessionId, sessionKv);
+  // Load the session from KV that was created during the scenario choices flow
+  const session = await loadSession(sessionId);
   if (!session) {
     return NextResponse.json({ error: 'Session not found' }, { status: 400 });
   }
 
-  const logEntry =
-    typeof structuredClone === 'function'
-      ? structuredClone(session)
-      : JSON.parse(JSON.stringify(session));
-  logEntry.responses = responses;
-
-  const jsonEntry = JSON.stringify(logEntry);
-  const serializedEntry = `${jsonEntry}\n`;
+  // Compose the log entry. We include the session snapshot + survey responses
+  const logEntry = {
+    ...(typeof structuredClone === 'function' ? structuredClone(ensureObject(session)) : { ...ensureObject(session) }),
+    responses: ensureObject(responses),
+    sessionId,
+    // keep an explicit timestamp for the log record
+    timestamp: new Date().toISOString(),
+  };
 
   try {
-    await persistUserLog(logEntry, serializedEntry, jsonEntry, userLogKv);
-    await deleteSession(sessionId, sessionKv);
-    return NextResponse.json({ success: true });
+    await persistUserLog(logEntry);
+    await deleteSession(sessionId);
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (err) {
-    console.error('Error writing user data:', err);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

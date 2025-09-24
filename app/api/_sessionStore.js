@@ -1,86 +1,19 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import {
-  isFileSystemAccessError,
-  isFileSystemUnavailable,
-  markFileSystemUnavailable,
-} from './_fsFallback.js';
+// Edge-friendly session store: in-memory cache + Vercel KV (no filesystem)
+// Replaces fs-based fallback with KV-only persistence.
+
+import { kv } from '@vercel/kv';
 
 const SESSION_KV_PREFIX = 'session:';
+const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
-// Resolve the path relative to the project root so all routes reference
-// the same file regardless of their working directory.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const sessionsFile = path.join(__dirname, '..', '..', 'sessions.json');
-
+// In-memory cache across requests on the same runtime instance
 const MEMORY_STORE_KEY = Symbol.for('moralmap.sessions.memory');
-
 function getMemoryStore() {
   const existing = globalThis[MEMORY_STORE_KEY];
-  if (existing && typeof existing === 'object') {
-    return existing;
-  }
-
+  if (existing && typeof existing === 'object' && !Array.isArray(existing)) return existing;
   const initial = {};
   globalThis[MEMORY_STORE_KEY] = initial;
   return initial;
-}
-
-function updateMemoryStore(sessions) {
-  if (sessions && typeof sessions === 'object') {
-    globalThis[MEMORY_STORE_KEY] = sessions;
-  } else {
-    globalThis[MEMORY_STORE_KEY] = {};
-  }
-}
-
-function readSessionsFromFile() {
-  if (isFileSystemUnavailable()) {
-    return getMemoryStore();
-  }
-
-  try {
-    const data = fs.readFileSync(sessionsFile, 'utf8');
-    const parsed = JSON.parse(data);
-    updateMemoryStore(parsed);
-    return parsed;
-  } catch (error) {
-    if (isFileSystemAccessError(error)) {
-      markFileSystemUnavailable(error, 'session tracking');
-      return getMemoryStore();
-    }
-
-    if (error && error.code === 'ENOENT') {
-      const empty = {};
-      updateMemoryStore(empty);
-      return empty;
-    }
-
-    updateMemoryStore({});
-    return {};
-  }
-}
-
-function writeSessionsToFile(sessions) {
-  if (isFileSystemUnavailable()) {
-    updateMemoryStore(sessions);
-    return;
-  }
-
-  try {
-    fs.writeFileSync(sessionsFile, JSON.stringify(sessions), 'utf8');
-    updateMemoryStore(sessions);
-  } catch (error) {
-    if (isFileSystemAccessError(error)) {
-      markFileSystemUnavailable(error, 'session tracking');
-      updateMemoryStore(sessions);
-      return;
-    }
-
-    throw error;
-  }
 }
 
 function coerceSession(value) {
@@ -88,109 +21,66 @@ function coerceSession(value) {
 }
 
 function parseStoredSession(value) {
-  if (value === null || typeof value === 'undefined') {
-    return undefined;
-  }
-
+  if (value === null || typeof value === 'undefined') return undefined;
   if (typeof value === 'string') {
-    try {
-      return JSON.parse(value);
-    } catch (err) {
-      console.warn('Failed to parse session stored in KV as JSON:', err);
-      return undefined;
-    }
+    try { return JSON.parse(value); } catch { return undefined; }
   }
-
-  return value;
+  return coerceSession(value);
 }
 
-export async function loadSession(sessionId, kv) {
-  if (typeof sessionId !== 'string' || !sessionId) {
-    return undefined;
-  }
+export async function loadSession(sessionId) {
+  if (typeof sessionId !== 'string' || !sessionId) return undefined;
 
   const memory = getMemoryStore();
   if (Object.prototype.hasOwnProperty.call(memory, sessionId)) {
     return coerceSession(memory[sessionId]);
   }
 
-  if (kv) {
-    try {
-      const stored = await kv.get(`${SESSION_KV_PREFIX}${sessionId}`);
-      const session = coerceSession(parseStoredSession(stored));
-      if (session) {
-        memory[sessionId] = session;
-        return session;
-      }
-      delete memory[sessionId];
-      return undefined;
-    } catch (err) {
-      console.error('Failed to load session from KV:', err);
+  try {
+    const stored = await kv.get(`${SESSION_KV_PREFIX}${sessionId}`);
+    const session = parseStoredSession(stored);
+    if (session) {
+      memory[sessionId] = session;
+      return session;
     }
-  }
-
-  const sessions = readSessionsFromFile();
-  const fallback = coerceSession(sessions[sessionId]);
-  if (fallback) {
-    memory[sessionId] = fallback;
-  } else {
     delete memory[sessionId];
+    return undefined;
+  } catch (err) {
+    console.error('Failed to load session from KV:', err);
+    return undefined;
   }
-  return fallback;
 }
 
-export async function saveSession(sessionId, session, kv) {
-  if (typeof sessionId !== 'string' || !sessionId) {
-    return;
-  }
+export async function saveSession(sessionId, session, { ttlSeconds = DEFAULT_TTL_SECONDS } = {}) {
+  if (typeof sessionId !== 'string' || !sessionId) return;
   const normalized = coerceSession(session);
-  if (!normalized) {
-    return;
+  if (!normalized) return;
+
+  const key = `${SESSION_KV_PREFIX}${sessionId}`;
+
+  // Persist to KV with TTL
+  try {
+    await kv.set(key, normalized, { ex: ttlSeconds });
+  } catch (err) {
+    console.error('Failed to persist session to KV:', err);
   }
 
-  let persistedToKv = false;
-  if (kv) {
-    try {
-      await kv.set(`${SESSION_KV_PREFIX}${sessionId}`, normalized);
-      persistedToKv = true;
-    } catch (err) {
-      console.error('Failed to persist session to KV:', err);
-    }
-  }
-
+  // Always update in-memory cache
   const memory = getMemoryStore();
   memory[sessionId] = normalized;
-
-  if (!persistedToKv) {
-    const sessions = readSessionsFromFile();
-    sessions[sessionId] = normalized;
-    writeSessionsToFile(sessions);
-  }
 }
 
-export async function deleteSession(sessionId, kv) {
-  if (typeof sessionId !== 'string' || !sessionId) {
-    return;
-  }
+export async function deleteSession(sessionId) {
+  if (typeof sessionId !== 'string' || !sessionId) return;
 
-  let deletedFromKv = false;
-  if (kv) {
-    try {
-      await kv.del(`${SESSION_KV_PREFIX}${sessionId}`);
-      deletedFromKv = true;
-    } catch (err) {
-      console.error('Failed to delete session from KV:', err);
-    }
+  const key = `${SESSION_KV_PREFIX}${sessionId}`;
+
+  try {
+    await kv.del(key);
+  } catch (err) {
+    console.error('Failed to delete session from KV:', err);
   }
 
   const memory = getMemoryStore();
   delete memory[sessionId];
-
-  if (!deletedFromKv) {
-    const sessions = readSessionsFromFile();
-    if (Object.prototype.hasOwnProperty.call(sessions, sessionId)) {
-      delete sessions[sessionId];
-      writeSessionsToFile(sessions);
-    }
-  }
 }

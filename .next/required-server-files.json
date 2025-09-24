@@ -13,7 +13,7 @@
     "typedRoutes": false,
     "distDir": ".next",
     "cleanDistDir": true,
-    "assetPrefix": "https://fe5fe983-c5b4-4e34-b89b-4e34983ef56c.wf-app-prod.cosmic.webflow.services/app",
+    "assetPrefix": "/app",
     "cacheMaxMemorySize": 52428800,
     "configOrigin": "next.config.ts",
     "useFileSystemPublicRoutes": true,
@@ -47,9 +47,9 @@
         256,
         384
       ],
-      "path": "/app/_next/image/",
-      "loader": "custom",
-      "loaderFile": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap\\webflow-loader.ts",
+      "path": "/app/_next/image",
+      "loader": "default",
+      "loaderFile": "",
       "domains": [],
       "disableStaticImages": false,
       "minimumCacheTTL": 60,
@@ -59,13 +59,7 @@
       "dangerouslyAllowSVG": false,
       "contentSecurityPolicy": "script-src 'none'; frame-src 'none'; sandbox;",
       "contentDispositionType": "attachment",
-      "remotePatterns": [
-        {
-          "hostname": "fe5fe983-c5b4-4e34-b89b-4e34983ef56c.wf-app-prod.cosmic.webflow.services",
-          "protocol": "https",
-          "port": ""
-        }
-      ],
+      "remotePatterns": [],
       "unoptimized": false
     },
     "devIndicators": {

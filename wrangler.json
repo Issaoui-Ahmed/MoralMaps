@@ -1,0 +1,7 @@
+{
+  "kv_namespaces": [
+    { "binding": "ROUTE_CONFIG_KV",  "id": "placeholder" },
+    { "binding": "SESSION_DATA_KV", "id": "placeholder" },
+    { "binding": "USER_DATA_KV",    "id": "placeholder" }
+  ]
+}

@@ -1,4 +1,3 @@
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextResponse } from 'next/server';
 import { loadSession, saveSession } from '../_sessionStore.js';
 import {
@@ -7,6 +6,7 @@ import {
   mergeWithDefaults,
   readPersistedConfig,
 } from '../_configStore.js';
+import { getKvBinding } from '../_kvBinding.js';
 
 function determineTotalScenarios(config) {
   const scenarioCfg = ensureObject(config);
@@ -54,14 +54,8 @@ export async function POST(req) {
   const encoded = `${tts}-${isChosen}`;
 
   let totalScenarios = 0;
-  let env;
-  try {
-    env = getCloudflareContext().env;
-  } catch {
-    env = undefined;
-  }
-  const configKv = getConfigKv(env);
-  const sessionKv = env?.SESSION_DATA_KV;
+  const configKv = getConfigKv();
+  const sessionKv = getKvBinding();
   try {
     const persisted = await readPersistedConfig(configKv);
     const { scenarioCfg } = mergeWithDefaults(persisted);

@@ -6,6 +6,7 @@ import {
   isFileSystemUnavailable,
   markFileSystemUnavailable,
 } from './_fsFallback.js';
+import { getKvBinding } from './_kvBinding.js';
 import scenariosDefaults from '../../config/scenariosConfig.json' assert { type: 'json' };
 import textsDefaults from '../../config/textsConfig.json' assert { type: 'json' };
 import instructionsDefaults from '../../config/instructionsConfig.json' assert { type: 'json' };
@@ -119,22 +120,33 @@ function warnMissingKvBinding() {
 
   globalThis[MISSING_KV_WARNING] = true;
   console.warn(
-    'ROUTE_CONFIG_KV binding is not configured. Falling back to in-memory storage; updates will not persist across deployments.',
+    'Vercel KV is not configured. Falling back to in-memory storage; updates will not persist across deployments.',
   );
 }
 
 export function getConfigKv(env) {
-  return env?.ROUTE_CONFIG_KV;
+  return env?.ROUTE_CONFIG_KV ?? getKvBinding();
 }
 
 export async function readPersistedConfig(kv) {
   try {
     if (kv) {
-      const stored = await kv.get(CONFIG_KV_KEY, { type: 'json' });
-      if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
-        return updateMemoryConfig(stored);
-      }
+      const stored = await kv.get(CONFIG_KV_KEY);
       if (stored) {
+        let parsed = stored;
+        if (typeof stored === 'string') {
+          try {
+            parsed = JSON.parse(stored);
+          } catch {
+            console.warn('Route config persisted in KV is not valid JSON. Ignoring value.');
+            parsed = undefined;
+          }
+        }
+
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return updateMemoryConfig(parsed);
+        }
+
         console.warn('Route config persisted in KV is not an object. Ignoring value.');
       }
     } else {
@@ -171,7 +183,7 @@ export async function persistConfig(mutator, kv) {
   let persistedToKv = false;
   if (kv) {
     try {
-      await kv.put(CONFIG_KV_KEY, JSON.stringify(nextState));
+      await kv.set(CONFIG_KV_KEY, nextState);
       persistedToKv = true;
     } catch (err) {
       console.error('Failed to persist config to KV:', err);

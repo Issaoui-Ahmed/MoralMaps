@@ -1,4 +1,3 @@
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '../_utils';
 import { buildScenarios } from '../../../src/utils/buildScenarios';
@@ -11,13 +10,7 @@ import {
 } from '../_configStore.js';
 
 export async function GET(req) {
-  let env;
-  try {
-    env = getCloudflareContext().env;
-  } catch {
-    env = undefined;
-  }
-  const configKv = getConfigKv(env);
+  const configKv = getConfigKv();
   try {
     const persisted = await readPersistedConfig(configKv);
     const { scenarioCfg, textsCfg, instructionsCfg: instrCfg, surveyCfg } =
@@ -54,13 +47,7 @@ export async function POST(req) {
   }
   const incoming = await req.json();
 
-  let env;
-  try {
-    env = getCloudflareContext().env;
-  } catch {
-    env = undefined;
-  }
-  const configKv = getConfigKv(env);
+  const configKv = getConfigKv();
 
   const routeFields = {};
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
@@ -135,13 +122,7 @@ export async function PATCH(req) {
   const incoming = await req.json();
   const routePatch = {};
 
-  let env;
-  try {
-    env = getCloudflareContext().env;
-  } catch {
-    env = undefined;
-  }
-  const configKv = getConfigKv(env);
+  const configKv = getConfigKv();
 
   if (Object.prototype.hasOwnProperty.call(incoming, 'scenarios')) {
     if (

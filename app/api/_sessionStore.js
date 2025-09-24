@@ -87,6 +87,23 @@ function coerceSession(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : undefined;
 }
 
+function parseStoredSession(value) {
+  if (value === null || typeof value === 'undefined') {
+    return undefined;
+  }
+
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      console.warn('Failed to parse session stored in KV as JSON:', err);
+      return undefined;
+    }
+  }
+
+  return value;
+}
+
 export async function loadSession(sessionId, kv) {
   if (typeof sessionId !== 'string' || !sessionId) {
     return undefined;
@@ -99,8 +116,8 @@ export async function loadSession(sessionId, kv) {
 
   if (kv) {
     try {
-      const stored = await kv.get(`${SESSION_KV_PREFIX}${sessionId}`, { type: 'json' });
-      const session = coerceSession(stored);
+      const stored = await kv.get(`${SESSION_KV_PREFIX}${sessionId}`);
+      const session = coerceSession(parseStoredSession(stored));
       if (session) {
         memory[sessionId] = session;
         return session;
@@ -134,7 +151,7 @@ export async function saveSession(sessionId, session, kv) {
   let persistedToKv = false;
   if (kv) {
     try {
-      await kv.put(`${SESSION_KV_PREFIX}${sessionId}`, JSON.stringify(normalized));
+      await kv.set(`${SESSION_KV_PREFIX}${sessionId}`, normalized);
       persistedToKv = true;
     } catch (err) {
       console.error('Failed to persist session to KV:', err);
@@ -159,7 +176,7 @@ export async function deleteSession(sessionId, kv) {
   let deletedFromKv = false;
   if (kv) {
     try {
-      await kv.delete(`${SESSION_KV_PREFIX}${sessionId}`);
+      await kv.del(`${SESSION_KV_PREFIX}${sessionId}`);
       deletedFromKv = true;
     } catch (err) {
       console.error('Failed to delete session from KV:', err);

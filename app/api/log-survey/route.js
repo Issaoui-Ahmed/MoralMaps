@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { deleteSession, loadSession } from '../_sessionStore.js';
 import {
   isFileSystemAccessError,
   isFileSystemUnavailable,
   markFileSystemUnavailable,
 } from '../_fsFallback.js';
+import { getKvBinding } from '../_kvBinding.js';
 
 const USER_DATA_KV_PREFIX = 'user-log:';
 
@@ -44,7 +44,7 @@ async function persistUserLog(entry, serializedEntry, jsonEntry, kv) {
   if (kv) {
     try {
       const key = createUserLogKey(entry);
-      await kv.put(key, jsonEntry);
+      await kv.set(key, jsonEntry);
       persisted = true;
     } catch (err) {
       console.error('Failed to persist user data to KV:', err);
@@ -79,14 +79,8 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
   }
 
-  let env;
-  try {
-    env = getCloudflareContext().env;
-  } catch {
-    env = undefined;
-  }
-  const sessionKv = env?.SESSION_DATA_KV;
-  const userLogKv = env?.USER_DATA_KV;
+  const sessionKv = getKvBinding();
+  const userLogKv = getKvBinding();
 
   const session = await loadSession(sessionId, sessionKv);
   if (!session) {

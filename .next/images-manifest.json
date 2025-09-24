@@ -21,9 +21,9 @@
       256,
       384
     ],
-    "path": "/app/_next/image",
-    "loader": "default",
-    "loaderFile": "",
+    "path": "/app/_next/image/",
+    "loader": "custom",
+    "loaderFile": "C:\\Users\\aissa\\OneDrive\\Desktop\\CRAiDEL\\Summer\\MoralMap\\webflow-loader.ts",
     "domains": [],
     "disableStaticImages": false,
     "minimumCacheTTL": 60,
@@ -33,7 +33,14 @@
     "dangerouslyAllowSVG": false,
     "contentSecurityPolicy": "script-src 'none'; frame-src 'none'; sandbox;",
     "contentDispositionType": "attachment",
-    "remotePatterns": [],
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "^(?:^(?:fe5fe983\\-c5b4\\-4e34\\-b89b\\-4e34983ef56c\\.wf\\-app\\-prod\\.cosmic\\.webflow\\.services)$)$",
+        "port": "",
+        "pathname": "^(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$))(?:(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$)).)*?)\\/?)$"
+      }
+    ],
     "unoptimized": false,
     "sizes": [
       640,

@@ -3,11 +3,11 @@
   "/api/log-choice/route": "/api/log-choice",
   "/api/route-endpoints/route": "/api/route-endpoints",
   "/api/log-survey/route": "/api/log-survey",
-  "/admin/instructions/page": "/admin/instructions",
-  "/admin/texts/page": "/admin/texts",
-  "/admin/survey/page": "/admin/survey",
-  "/admin/scenarios/page": "/admin/scenarios",
   "/admin/page": "/admin",
+  "/admin/scenarios/page": "/admin/scenarios",
+  "/admin/instructions/page": "/admin/instructions",
+  "/admin/survey/page": "/admin/survey",
+  "/admin/texts/page": "/admin/texts",
   "/page": "/",
   "/thank-you/page": "/thank-you"
 }

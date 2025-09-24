@@ -1,5 +1,5 @@
 var define_IMAGES_LOCAL_PATTERNS_default = [];
-var define_IMAGES_REMOTE_PATTERNS_default = [];
+var define_IMAGES_REMOTE_PATTERNS_default = [{ protocol: "https", hostname: "^(?:^(?:fe5fe983\\-c5b4\\-4e34\\-b89b\\-4e34983ef56c\\.wf\\-app\\-prod\\.cosmic\\.webflow\\.services)$)$", port: "", pathname: "^(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$))(?:(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$)).)*?)\\/?)$" }];
 async function fetchImage(fetcher, imageUrl, ctx) {
   if (!imageUrl || imageUrl.length > 3072 || imageUrl.startsWith("//")) {
     return getUrlErrorResponse();

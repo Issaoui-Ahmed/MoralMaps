@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { startIcon, endIcon } from "../markerIcons";
+import { fetchRoute } from "../utils/fetchRoute";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -59,28 +60,86 @@ export default function ScenarioMapPreview({
   const alternatives = Array.isArray(scenario?.choice_list) ? scenario.choice_list : [];
   const routeSelections = Array.isArray(selection?.choice_list) ? selection.choice_list : [];
 
-  const previewRoutes = useMemo(() => {
-    const altPolylines = alternatives.map((route, routeIndex) => {
-      const middleOptions = Array.isArray(route?.middle_point)
-        ? route.middle_point.filter(isValidCoord)
-        : [];
-      const middleIndex = clampIndex(routeSelections?.[routeIndex]?.middle_point, middleOptions.length);
-      const middlePoint = middleIndex !== null ? middleOptions[middleIndex] : middleOptions[0];
+  const alternativeSelections = useMemo(
+    () =>
+      alternatives.map((route, routeIndex) => {
+        const middleOptions = Array.isArray(route?.middle_point)
+          ? route.middle_point.filter(isValidCoord)
+          : [];
+        const middleIndex = clampIndex(
+          routeSelections?.[routeIndex]?.middle_point,
+          middleOptions.length
+        );
+        const middlePoint = middleIndex !== null ? middleOptions[middleIndex] : middleOptions[0];
 
-      const points = [activeStart, middlePoint, activeEnd].filter(Boolean);
-      if (points.length < 2) {
-        return null;
-      }
-      return makePolyline(
-        points,
-        ALTERNATIVE_ROUTE_COLORS[routeIndex % ALTERNATIVE_ROUTE_COLORS.length],
-        4
-      );
+        return { route, routeIndex, middlePoint, middleOptions };
+      }),
+    [alternatives, routeSelections]
+  );
+
+  const [previewRoutes, setPreviewRoutes] = useState([]);
+
+  useEffect(() => {
+    if (!isValidCoord(activeStart) || !isValidCoord(activeEnd)) {
+      setPreviewRoutes([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    const defaultPoints = [activeStart, activeEnd].filter(isValidCoord);
+    if (defaultPoints.length < 2) {
+      setPreviewRoutes([]);
+      return;
+    }
+
+    const buildFallbackRoute = (points, color, weight) => ({
+      points: points.filter(isValidCoord),
+      color,
+      weight,
     });
 
-    const baseLine = makePolyline([activeStart, activeEnd], DEFAULT_ROUTE_COLOR, 6);
-    return [baseLine, ...altPolylines.filter(Boolean)];
-  }, [activeStart, activeEnd, alternatives, routeSelections]);
+    const loadRoutes = async () => {
+      const fallbackRoutes = [
+        buildFallbackRoute(defaultPoints, DEFAULT_ROUTE_COLOR, 6),
+        ...alternativeSelections.map((selection, index) => {
+          const points = [activeStart, selection.middlePoint, activeEnd].filter(isValidCoord);
+          if (points.length < 2) return null;
+          return buildFallbackRoute(
+            points,
+            ALTERNATIVE_ROUTE_COLORS[index % ALTERNATIVE_ROUTE_COLORS.length],
+            4
+          );
+        }),
+      ];
+
+      const fetches = fallbackRoutes.map((route) =>
+        route ? fetchRoute(route.points, controller.signal).catch(() => null) : Promise.resolve(null)
+      );
+
+      const results = await Promise.all(fetches);
+      if (cancelled) return;
+
+      const builtRoutes = fallbackRoutes
+        .map((route, idx) => {
+          if (!route) return null;
+          const fetched = results[idx];
+          const points = Array.isArray(fetched) && fetched.length >= 2 ? fetched : route.points;
+          return makePolyline(points, route.color, route.weight);
+        })
+        .filter(Boolean);
+
+      setPreviewRoutes(builtRoutes);
+    };
+
+    loadRoutes();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [activeStart, activeEnd, alternativeSelections]);
 
   const bounds = useMemo(() => {
     const coords = previewRoutes.flatMap((route) => route.points);
@@ -147,16 +206,10 @@ export default function ScenarioMapPreview({
     );
   }
 
-  const middleMarkers = alternatives
-    .map((route, routeIndex) => {
-      const middleOptions = Array.isArray(route?.middle_point)
-        ? route.middle_point.filter(isValidCoord)
-        : [];
-      const middleIndex = clampIndex(routeSelections?.[routeIndex]?.middle_point, middleOptions.length);
-      if (middleIndex === null) return null;
-      const position = middleOptions[middleIndex];
-      if (!position) return null;
-      return { position, routeIndex };
+  const middleMarkers = alternativeSelections
+    .map(({ middlePoint, routeIndex }) => {
+      if (!middlePoint) return null;
+      return { position: middlePoint, routeIndex };
     })
     .filter(Boolean);
 

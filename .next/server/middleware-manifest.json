@@ -1,32 +1,36 @@
 {
   "version": 3,
-  "middleware": {
-    "/": {
+  "middleware": {},
+  "functions": {
+    "/api/route-endpoints/route": {
       "files": [
+        "server/server-reference-manifest.js",
+        "server/app/api/route-endpoints/route_client-reference-manifest.js",
+        "server/middleware-build-manifest.js",
+        "server/middleware-react-loadable-manifest.js",
+        "server/next-font-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
         "server/edge-runtime-webpack.js",
-        "server/middleware.js"
+        "server/app/api/route-endpoints/route.js"
       ],
-      "name": "middleware",
-      "page": "/",
+      "name": "app/api/route-endpoints/route",
+      "page": "/api/route-endpoints/route",
       "matchers": [
         {
-          "regexp": "^\\/app(?:\\/(_next\\/data\\/[^/]{1,}))?\\/admin(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(\\.json)?[\\/#\\?]?$",
-          "originalSource": "/admin/:path*"
+          "regexp": "^/api/route\\-endpoints$",
+          "originalSource": "/api/route-endpoints"
         }
       ],
       "wasm": [],
       "assets": [],
       "env": {
-        "__NEXT_BUILD_ID": "FrVpJsSPt48MhtHfveqR2",
+        "__NEXT_BUILD_ID": "development",
         "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "8j4+6lqqQZJ5GV4u1o5i136JMcjHHLcltzGaIncwCNc=",
-        "__NEXT_PREVIEW_MODE_ID": "a3ff917d29cec36ed9568e7ed53279da",
-        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "0d384a2825f7fadf5bdb7732437dc77a3c0608dd32b0fc17e16ad3237c9ab694",
-        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "6ecd020e6891f27c3bfa94d625b5606aaf15980936a6f5d875b52ce976026cc5"
+        "__NEXT_PREVIEW_MODE_ID": "f6e2e699ae54c5c04d3d8fa707cf3ae6",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "a3e31c5b84abe38bf6d83aa07eb752ac6ffd9df776dba01b1d84ceb73dbcc8ea",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "f0fe7c03875a84864105668d6d8387d7f3d8ca48414ce7740da1b53cd8743666"
       }
     }
   },
-  "functions": {},
-  "sortedMiddleware": [
-    "/"
-  ]
+  "sortedMiddleware": []
 }

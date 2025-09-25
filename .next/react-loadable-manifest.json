@@ -1,67 +1,14 @@
 {
-  "app\\admin\\instructions\\page.js -> ../../../src/admin/AdminApp": {
-    "id": 3133,
-    "files": [
-      "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/914.fff3aebaf9c7ffa3.js",
-      "static/chunks/133.673d9e95af98643e.js"
-    ]
-  },
-  "app\\admin\\page.js -> ../../src/admin/AdminApp": {
-    "id": 3133,
-    "files": [
-      "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/914.fff3aebaf9c7ffa3.js",
-      "static/chunks/133.673d9e95af98643e.js"
-    ]
-  },
-  "app\\admin\\scenarios\\page.js -> ../../../src/admin/AdminApp": {
-    "id": 3133,
-    "files": [
-      "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/914.fff3aebaf9c7ffa3.js",
-      "static/chunks/133.673d9e95af98643e.js"
-    ]
-  },
-  "app\\admin\\survey\\page.js -> ../../../src/admin/AdminApp": {
-    "id": 3133,
-    "files": [
-      "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/914.fff3aebaf9c7ffa3.js",
-      "static/chunks/133.673d9e95af98643e.js"
-    ]
-  },
-  "app\\admin\\texts\\page.js -> ../../../src/admin/AdminApp": {
-    "id": 3133,
-    "files": [
-      "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/914.fff3aebaf9c7ffa3.js",
-      "static/chunks/133.673d9e95af98643e.js"
-    ]
-  },
   "app\\page.js -> ../src/MapRoute": {
-    "id": 2602,
+    "id": "app\\page.js -> ../src/MapRoute",
     "files": [
-      "static/chunks/d0deef33.cac6acee3fffe7af.js",
-      "static/chunks/602.1f63a6e34078ed1e.js"
+      "static/chunks/_app-pages-browser_src_MapRoute_js.js"
     ]
   },
-  "app\\thank-you\\page.js -> ../../src/ThankYou": {
-    "id": 1485,
+  "node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts": {
+    "id": "node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts",
     "files": [
-      "static/chunks/485.1b7b974c7333455b.js"
-    ]
-  },
-  "node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
-    "id": 5139,
-    "files": [
-      "static/chunks/139.7a5a8e93a21948c1.js"
-    ]
-  },
-  "node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
-    "id": 1646,
-    "files": [
-      "static/chunks/646.f342b7cffc01feb0.js"
+      "static/chunks/_app-pages-browser_node_modules_next_dist_client_dev_noop-turbopack-hmr_js.js"
     ]
   }
 }

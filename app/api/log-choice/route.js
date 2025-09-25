@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { redis } from '../../_redis';
+import { redis } from '../_redis';
 import { get } from '@vercel/edge-config';
 
 

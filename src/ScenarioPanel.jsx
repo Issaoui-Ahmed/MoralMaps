@@ -39,17 +39,6 @@ const ScenarioPanel = ({
       </div>
 
       <div className="space-y-4">
-        <div className="text-sm text-gray-600">
-          Default route: <span className="font-medium">{defaultTimeText} minutes</span>
-        </div>
-
-        {activeDescription && (
-          <div className="p-3 bg-blue-50 border border-blue-100 rounded-md text-sm text-blue-900">
-            <p className="font-medium mb-1">Currently highlighted: {safeLabel}</p>
-            <p>{activeDescription}</p>
-          </div>
-        )}
-
         <div className="space-y-3">
           {alternatives.length === 0 ? (
             <p className="text-sm text-gray-500">No alternative routes configured.</p>

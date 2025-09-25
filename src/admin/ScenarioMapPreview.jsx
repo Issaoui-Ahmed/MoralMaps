@@ -188,9 +188,45 @@ export default function ScenarioMapPreview({
   const [previewMode, setPreviewMode] = useState("canonical");
   const [comboIndex, setComboIndex] = useState(0);
 
-  const start = Array.isArray(scenario?.start?.[0]) ? scenario.start[0] : null;
-  const end = Array.isArray(scenario?.end?.[0]) ? scenario.end[0] : null;
-  if (!start || !end) return null;
+  const startRaw = Array.isArray(scenario?.start) ? scenario.start : [];
+  const endRaw = Array.isArray(scenario?.end) ? scenario.end : [];
+
+  const startOptions = startRaw.filter(isValidCoord);
+  const endOptions = endRaw.filter(isValidCoord);
+
+  const validationErrors = [];
+
+  if (!startRaw.length) {
+    validationErrors.push("Missing starting points");
+  } else if (!startOptions.length) {
+    validationErrors.push("Starting points must be [lat, lng] numbers");
+  }
+
+  if (!endRaw.length) {
+    validationErrors.push("Missing ending points");
+  } else if (!endOptions.length) {
+    validationErrors.push("Ending points must be [lat, lng] numbers");
+  }
+
+  const start = startOptions[0] || null;
+  const end = endOptions[0] || null;
+
+  if (!start || !end) {
+    return (
+      <div
+        className={`relative ${className} flex items-center justify-center rounded border border-dashed border-rose-300 bg-rose-50 p-4 text-sm text-rose-700`}
+      >
+        <div className="space-y-1 text-center">
+          <p className="font-semibold">Unable to render map preview</p>
+          <ul className="space-y-0.5">
+            {validationErrors.map((err) => (
+              <li key={err}>{err}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
 
   const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
 

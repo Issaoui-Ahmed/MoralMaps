@@ -56,8 +56,11 @@ const MapRoute = () => {
               0,
               alternatives.findIndex((c) => c.preselected)
             );
+            const valueName = sc.value_name || sc.scenario_name;
             return {
-              label: sc.scenario_name,
+              label: valueName,
+              scenarioName: sc.scenario_name,
+              valueName,
               description: sc.description,
               start: sc.start,
               end: sc.end,

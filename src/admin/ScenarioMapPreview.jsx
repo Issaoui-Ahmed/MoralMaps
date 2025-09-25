@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Polyline, TileLayer, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import { startIcon, endIcon } from "../markerIcons";
 import { fetchRoute } from "../utils/fetchRoute";
@@ -221,13 +221,14 @@ export default function ScenarioMapPreview({
           center={bounds ? undefined : activeStart}
           zoom={13}
           style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={false}
-          doubleClickZoom={false}
-          touchZoom={false}
-          boxZoom={false}
-          keyboard={false}
+          scrollWheelZoom
+          doubleClickZoom
+          touchZoom
+          boxZoom
+          keyboard
           zoomControl={false}
         >
+          <ZoomControl position="topright" />
           <TileLayer
             attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

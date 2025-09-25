@@ -152,8 +152,19 @@ const MapRoute = () => {
         ] ?? null
       : null;
   const panelLabel =
-    activeAlternative?.label || currentScenario?.scenarioName || "Alternative";
-  const panelDescription = activeAlternative?.description || "";
+    currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
+  const panelDescription = currentAlternative?.description || "";
+  const choiceOptions = currentScenario
+    ? currentScenario.alternatives.map((alt, idx) => ({
+        id: idx + 1,
+        label: alt.label,
+        description: alt.description,
+        totalTimeMinutes: alt.totalTimeMinutes,
+        isSelected: selectedRouteIndex === idx + 1,
+        recommended: idx === currentScenario.preselectedIndex,
+      }))
+    : [];
+
   const bounds = useMemo(() => {
     if (!currentScenario) return null;
     const pts = [currentScenario.start, currentScenario.end];
@@ -258,33 +269,33 @@ const MapRoute = () => {
         <ScenarioPanel
           label={panelLabel}
           description={panelDescription}
-          isSelected={selectedRouteIndex !== 0}
-          onToggle={() => {
-            if (selectedRouteIndex !== 0) {
-              setSelectedLabel("default");
-              setSelectedRouteIndex(0);
-            } else {
-              const alternatives = currentScenario.alternatives || [];
-              if (!alternatives.length) return;
-              const desiredIndex = Math.min(
-                Math.max(activeAlternativeIndex, 0),
-                alternatives.length - 1
-              );
-              const alt = alternatives[desiredIndex];
-              setSelectedLabel(alt?.label || "alternative");
-              setSelectedRouteIndex(desiredIndex + 1);
-            }
-          }}
+
           onSubmit={handleChoice}
           scenarioNumber={scenarioIndex + 1}
           totalScenarios={scenarios.length}
           defaultTime={defaultTime}
           alternativeTime={
-            activeAlternative?.totalTimeMinutes ?? defaultTime
+            selectedRouteIndex === 0
+              ? currentScenario.alternatives[
+                  currentScenario.preselectedIndex
+                ]?.totalTimeMinutes ?? defaultTime
+              : currentScenario.alternatives[selectedRouteIndex - 1]?.totalTimeMinutes
           }
           scenarioText={scenarioText}
-          alternatives={currentScenario.alternatives}
-          activeAlternativeIndex={activeAlternativeIndex}
+          choices={choiceOptions}
+          onToggleRoute={(idx) => {
+            if (!currentScenario) return;
+            if (idx === 0) {
+              setSelectedLabel("default");
+              setSelectedRouteIndex(0);
+              return;
+            }
+
+            const alt = currentScenario.alternatives[idx - 1];
+            setSelectedLabel(alt?.label || "alternative");
+            setSelectedRouteIndex(idx);
+          }}
+
         />
       )}
     </div>

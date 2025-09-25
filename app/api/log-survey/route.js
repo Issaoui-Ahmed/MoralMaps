@@ -16,13 +16,12 @@ return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
 }
 
 
-const raw = await redis.get(`session:${sessionId}`);
-if (!raw) return NextResponse.json({ error: 'Session not found' }, { status: 400 });
-const session = JSON.parse(raw);
+const session = await redis.json.get(`session:${sessionId}`);
+if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 400 });
 
 
 const entry = { ...session, responses, sessionId, timestamp: new Date().toISOString() };
-await redis.set(logKey(sessionId), JSON.stringify(entry));
+await redis.json.set(logKey(sessionId), '$', entry);
 await redis.del(`session:${sessionId}`);
 
 

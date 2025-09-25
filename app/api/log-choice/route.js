@@ -37,8 +37,8 @@ const requiredLength = Math.max(totalScenarios || 0, scenarioIndex + 1);
 
 
 // Load existing session
-const raw = await redis.get(`session:${sessionId}`);
-const existing = raw ? JSON.parse(raw) : { sessionId, timestamp: new Date().toISOString() };
+const raw = await redis.json.get(`session:${sessionId}`);
+const existing = raw ?? { sessionId, timestamp: new Date().toISOString() };
 
 
 const choices = Array.isArray(existing.choices) ? existing.choices.slice() : [];
@@ -47,7 +47,8 @@ choices[scenarioIndex] = encoded;
 
 
 const session = { ...existing, defaultTime, totalScenarios: totalScenarios || requiredLength, choices };
-await redis.set(`session:${sessionId}`, JSON.stringify(session), { EX: 60 * 60 * 24 * 30 });
+await redis.json.set(`session:${sessionId}`, '$', session);
+await redis.expire(`session:${sessionId}`, 60 * 60 * 24 * 30);
 
 
 return NextResponse.json({ success: true });

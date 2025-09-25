@@ -30,5 +30,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ['/((?!api|_next|.*\\..*).*)'], // excludes /api, /_next, and static files
 };

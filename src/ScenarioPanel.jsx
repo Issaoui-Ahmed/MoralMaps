@@ -26,7 +26,7 @@ const ScenarioPanel = ({
     <div className="absolute top-5 left-5 w-96 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
       <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
       <div className="mt-3 mb-6 p-4 bg-gray-100 rounded-md text-gray-700">
-        <p>{scenarioDescription}</p>
+        <p className="whitespace-pre-line">{scenarioDescription}</p>
       </div>
 
       <div className="space-y-4">

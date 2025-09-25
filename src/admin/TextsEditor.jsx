@@ -19,8 +19,7 @@ export default function TextsEditor() {
       })
       .then((data) => {
         setConsentText(data.consentText || "");
-        const st = data.scenarioText || { line1: "", line2: "", line3: "" };
-        setScenarioText([st.line1, st.line2, st.line3].filter(Boolean).join("\n"));
+        setScenarioText(typeof data.scenarioText === "string" ? data.scenarioText : "");
         setError("");
       })
       .catch((e) => setError(e.message))
@@ -31,17 +30,11 @@ export default function TextsEditor() {
     setSaving(true);
     setError("");
     try {
-      const lines = scenarioText.split("\n");
-      const scenarioObj = {
-        line1: lines[0] || "",
-        line2: lines[1] || "",
-        line3: lines[2] || "",
-      };
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ consentText, scenarioText: scenarioObj }),
+        body: JSON.stringify({ consentText, scenarioText }),
       });
       if (!res.ok) throw new Error(`Failed to save (${res.status})`);
     } catch (e) {
@@ -57,8 +50,7 @@ export default function TextsEditor() {
       .then((r) => r.json())
       .then((data) => {
         setConsentText(data.consentText || "");
-        const st = data.scenarioText || { line1: "", line2: "", line3: "" };
-        setScenarioText([st.line1, st.line2, st.line3].filter(Boolean).join("\n"));
+        setScenarioText(typeof data.scenarioText === "string" ? data.scenarioText : "");
       })
       .finally(() => setLoading(false));
   };

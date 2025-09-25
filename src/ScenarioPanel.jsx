@@ -14,28 +14,31 @@ const ScenarioPanel = ({
   onSubmit,
 }) => {
   const safeLabel = activeLabel || "Alternative";
-  const lowerLabel = safeLabel.toLowerCase();
-  const defaultTimeText = defaultTime ?? "-";
-  const activeTimeText = activeTime ?? defaultTime ?? "-";
-  const line1 =
-    scenarioText?.line1?.replace("{defaultTime}", String(defaultTimeText)) ||
-    `The time-efficient route takes approximately ${defaultTimeText} minutes.`;
-  const line2 =
-    scenarioText?.line2
-      ?.replace("{label}", safeLabel)
-      ?.replace("{alternativeTime}", String(activeTimeText)) ||
-    `The ${safeLabel} route prioritizes safety and takes about ${activeTimeText} minutes.`;
-  const line3 =
-    scenarioText?.line3?.replace("{label}", lowerLabel) ||
-    "Use the toggles below to activate an alternative route if you prefer safety over speed.";
+  const defaultScenarioText =
+    "The time-efficient route takes approximately 25 minutes.\n\n" +
+    "The Default route prioritizes safety and takes about 25 minutes.\n\n" +
+    "Use the toggle below to activate the default route if you prefer safety over speed.";
+  const scenarioDescription =
+    typeof scenarioText === "string" && scenarioText.trim().length > 0
+      ? scenarioText
+      : defaultScenarioText;
+  const paragraphs = scenarioDescription
+    .split(/\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
 
   return (
     <div className="absolute top-5 left-5 w-96 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
       <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
       <div className="mt-3 mb-6 p-4 bg-gray-100 rounded-md text-gray-700">
-        <p className="mb-2">{line1}</p>
-        <p className="mb-2">{line2}</p>
-        <p className="text-sm">{line3}</p>
+        {paragraphs.map((text, index) => (
+          <p
+            key={`${text}-${index}`}
+            className={index === paragraphs.length - 1 ? "text-sm" : "mb-2"}
+          >
+            {text}
+          </p>
+        ))}
       </div>
 
       <div className="space-y-4">

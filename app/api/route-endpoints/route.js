@@ -98,7 +98,7 @@ export async function GET() {
       scenarios: rawScenarios,
       settings,
       consentText: textsConfig?.consentText ?? '',
-      scenarioText: textsConfig?.scenarioText ?? {},
+      scenarioText: typeof textsConfig?.scenarioText === 'string' ? textsConfig.scenarioText : '',
       instructions: Array.isArray(instructionsConfig?.steps) ? instructionsConfig.steps : [],
       survey: Array.isArray(surveyConfig?.survey) ? surveyConfig.survey : [],
       publicScenarios,
@@ -174,8 +174,8 @@ export async function POST(req) {
     if ('consentText' in body && typeof body.consentText !== 'string') {
       return NextResponse.json({ error: 'consentText must be a string' }, { status: 400 });
     }
-    if ('scenarioText' in body && (typeof body.scenarioText !== 'object' || body.scenarioText === null)) {
-      return NextResponse.json({ error: 'scenarioText must be an object' }, { status: 400 });
+    if ('scenarioText' in body && typeof body.scenarioText !== 'string') {
+      return NextResponse.json({ error: 'scenarioText must be a string' }, { status: 400 });
     }
 
     const existingTexts = clone((await get('textsConfig')) || {});

@@ -1,27 +1,23 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
-import Routing from "../Routing";
-import RoutingLabels from "../RoutingLabels";
-import ScenarioPanel from "../ScenarioPanel";
+import { startIcon, endIcon } from "../markerIcons";
+import { fetchRoute } from "../utils/fetchRoute";
 
+// Ensure Leaflet marker icons are loaded correctly in bundlers like Next.js
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-import "leaflet/dist/leaflet.css";
-
-// Ensure Leaflet marker icons are loaded correctly in bundlers like Next.js
-if (typeof window !== "undefined") {
-  delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x.src || markerIcon2x,
-    iconUrl: markerIcon.src || markerIcon,
-    shadowUrl: markerShadow.src || markerShadow,
-  });
-}
+// Fix for missing marker icons by explicitly setting their image URLs
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x.src || markerIcon2x,
+  iconUrl: markerIcon.src || markerIcon,
+  shadowUrl: markerShadow.src || markerShadow,
+});
 
 function isValidCoord(point) {
   return (
@@ -31,158 +27,369 @@ function isValidCoord(point) {
   );
 }
 
-function toNumberArray(value) {
-  if (Array.isArray(value)) {
-    return value.filter((item) => typeof item === "number" && Number.isFinite(item));
-  }
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return [value];
-  }
-  return [];
-}
+function buildCombinations(scenario) {
+  if (!scenario) return [];
 
-function toStringArray(value) {
-  if (Array.isArray(value)) {
-    return value.filter((item) => typeof item === "string" && item.trim() !== "");
-  }
-  if (typeof value === "string" && value.trim() !== "") {
-    return [value];
-  }
-  return [];
-}
+  const startOptions = Array.isArray(scenario.start)
+    ? scenario.start.filter(isValidCoord)
+    : [];
+  const endOptions = Array.isArray(scenario.end)
+    ? scenario.end.filter(isValidCoord)
+    : [];
 
-function normalizeMiddlePoints(value) {
-  if (!Array.isArray(value)) return [];
-  return value.filter(isValidCoord);
-}
+  if (!startOptions.length || !endOptions.length) return [];
 
-export default function ScenarioMapPreview({ scenario, className = "h-64 w-full" }) {
-  const [mapPoints, setMapPoints] = useState([]);
-  const [routes, setRoutes] = useState([]);
-  const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
+  const alternatives = Array.isArray(scenario.choice_list)
+    ? scenario.choice_list
+    : [];
 
-  const startOptions = useMemo(() => {
-    return Array.isArray(scenario?.start) ? scenario.start.filter(isValidCoord) : [];
-  }, [scenario]);
-
-  const endOptions = useMemo(() => {
-    return Array.isArray(scenario?.end) ? scenario.end.filter(isValidCoord) : [];
-  }, [scenario]);
-
-  const defaultTimeOptions = useMemo(() => {
-    return toNumberArray(scenario?.default_route_time);
-  }, [scenario]);
-
-  const scenarioNameOptions = useMemo(() => {
-    return toStringArray(scenario?.scenario_name);
-  }, [scenario]);
-
-  const alternativeOptions = useMemo(() => {
-    return Array.isArray(scenario?.choice_list)
-      ? scenario.choice_list.map((route) => ({
-          middlePoints: normalizeMiddlePoints(route?.middle_point),
-          tts: toNumberArray(route?.tts),
-          valueNames: toStringArray(route?.value_name),
-          descriptions: toStringArray(route?.description),
-          preselected: !!route?.preselected,
-        }))
+  const middleOptions = alternatives.map((alt) => {
+    const mids = Array.isArray(alt?.middle_point)
+      ? alt.middle_point.filter(isValidCoord)
       : [];
-  }, [scenario]);
-
-  const [startIndex, setStartIndex] = useState(0);
-  const [endIndex, setEndIndex] = useState(0);
-  const [defaultTimeIndex, setDefaultTimeIndex] = useState(0);
-  const [scenarioNameIndex, setScenarioNameIndex] = useState(0);
-  const [alternativeSelections, setAlternativeSelections] = useState([]);
-
-  useEffect(() => {
-    setStartIndex(0);
-    setEndIndex(0);
-    setDefaultTimeIndex(0);
-    setScenarioNameIndex(0);
-    setSelectedRouteIndex(0);
-  }, [scenario, startOptions.length, endOptions.length, defaultTimeOptions.length, scenarioNameOptions.length]);
-
-  useEffect(() => {
-    setAlternativeSelections(
-      alternativeOptions.map(() => ({
-        middleIndex: 0,
-        ttsIndex: 0,
-        valueIndex: 0,
-        descriptionIndex: 0,
-      }))
-    );
-    setSelectedRouteIndex(0);
-  }, [scenario, alternativeOptions.length]);
-
-  const activeStart = startOptions[startIndex] || startOptions[0] || null;
-  const activeEnd = endOptions[endIndex] || endOptions[0] || null;
-  const activeDefaultTime = defaultTimeOptions[defaultTimeIndex] ?? defaultTimeOptions[0] ?? 0;
-  const activeScenarioName =
-    scenarioNameOptions[scenarioNameIndex] || scenarioNameOptions[0] || scenario?.scenario_name || "Scenario";
-
-  const processedAlternatives = alternativeOptions.map((alt, idx) => {
-    const selection = alternativeSelections[idx] || {};
-    const middle = alt.middlePoints[selection.middleIndex] || alt.middlePoints[0] || null;
-    const tts = alt.tts[selection.ttsIndex] ?? alt.tts[0] ?? 0;
-    const label =
-      alt.valueNames[selection.valueIndex] || alt.valueNames[0] || `Alternative ${idx + 1}`;
-    const description = alt.descriptions[selection.descriptionIndex] || alt.descriptions[0] || "";
-
-    const numericTts = typeof tts === "number" && Number.isFinite(tts) ? tts : 0;
-
-    return {
-      middle,
-      tts: numericTts,
-      totalTimeMinutes: numericTts + (typeof activeDefaultTime === "number" ? activeDefaultTime : 0),
-      label,
-      description,
-      preselected: alt.preselected,
-    };
+    return mids.length ? mids : [null];
   });
 
-  const preselectedIndex = useMemo(() => {
-    const idx = processedAlternatives.findIndex((alt) => alt.preselected);
-    return idx === -1 ? 0 : idx;
-  }, [processedAlternatives]);
+  const combos = [];
 
-  const bounds = useMemo(() => {
-    if (!activeStart || !activeEnd) return null;
-    const points = [activeStart, activeEnd];
-    processedAlternatives.forEach((alt) => {
-      if (isValidCoord(alt.middle)) {
-        points.push(alt.middle);
+  startOptions.forEach((start, startIndex) => {
+    endOptions.forEach((end, endIndex) => {
+      const iterate = (depth, selected) => {
+        if (depth === middleOptions.length) {
+          combos.push({
+            start,
+            end,
+            startIndex,
+            endIndex,
+            middlePoints: middleOptions.map((options, idx) => {
+              const optIndex = selected[idx];
+              const coord = options[optIndex] || null;
+              return {
+                coord: coord && isValidCoord(coord) ? coord : null,
+                index: coord && isValidCoord(coord) ? optIndex : null,
+              };
+            }),
+          });
+          return;
+        }
+
+        const options = middleOptions[depth];
+        options.forEach((_, optionIndex) => {
+          iterate(depth + 1, [...selected, optionIndex]);
+        });
+      };
+
+      if (middleOptions.length) {
+        iterate(0, []);
+      } else {
+        combos.push({
+          start,
+          end,
+          startIndex,
+          endIndex,
+          middlePoints: [],
+        });
       }
     });
-    return points.length ? L.latLngBounds(points) : null;
-  }, [activeStart, activeEnd, processedAlternatives]);
+  });
 
-  const fallbackAlternative =
-    processedAlternatives[preselectedIndex] || processedAlternatives[0] || null;
-  const panelAlternative =
-    selectedRouteIndex === 0
-      ? fallbackAlternative
-      : processedAlternatives[selectedRouteIndex - 1] || fallbackAlternative;
+  return combos;
+}
 
-  if (!activeStart || !activeEnd || !bounds) {
+function Routes({ start, end, middlePoints }) {
+  const map = useMap();
+  const [routes, setRoutes] = useState([]);
+
+  const startKey = Array.isArray(start) ? start.join(",") : "";
+  const endKey = Array.isArray(end) ? end.join(",") : "";
+  const middleKey = Array.isArray(middlePoints)
+    ? middlePoints
+        .map((mid) => (Array.isArray(mid) ? mid.join(",") : "null"))
+        .join("|")
+    : "";
+
+  useEffect(() => {
+    if (!map || !Array.isArray(start) || !Array.isArray(end)) return;
+    if (
+      !start ||
+      !end ||
+      (start[0] === 0 && start[1] === 0) ||
+      (end[0] === 0 && end[1] === 0) ||
+      (start[0] === end[0] && start[1] === end[1])
+    )
+      return;
+
+    const validMids = Array.isArray(middlePoints)
+      ? middlePoints.filter((mid) => Array.isArray(mid) && mid.length === 2)
+      : [];
+
+    const waypointSets = [[start, end]];
+    validMids.forEach((mid) => {
+      waypointSets.push([start, mid, end]);
+    });
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    async function load() {
+      const tasks = waypointSets.map((wps) => fetchRoute(wps, controller.signal));
+      const results = await Promise.all(tasks.map((p) => p.catch(() => null)));
+
+      if (cancelled) return;
+
+      setRoutes(results);
+
+      const defined = results.filter(Boolean);
+      const allCoords = defined.flat();
+      if (allCoords.length) {
+        const bounds = L.latLngBounds(allCoords);
+        map.whenReady(() => {
+          if (!cancelled) {
+            map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
+          }
+        });
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      setRoutes([]);
+    };
+  }, [map, startKey, endKey, middleKey]);
+
+  return (
+    <>
+      {routes.map(
+        (coords, i) =>
+          coords && (
+            <Polyline
+              key={i}
+              positions={coords}
+              pathOptions={{
+                color: i === 0 ? "#1452EE" : "#BCCEFB",
+                weight: i === 0 ? 7 : 5,
+                opacity: 1,
+              }}
+            />
+          )
+      )}
+    </>
+  );
+}
+
+export default function ScenarioMapPreview({
+  scenario,
+  onChange = () => {},
+  className = "h-64 w-full",
+}) {
+  const [previewMode, setPreviewMode] = useState("canonical");
+  const [comboIndex, setComboIndex] = useState(0);
+
+  const startRaw = Array.isArray(scenario?.start) ? scenario.start : [];
+  const endRaw = Array.isArray(scenario?.end) ? scenario.end : [];
+
+  const startOptions = startRaw.filter(isValidCoord);
+  const endOptions = endRaw.filter(isValidCoord);
+
+  const validationErrors = [];
+
+  if (!startRaw.length) {
+    validationErrors.push("Missing starting points");
+  } else if (!startOptions.length) {
+    validationErrors.push("Starting points must be [lat, lng] numbers");
+  }
+
+  if (!endRaw.length) {
+    validationErrors.push("Missing ending points");
+  } else if (!endOptions.length) {
+    validationErrors.push("Ending points must be [lat, lng] numbers");
+  }
+
+  const start = startOptions[0] || null;
+  const end = endOptions[0] || null;
+
+  if (!start || !end) {
     return (
-      <div className={`relative ${className} flex items-center justify-center rounded border border-dashed border-rose-300 bg-rose-50 p-4 text-sm text-rose-700`}>
+      <div
+        className={`relative ${className} flex items-center justify-center rounded border border-dashed border-rose-300 bg-rose-50 p-4 text-sm text-rose-700`}
+      >
         <div className="space-y-1 text-center">
           <p className="font-semibold">Unable to render map preview</p>
           <ul className="space-y-0.5">
-            {!startOptions.length && <li>Provide at least one valid starting coordinate.</li>}
-            {!endOptions.length && <li>Provide at least one valid ending coordinate.</li>}
+            {validationErrors.map((err) => (
+              <li key={err}>{err}</li>
+            ))}
           </ul>
         </div>
       </div>
     );
   }
 
+  const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
+
+  const combinations = useMemo(() => buildCombinations(scenario), [scenario]);
+
+  useEffect(() => {
+    if (previewMode === "canonical") {
+      setComboIndex(0);
+      return;
+    }
+
+    if (previewMode === "sample" && combinations.length) {
+      setComboIndex((prev) => {
+        if (combinations.length === 1) return 0;
+        let next = Math.floor(Math.random() * combinations.length);
+        if (next === prev) {
+          next = (next + 1) % combinations.length;
+        }
+        return next;
+      });
+    }
+  }, [previewMode, combinations]);
+
+  useEffect(() => {
+    if (!combinations.length) {
+      setComboIndex(0);
+      return;
+    }
+
+    setComboIndex((idx) => {
+      if (idx >= combinations.length) {
+        return combinations.length - 1;
+      }
+      return idx;
+    });
+  }, [combinations.length]);
+
+  const activeCombo = combinations.length ? combinations[comboIndex] : null;
+
+  const activeStart = activeCombo?.start || start;
+  const activeEnd = activeCombo?.end || end;
+  const middleSelections = activeCombo
+    ? activeCombo.middlePoints.map((mp) => mp?.coord || null)
+    : alternatives.map((ch) => (Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null));
+
+  const markersDraggable = previewMode === "canonical";
+
+  const handleDrag = (type, idx) => (e) => {
+    const { lat, lng } = e.target.getLatLng();
+    if (type === "start") {
+      const arr = Array.isArray(scenario.start) ? [...scenario.start] : [];
+      arr[0] = [lat, lng];
+      onChange({ start: arr });
+    } else if (type === "end") {
+      const arr = Array.isArray(scenario.end) ? [...scenario.end] : [];
+      arr[0] = [lat, lng];
+      onChange({ end: arr });
+    } else if (type === "mid") {
+      const next = alternatives.map((r, i) => {
+        if (i !== idx) return r;
+        const arr = Array.isArray(r.middle_point) ? [...r.middle_point] : [];
+        arr[0] = [lat, lng];
+        return { ...r, middle_point: arr };
+      });
+      onChange({ choice_list: next });
+    }
+  };
+
+  const boundCoords = [activeStart, activeEnd, ...middleSelections.filter(Boolean)];
+  const bounds = L.latLngBounds(boundCoords);
+
+  const canCycle = combinations.length > 1;
+
+  const cyclePrev = () => {
+    if (!canCycle || previewMode !== "sample") return;
+    setComboIndex((idx) => (idx - 1 + combinations.length) % combinations.length);
+  };
+
+  const cycleNext = () => {
+    if (!canCycle || previewMode !== "sample") return;
+    setComboIndex((idx) => (idx + 1) % combinations.length);
+  };
+
+  const randomize = () => {
+    if (!canCycle || previewMode !== "sample") return;
+    setComboIndex((prev) => {
+      let next = Math.floor(Math.random() * combinations.length);
+      if (next === prev) {
+        next = (next + 1) % combinations.length;
+      }
+      return next;
+    });
+  };
+
   return (
     <div className={`relative ${className}`}>
+      <div className="absolute right-3 top-3 z-[1000] flex flex-col items-end gap-2">
+        <div className="flex overflow-hidden rounded bg-white shadow">
+          <button
+            type="button"
+            onClick={() => setPreviewMode("canonical")}
+            className={`px-3 py-1 text-xs font-medium transition ${
+              previewMode === "canonical"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Canonical preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setPreviewMode("sample")}
+            className={`px-3 py-1 text-xs font-medium transition ${
+              previewMode === "sample"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Sample preview
+          </button>
+        </div>
+        {canCycle && (
+          <div className="flex items-center gap-2 rounded bg-white/95 px-3 py-1 text-xs shadow">
+            <button
+              type="button"
+              onClick={cyclePrev}
+              disabled={previewMode !== "sample"}
+              className="rounded border px-2 py-0.5 disabled:opacity-40"
+              aria-label="Previous combination"
+            >
+              ◀
+            </button>
+            <span className="font-medium">
+              {comboIndex + 1} / {combinations.length}
+            </span>
+            <button
+              type="button"
+              onClick={cycleNext}
+              disabled={previewMode !== "sample"}
+              className="rounded border px-2 py-0.5 disabled:opacity-40"
+              aria-label="Next combination"
+            >
+              ▶
+            </button>
+            <button
+              type="button"
+              onClick={randomize}
+              disabled={previewMode !== "sample"}
+              className="rounded border px-2 py-0.5 disabled:opacity-40"
+            >
+              Shuffle
+            </button>
+          </div>
+        )}
+        {previewMode === "sample" && (
+          <span className="rounded bg-white/90 px-2 py-0.5 text-[0.65rem] text-gray-600 shadow">
+            Sample mode is read-only
+          </span>
+        )}
+      </div>
       <MapContainer
         bounds={bounds}
-        boundsOptions={{ padding: [50, 50], maxZoom: 15 }}
+        boundsOptions={{ padding: [20, 20], maxZoom: 15 }}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={false}
         doubleClickZoom={false}
@@ -195,263 +402,44 @@ export default function ScenarioMapPreview({ scenario, className = "h-64 w-full"
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        <Routing
-          from={activeStart}
-          to={activeEnd}
-          alternatives={processedAlternatives}
-          defaultTimeMinutes={activeDefaultTime}
-          selectedIndex={selectedRouteIndex}
-          setSelectedIndex={setSelectedRouteIndex}
-          consentGiven={true}
-          setMapPoints={setMapPoints}
-          setRoutes={setRoutes}
-        />
+        {activeStart && (
+          <Marker
+            position={activeStart}
+            draggable={markersDraggable}
+            icon={startIcon}
+            eventHandlers={
+              markersDraggable ? { dragend: handleDrag("start") } : undefined
+            }
+          />
+        )}
+        {activeEnd && (
+          <Marker
+            position={activeEnd}
+            draggable={markersDraggable}
+            icon={endIcon}
+            eventHandlers={
+              markersDraggable ? { dragend: handleDrag("end") } : undefined
+            }
+          />
+        )}
+        {alternatives.map((ch, i) => {
+          const mid = middleSelections[i];
+          return (
+            mid && (
+              <Marker
+                key={i}
+                position={mid}
+                draggable={markersDraggable}
+                eventHandlers={
+                  markersDraggable ? { dragend: handleDrag("mid", i) } : undefined
+                }
+              />
+            )
+          );
+        })}
+        <Routes start={activeStart} end={activeEnd} middlePoints={middleSelections} />
       </MapContainer>
-
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 400,
-        }}
-      >
-        <RoutingLabels mapPoints={mapPoints} routes={routes} />
-      </div>
-
-      <ScenarioPanel
-        label={panelAlternative?.label || activeScenarioName}
-        description={panelAlternative?.description || ""}
-        isSelected={selectedRouteIndex !== 0}
-        onToggle={() => {
-          if (selectedRouteIndex === 0) {
-            const targetIndex = processedAlternatives.length ? preselectedIndex + 1 : 0;
-            setSelectedRouteIndex(targetIndex);
-          } else {
-            setSelectedRouteIndex(0);
-          }
-        }}
-        onSubmit={() => {}}
-        scenarioNumber={1}
-        totalScenarios={1}
-        defaultTime={activeDefaultTime}
-        alternativeTime={panelAlternative?.totalTimeMinutes || activeDefaultTime}
-        scenarioText={null}
-      />
-
-      <div className="absolute right-5 top-5 z-[1000] max-h-[calc(100%-2.5rem)] w-80 overflow-y-auto rounded-xl bg-white/95 p-4 text-sm shadow-lg">
-        <h3 className="mb-3 text-base font-semibold text-gray-800">Preview options</h3>
-
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Scenario name</label>
-            <select
-              className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-              value={scenarioNameIndex}
-              onChange={(e) => setScenarioNameIndex(Number(e.target.value))}
-            >
-              {scenarioNameOptions.length ? (
-                scenarioNameOptions.map((name, idx) => (
-                  <option key={name + idx} value={idx}>
-                    {name}
-                  </option>
-                ))
-              ) : (
-                <option value={0}>{String(scenario?.scenario_name || "Scenario")}</option>
-              )}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Start point</label>
-            <select
-              className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-              value={startIndex}
-              onChange={(e) => setStartIndex(Number(e.target.value))}
-            >
-              {startOptions.map((coord, idx) => (
-                <option key={`start-${coord.join("-")}-${idx}`} value={idx}>
-                  #{idx + 1}: {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-gray-500">End point</label>
-            <select
-              className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-              value={endIndex}
-              onChange={(e) => setEndIndex(Number(e.target.value))}
-            >
-              {endOptions.map((coord, idx) => (
-                <option key={`end-${coord.join("-")}-${idx}`} value={idx}>
-                  #{idx + 1}: {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Default route time</label>
-            <select
-              className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-              value={defaultTimeIndex}
-              onChange={(e) => setDefaultTimeIndex(Number(e.target.value))}
-            >
-              {defaultTimeOptions.length ? (
-                defaultTimeOptions.map((minutes, idx) => (
-                  <option key={`time-${minutes}-${idx}`} value={idx}>
-                    {minutes} minutes
-                  </option>
-                ))
-              ) : (
-                <option value={0}>{String(activeDefaultTime)} minutes</option>
-              )}
-            </select>
-          </div>
-
-          {processedAlternatives.map((alt, idx) => {
-            const selection = alternativeSelections[idx] || {
-              middleIndex: 0,
-              ttsIndex: 0,
-              valueIndex: 0,
-              descriptionIndex: 0,
-            };
-            const options = alternativeOptions[idx];
-
-            return (
-              <div key={`alt-${idx}`} className="rounded-lg border border-gray-200 p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-800">Alternative {idx + 1}</h4>
-                  {options?.preselected && (
-                    <span className="rounded bg-blue-100 px-2 py-0.5 text-[0.65rem] font-medium text-blue-700">
-                      Preselected
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Middle point</label>
-                    <select
-                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-                      value={selection.middleIndex}
-                      onChange={(e) =>
-                        setAlternativeSelections((prev) => {
-                          const next = [...prev];
-                          next[idx] = {
-                            ...selection,
-                            middleIndex: Number(e.target.value),
-                          };
-                          return next;
-                        })
-                      }
-                    >
-                      {options?.middlePoints?.length ? (
-                        options.middlePoints.map((coord, optionIdx) => (
-                          <option key={`mid-${idx}-${optionIdx}`} value={optionIdx}>
-                            #{optionIdx + 1}: {coord[0].toFixed(5)}, {coord[1].toFixed(5)}
-                          </option>
-                        ))
-                      ) : (
-                        <option value={0}>No middle point</option>
-                      )}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Additional time</label>
-                    <select
-                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-                      value={selection.ttsIndex}
-                      onChange={(e) =>
-                        setAlternativeSelections((prev) => {
-                          const next = [...prev];
-                          next[idx] = {
-                            ...selection,
-                            ttsIndex: Number(e.target.value),
-                          };
-                          return next;
-                        })
-                      }
-                    >
-                      {options?.tts?.length ? (
-                        options.tts.map((minutes, optionIdx) => (
-                          <option key={`tts-${idx}-${optionIdx}`} value={optionIdx}>
-                            {minutes} minutes
-                          </option>
-                        ))
-                      ) : (
-                        <option value={0}>{alt.tts} minutes</option>
-                      )}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Label</label>
-                    <select
-                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-                      value={selection.valueIndex}
-                      onChange={(e) =>
-                        setAlternativeSelections((prev) => {
-                          const next = [...prev];
-                          next[idx] = {
-                            ...selection,
-                            valueIndex: Number(e.target.value),
-                          };
-                          return next;
-                        })
-                      }
-                    >
-                      {options?.valueNames?.length ? (
-                        options.valueNames.map((name, optionIdx) => (
-                          <option key={`label-${idx}-${optionIdx}`} value={optionIdx}>
-                            {name}
-                          </option>
-                        ))
-                      ) : (
-                        <option value={0}>{alt.label}</option>
-                      )}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-xs font-medium uppercase text-gray-500">Description</label>
-                    <select
-                      className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
-                      value={selection.descriptionIndex}
-                      onChange={(e) =>
-                        setAlternativeSelections((prev) => {
-                          const next = [...prev];
-                          next[idx] = {
-                            ...selection,
-                            descriptionIndex: Number(e.target.value),
-                          };
-                          return next;
-                        })
-                      }
-                    >
-                      {options?.descriptions?.length ? (
-                        options.descriptions.map((text, optionIdx) => (
-                          <option key={`desc-${idx}-${optionIdx}`} value={optionIdx}>
-                            {text}
-                          </option>
-                        ))
-                      ) : (
-                        <option value={0}>{alt.description || "No description"}</option>
-                      )}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 }
+

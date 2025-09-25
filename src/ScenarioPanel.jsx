@@ -1,30 +1,36 @@
 import React from "react";
 
 const ScenarioPanel = ({
-  label,
-  description,
-  isSelected,
-  onToggle,
-  onSubmit,
   scenarioNumber,
   totalScenarios,
   defaultTime,
-  alternativeTime,
   scenarioText,
+  activeLabel,
+  activeDescription,
+  activeTime,
+  alternatives,
+  selectedRouteIndex,
+  onSelectRoute,
+  onSubmit,
 }) => {
-
-  const line1 = scenarioText?.line1?.replace('{defaultTime}', defaultTime) ||
-    `The time-efficient route takes approximately ${defaultTime} minutes.`;
-  const line2 = scenarioText?.line2
-    ?.replace('{label}', label)
-    ?.replace('{alternativeTime}', alternativeTime) ||
-    `The ${label} route prioritizes safety and takes about ${alternativeTime} minutes.`;
-  const line3 = scenarioText?.line3
-    ?.replace('{label}', label.toLowerCase()) ||
-    `Use the toggle below to activate the ${label.toLowerCase()} route if you prefer safety over speed.`;
+  const safeLabel = activeLabel || "Alternative";
+  const lowerLabel = safeLabel.toLowerCase();
+  const defaultTimeText = defaultTime ?? "-";
+  const activeTimeText = activeTime ?? defaultTime ?? "-";
+  const line1 =
+    scenarioText?.line1?.replace("{defaultTime}", String(defaultTimeText)) ||
+    `The time-efficient route takes approximately ${defaultTimeText} minutes.`;
+  const line2 =
+    scenarioText?.line2
+      ?.replace("{label}", safeLabel)
+      ?.replace("{alternativeTime}", String(activeTimeText)) ||
+    `The ${safeLabel} route prioritizes safety and takes about ${activeTimeText} minutes.`;
+  const line3 =
+    scenarioText?.line3?.replace("{label}", lowerLabel) ||
+    "Use the toggles below to activate an alternative route if you prefer safety over speed.";
 
   return (
-    <div className="absolute top-5 left-5 w-80 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
+    <div className="absolute top-5 left-5 w-96 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
       <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
       <div className="mt-3 mb-6 p-4 bg-gray-100 rounded-md text-gray-700">
         <p className="mb-2">{line1}</p>
@@ -32,33 +38,74 @@ const ScenarioPanel = ({
         <p className="text-sm">{line3}</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="text-sm text-gray-600">
+          Default route: <span className="font-medium">{defaultTimeText} minutes</span>
+        </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">{label}</p>
-            {description && (
-              <p className="text-xs text-gray-500">{description}</p>
-            )}
+        {activeDescription && (
+          <div className="p-3 bg-blue-50 border border-blue-100 rounded-md text-sm text-blue-900">
+            <p className="font-medium mb-1">Currently highlighted: {safeLabel}</p>
+            <p>{activeDescription}</p>
           </div>
+        )}
 
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggle}
-              className="sr-only peer"
-            />
-            <div
-              className={
-                "w-14 h-7 bg-gray-300 rounded-full relative transition-colors " +
-                "peer-checked:bg-blue-600 " +
-                "after:content-[''] after:absolute after:top-[2px] after:left-[2px] " +
-                "after:w-6 after:h-6 after:bg-white after:rounded-full after:transition-transform " +
-                "peer-checked:after:translate-x-7"
-              }
-            ></div>
-          </label>
+        <div className="space-y-3">
+          {alternatives.length === 0 ? (
+            <p className="text-sm text-gray-500">No alternative routes configured.</p>
+          ) : (
+            alternatives.map((alt, idx) => {
+              const index = idx + 1;
+              const isSelected = selectedRouteIndex === index;
+              const altTime = alt.totalTimeMinutes ?? "-";
+              const difference =
+                typeof alt.totalTimeMinutes === "number" && typeof defaultTime === "number"
+                  ? alt.totalTimeMinutes - defaultTime
+                  : null;
+              const diffLabel =
+                Number.isFinite(difference) && difference !== 0
+                  ? `${difference > 0 ? "+" : ""}${difference} min`
+                  : null;
+
+              return (
+                <div
+                  key={`${alt.label}-${idx}`}
+                  className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
+                    isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                  }`}
+                >
+                  <div className="pr-4">
+                    <p className="font-medium text-sm">{alt.label}</p>
+                    {alt.description && (
+                      <p className="text-xs text-gray-500 mt-1">{alt.description}</p>
+                    )}
+                    <p className="text-xs text-gray-600 mt-1">
+                      Estimated time: {altTime} min
+                      {diffLabel && <span className="ml-1">({diffLabel} vs default)</span>}
+                    </p>
+                  </div>
+
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onSelectRoute(isSelected ? 0 : index)}
+                      className="sr-only peer"
+                    />
+                    <div
+                      className={
+                        "w-14 h-7 bg-gray-300 rounded-full relative transition-colors " +
+                        "peer-checked:bg-blue-600 " +
+                        "after:content-[''] after:absolute after:top-[2px] after:left-[2px] " +
+                        "after:w-6 after:h-6 after:bg-white after:rounded-full after:transition-transform " +
+                        "peer-checked:after:translate-x-7"
+                      }
+                    ></div>
+                  </label>
+                </div>
+              );
+            })
+          )}
         </div>
 
         <button

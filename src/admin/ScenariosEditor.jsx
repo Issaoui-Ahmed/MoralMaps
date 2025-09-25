@@ -533,7 +533,20 @@ export default function ScenariosEditor() {
 
   const addScenario = () => {
     const prev = selectedKey ? scenarios[selectedKey] : null;
-    const nextIndex = scenarioKeys.length + 1;
+
+    const usedIndexes = new Set(
+      scenarioKeys
+        .map((key) => {
+          const match = /^scenario_(\d+)$/.exec(key);
+          return match ? Number.parseInt(match[1], 10) : null;
+        })
+        .filter((value) => Number.isInteger(value) && value > 0)
+    );
+
+    let nextIndex = 1;
+    while (usedIndexes.has(nextIndex)) {
+      nextIndex += 1;
+    }
 
     const cloneScenario = (sc) =>
       typeof structuredClone === "function"

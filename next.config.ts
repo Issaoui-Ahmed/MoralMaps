@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
   transpilePackages: ['react-router-dom'],
   basePath: normalizedBasePath || undefined,
   assetPrefix: normalizedBasePath || undefined,
+  env: {
+    // Expose the normalized base path to the browser so client-side helpers
+    // like withBasePath can build URLs that match Next.js routing.
+    NEXT_PUBLIC_BASE_PATH: normalizedBasePath || '',
+  },
   async redirects() {
     if (!normalizedBasePath) {
       return []

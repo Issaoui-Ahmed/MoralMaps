@@ -26,12 +26,24 @@ const MapRoute = () => {
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedLabel, setSelectedLabel] = useState("default");
   const [selectedRouteIndex, setSelectedRouteIndex] = useState(0); // 0 = default
+  const [activeAlternativeIndex, setActiveAlternativeIndex] = useState(0);
   const [error, setError] = useState(null);
   const [sessionId] = useState(uuidv4());
   useEffect(() => {
     localStorage.setItem("sessionId", sessionId);
   }, [sessionId]);
   const router = useRouter();
+
+  useEffect(() => {
+    const scenario = scenarios[scenarioIndex];
+    if (!scenario || !Array.isArray(scenario.alternatives)) return;
+
+    const cappedIndex = Math.min(
+      Math.max(scenario.preselectedIndex ?? 0, 0),
+      Math.max(scenario.alternatives.length - 1, 0)
+    );
+    setActiveAlternativeIndex(cappedIndex);
+  }, [scenarios, scenarioIndex]);
 
   useEffect(() => {
     fetch(withBasePath("/api/route-endpoints"))
@@ -130,11 +142,15 @@ const MapRoute = () => {
   const { consentText, scenarioText, instructions } = routeConfig || {};
   const currentScenario = scenarios[scenarioIndex];
   const defaultTime = currentScenario?.defaultTime;
-  const currentAlternative = currentScenario
-    ? selectedRouteIndex === 0
-      ? currentScenario.alternatives[currentScenario.preselectedIndex]
-      : currentScenario.alternatives[selectedRouteIndex - 1]
-    : null;
+  const activeAlternative =
+    currentScenario && Array.isArray(currentScenario.alternatives)
+      ? currentScenario.alternatives[
+          Math.min(
+            Math.max(activeAlternativeIndex, 0),
+            currentScenario.alternatives.length - 1
+          )
+        ] ?? null
+      : null;
   const panelLabel =
     currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
   const panelDescription = currentAlternative?.description || "";
@@ -148,6 +164,7 @@ const MapRoute = () => {
         recommended: idx === currentScenario.preselectedIndex,
       }))
     : [];
+
   const bounds = useMemo(() => {
     if (!currentScenario) return null;
     const pts = [currentScenario.start, currentScenario.end];
@@ -193,6 +210,7 @@ const MapRoute = () => {
               setSelectedLabel("default");
             } else {
               const alt = currentScenario.alternatives[i - 1];
+              setActiveAlternativeIndex(i - 1);
               setSelectedLabel(alt?.label || "alternative");
             }
           }}
@@ -251,6 +269,7 @@ const MapRoute = () => {
         <ScenarioPanel
           label={panelLabel}
           description={panelDescription}
+
           onSubmit={handleChoice}
           scenarioNumber={scenarioIndex + 1}
           totalScenarios={scenarios.length}
@@ -276,6 +295,7 @@ const MapRoute = () => {
             setSelectedLabel(alt?.label || "alternative");
             setSelectedRouteIndex(idx);
           }}
+
         />
       )}
     </div>

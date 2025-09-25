@@ -1,17 +1,14 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
+import React, { useMemo } from "react";
+import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { startIcon, endIcon } from "../markerIcons";
-import { fetchRoute } from "../utils/fetchRoute";
 
-// Ensure Leaflet marker icons are loaded correctly in bundlers like Next.js
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Fix for missing marker icons by explicitly setting their image URLs
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x.src || markerIcon2x,
@@ -27,333 +24,146 @@ function isValidCoord(point) {
   );
 }
 
-function buildCombinations(scenario) {
-  if (!scenario) return [];
+const clampIndex = (idx, length) => {
+  if (!length) return null;
+  const value = typeof idx === "number" && idx >= 0 ? idx : 0;
+  return Math.min(value, length - 1);
+};
 
-  const startOptions = Array.isArray(scenario.start)
-    ? scenario.start.filter(isValidCoord)
-    : [];
-  const endOptions = Array.isArray(scenario.end)
-    ? scenario.end.filter(isValidCoord)
-    : [];
+const DEFAULT_ROUTE_COLOR = "#1452EE";
+const ALTERNATIVE_ROUTE_COLORS = ["#4B78F2", "#7897F6", "#A5B6FA", "#CFD9FD"];
 
-  if (!startOptions.length || !endOptions.length) return [];
-
-  const alternatives = Array.isArray(scenario.choice_list)
-    ? scenario.choice_list
-    : [];
-
-  const middleOptions = alternatives.map((alt) => {
-    const mids = Array.isArray(alt?.middle_point)
-      ? alt.middle_point.filter(isValidCoord)
-      : [];
-    return mids.length ? mids : [null];
-  });
-
-  const combos = [];
-
-  startOptions.forEach((start, startIndex) => {
-    endOptions.forEach((end, endIndex) => {
-      const iterate = (depth, selected) => {
-        if (depth === middleOptions.length) {
-          combos.push({
-            start,
-            end,
-            startIndex,
-            endIndex,
-            middlePoints: middleOptions.map((options, idx) => {
-              const optIndex = selected[idx];
-              const coord = options[optIndex] || null;
-              return {
-                coord: coord && isValidCoord(coord) ? coord : null,
-                index: coord && isValidCoord(coord) ? optIndex : null,
-              };
-            }),
-          });
-          return;
-        }
-
-        const options = middleOptions[depth];
-        options.forEach((_, optionIndex) => {
-          iterate(depth + 1, [...selected, optionIndex]);
-        });
-      };
-
-      if (middleOptions.length) {
-        iterate(0, []);
-      } else {
-        combos.push({
-          start,
-          end,
-          startIndex,
-          endIndex,
-          middlePoints: [],
-        });
-      }
-    });
-  });
-
-  return combos;
-}
-
-function Routes({ start, end, middlePoints }) {
-  const map = useMap();
-  const [routes, setRoutes] = useState([]);
-
-  const startKey = Array.isArray(start) ? start.join(",") : "";
-  const endKey = Array.isArray(end) ? end.join(",") : "";
-  const middleKey = Array.isArray(middlePoints)
-    ? middlePoints
-        .map((mid) => (Array.isArray(mid) ? mid.join(",") : "null"))
-        .join("|")
-    : "";
-
-  useEffect(() => {
-    if (!map || !Array.isArray(start) || !Array.isArray(end)) return;
-    if (
-      !start ||
-      !end ||
-      (start[0] === 0 && start[1] === 0) ||
-      (end[0] === 0 && end[1] === 0) ||
-      (start[0] === end[0] && start[1] === end[1])
-    )
-      return;
-
-    const validMids = Array.isArray(middlePoints)
-      ? middlePoints.filter((mid) => Array.isArray(mid) && mid.length === 2)
-      : [];
-
-    const waypointSets = [[start, end]];
-    validMids.forEach((mid) => {
-      waypointSets.push([start, mid, end]);
-    });
-
-    const controller = new AbortController();
-    let cancelled = false;
-
-    async function load() {
-      const tasks = waypointSets.map((wps) => fetchRoute(wps, controller.signal));
-      const results = await Promise.all(tasks.map((p) => p.catch(() => null)));
-
-      if (cancelled) return;
-
-      setRoutes(results);
-
-      const defined = results.filter(Boolean);
-      const allCoords = defined.flat();
-      if (allCoords.length) {
-        const bounds = L.latLngBounds(allCoords);
-        map.whenReady(() => {
-          if (!cancelled) {
-            map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15, animate: false });
-          }
-        });
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-      setRoutes([]);
-    };
-  }, [map, startKey, endKey, middleKey]);
-
-  return (
-    <>
-      {routes.map(
-        (coords, i) =>
-          coords && (
-            <Polyline
-              key={i}
-              positions={coords}
-              pathOptions={{
-                color: i === 0 ? "#1452EE" : "#BCCEFB",
-                weight: i === 0 ? 7 : 5,
-                opacity: 1,
-              }}
-            />
-          )
-      )}
-    </>
-  );
-}
+const makePolyline = (points, color, weight) => ({
+  points: points.filter(isValidCoord),
+  color,
+  weight,
+});
 
 export default function ScenarioMapPreview({
   scenario,
+  selection = {},
   onChange = () => {},
   className = "h-64 w-full",
 }) {
-  const [previewMode, setPreviewMode] = useState("canonical");
-  const [comboIndex, setComboIndex] = useState(0);
+  const startOptions = Array.isArray(scenario?.start)
+    ? scenario.start.filter(isValidCoord)
+    : [];
+  const endOptions = Array.isArray(scenario?.end) ? scenario.end.filter(isValidCoord) : [];
 
-  const start = Array.isArray(scenario?.start?.[0]) ? scenario.start[0] : null;
-  const end = Array.isArray(scenario?.end?.[0]) ? scenario.end[0] : null;
-  if (!start || !end) return null;
+  const startIndex = clampIndex(selection?.start, startOptions.length);
+  const endIndex = clampIndex(selection?.end, endOptions.length);
 
-  const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
+  const activeStart = startIndex !== null ? startOptions[startIndex] : startOptions[0];
+  const activeEnd = endIndex !== null ? endOptions[endIndex] : endOptions[0];
 
-  const combinations = useMemo(() => buildCombinations(scenario), [scenario]);
+  const alternatives = Array.isArray(scenario?.choice_list) ? scenario.choice_list : [];
+  const routeSelections = Array.isArray(selection?.choice_list) ? selection.choice_list : [];
 
-  useEffect(() => {
-    if (previewMode === "canonical") {
-      setComboIndex(0);
-      return;
-    }
+  const previewRoutes = useMemo(() => {
+    const altPolylines = alternatives.map((route, routeIndex) => {
+      const middleOptions = Array.isArray(route?.middle_point)
+        ? route.middle_point.filter(isValidCoord)
+        : [];
+      const middleIndex = clampIndex(routeSelections?.[routeIndex]?.middle_point, middleOptions.length);
+      const middlePoint = middleIndex !== null ? middleOptions[middleIndex] : middleOptions[0];
 
-    if (previewMode === "sample" && combinations.length) {
-      setComboIndex((prev) => {
-        if (combinations.length === 1) return 0;
-        let next = Math.floor(Math.random() * combinations.length);
-        if (next === prev) {
-          next = (next + 1) % combinations.length;
-        }
-        return next;
-      });
-    }
-  }, [previewMode, combinations]);
-
-  useEffect(() => {
-    if (!combinations.length) {
-      setComboIndex(0);
-      return;
-    }
-
-    setComboIndex((idx) => {
-      if (idx >= combinations.length) {
-        return combinations.length - 1;
+      const points = [activeStart, middlePoint, activeEnd].filter(Boolean);
+      if (points.length < 2) {
+        return null;
       }
-      return idx;
+      return makePolyline(
+        points,
+        ALTERNATIVE_ROUTE_COLORS[routeIndex % ALTERNATIVE_ROUTE_COLORS.length],
+        4
+      );
     });
-  }, [combinations.length]);
 
-  const activeCombo = combinations.length ? combinations[comboIndex] : null;
+    const baseLine = makePolyline([activeStart, activeEnd], DEFAULT_ROUTE_COLOR, 6);
+    return [baseLine, ...altPolylines.filter(Boolean)];
+  }, [activeStart, activeEnd, alternatives, routeSelections]);
 
-  const activeStart = activeCombo?.start || start;
-  const activeEnd = activeCombo?.end || end;
-  const middleSelections = activeCombo
-    ? activeCombo.middlePoints.map((mp) => mp?.coord || null)
-    : alternatives.map((ch) => (Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null));
+  const bounds = useMemo(() => {
+    const coords = previewRoutes.flatMap((route) => route.points);
+    if (coords.length >= 2) {
+      return L.latLngBounds(coords);
+    }
+    if (coords.length === 1) {
+      const [[lat, lng]] = coords;
+      const delta = 0.01;
+      return L.latLngBounds(
+        [lat - delta, lng - delta],
+        [lat + delta, lng + delta]
+      );
+    }
+    return null;
+  }, [previewRoutes]);
 
-  const markersDraggable = previewMode === "canonical";
+  const handleDrag = (type, routeIndex) => (event) => {
+    const { lat, lng } = event.target.getLatLng();
+    const coords = [lat, lng];
 
-  const handleDrag = (type, idx) => (e) => {
-    const { lat, lng } = e.target.getLatLng();
     if (type === "start") {
-      const arr = Array.isArray(scenario.start) ? [...scenario.start] : [];
-      arr[0] = [lat, lng];
-      onChange({ start: arr });
-    } else if (type === "end") {
-      const arr = Array.isArray(scenario.end) ? [...scenario.end] : [];
-      arr[0] = [lat, lng];
-      onChange({ end: arr });
-    } else if (type === "mid") {
-      const next = alternatives.map((r, i) => {
-        if (i !== idx) return r;
-        const arr = Array.isArray(r.middle_point) ? [...r.middle_point] : [];
-        arr[0] = [lat, lng];
-        return { ...r, middle_point: arr };
-      });
-      onChange({ choice_list: next });
+      const next = Array.isArray(scenario.start) ? scenario.start.slice() : [];
+      const targetIndex = startIndex ?? 0;
+      if (typeof targetIndex === "number") {
+        next[targetIndex] = coords;
+        onChange({ start: next });
+      }
+      return;
+    }
+
+    if (type === "end") {
+      const next = Array.isArray(scenario.end) ? scenario.end.slice() : [];
+      const targetIndex = endIndex ?? 0;
+      if (typeof targetIndex === "number") {
+        next[targetIndex] = coords;
+        onChange({ end: next });
+      }
+      return;
+    }
+
+    if (type === "middle" && typeof routeIndex === "number") {
+      const choiceList = Array.isArray(scenario.choice_list) ? scenario.choice_list.slice() : [];
+      const route = choiceList[routeIndex];
+      if (!route) return;
+      const middleOptions = Array.isArray(route.middle_point) ? route.middle_point.slice() : [];
+      const currentSelection = clampIndex(routeSelections?.[routeIndex]?.middle_point, middleOptions.length);
+      const targetIndex = currentSelection ?? 0;
+      if (typeof targetIndex === "number") {
+        middleOptions[targetIndex] = coords;
+        choiceList[routeIndex] = { ...route, middle_point: middleOptions };
+        onChange({ choice_list: choiceList });
+      }
     }
   };
 
-  const boundCoords = [activeStart, activeEnd, ...middleSelections.filter(Boolean)];
-  const bounds = L.latLngBounds(boundCoords);
+  if (!activeStart || !activeEnd) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-100 text-sm text-gray-600 ${className}`}>
+        Select valid start and end coordinates to preview the scenario.
+      </div>
+    );
+  }
 
-  const canCycle = combinations.length > 1;
-
-  const cyclePrev = () => {
-    if (!canCycle || previewMode !== "sample") return;
-    setComboIndex((idx) => (idx - 1 + combinations.length) % combinations.length);
-  };
-
-  const cycleNext = () => {
-    if (!canCycle || previewMode !== "sample") return;
-    setComboIndex((idx) => (idx + 1) % combinations.length);
-  };
-
-  const randomize = () => {
-    if (!canCycle || previewMode !== "sample") return;
-    setComboIndex((prev) => {
-      let next = Math.floor(Math.random() * combinations.length);
-      if (next === prev) {
-        next = (next + 1) % combinations.length;
-      }
-      return next;
-    });
-  };
+  const middleMarkers = alternatives
+    .map((route, routeIndex) => {
+      const middleOptions = Array.isArray(route?.middle_point)
+        ? route.middle_point.filter(isValidCoord)
+        : [];
+      const middleIndex = clampIndex(routeSelections?.[routeIndex]?.middle_point, middleOptions.length);
+      if (middleIndex === null) return null;
+      const position = middleOptions[middleIndex];
+      if (!position) return null;
+      return { position, routeIndex };
+    })
+    .filter(Boolean);
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute right-3 top-3 z-[1000] flex flex-col items-end gap-2">
-        <div className="flex overflow-hidden rounded bg-white shadow">
-          <button
-            type="button"
-            onClick={() => setPreviewMode("canonical")}
-            className={`px-3 py-1 text-xs font-medium transition ${
-              previewMode === "canonical"
-                ? "bg-indigo-600 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            Canonical preview
-          </button>
-          <button
-            type="button"
-            onClick={() => setPreviewMode("sample")}
-            className={`px-3 py-1 text-xs font-medium transition ${
-              previewMode === "sample"
-                ? "bg-indigo-600 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            Sample preview
-          </button>
-        </div>
-        {canCycle && (
-          <div className="flex items-center gap-2 rounded bg-white/95 px-3 py-1 text-xs shadow">
-            <button
-              type="button"
-              onClick={cyclePrev}
-              disabled={previewMode !== "sample"}
-              className="rounded border px-2 py-0.5 disabled:opacity-40"
-              aria-label="Previous combination"
-            >
-              ◀
-            </button>
-            <span className="font-medium">
-              {comboIndex + 1} / {combinations.length}
-            </span>
-            <button
-              type="button"
-              onClick={cycleNext}
-              disabled={previewMode !== "sample"}
-              className="rounded border px-2 py-0.5 disabled:opacity-40"
-              aria-label="Next combination"
-            >
-              ▶
-            </button>
-            <button
-              type="button"
-              onClick={randomize}
-              disabled={previewMode !== "sample"}
-              className="rounded border px-2 py-0.5 disabled:opacity-40"
-            >
-              Shuffle
-            </button>
-          </div>
-        )}
-        {previewMode === "sample" && (
-          <span className="rounded bg-white/90 px-2 py-0.5 text-[0.65rem] text-gray-600 shadow">
-            Sample mode is read-only
-          </span>
-        )}
-      </div>
       <MapContainer
-        bounds={bounds}
-        boundsOptions={{ padding: [20, 20], maxZoom: 15 }}
+        bounds={bounds ?? undefined}
+        center={bounds ? undefined : activeStart}
+        zoom={13}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={false}
         doubleClickZoom={false}
@@ -366,42 +176,34 @@ export default function ScenarioMapPreview({
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        {activeStart && (
+        <Marker
+          position={activeStart}
+          draggable
+          icon={startIcon}
+          eventHandlers={{ dragend: handleDrag("start") }}
+        />
+        <Marker
+          position={activeEnd}
+          draggable
+          icon={endIcon}
+          eventHandlers={{ dragend: handleDrag("end") }}
+        />
+        {middleMarkers.map(({ position, routeIndex }) => (
           <Marker
-            position={activeStart}
-            draggable={markersDraggable}
-            icon={startIcon}
-            eventHandlers={
-              markersDraggable ? { dragend: handleDrag("start") } : undefined
-            }
+            key={`middle-${routeIndex}`}
+            position={position}
+            draggable
+            eventHandlers={{ dragend: handleDrag("middle", routeIndex) }}
           />
-        )}
-        {activeEnd && (
-          <Marker
-            position={activeEnd}
-            draggable={markersDraggable}
-            icon={endIcon}
-            eventHandlers={
-              markersDraggable ? { dragend: handleDrag("end") } : undefined
-            }
+        ))}
+        {previewRoutes.map((route, index) => (
+          <Polyline
+            // eslint-disable-next-line react/no-array-index-key
+            key={index}
+            positions={route.points}
+            pathOptions={{ color: route.color, weight: route.weight, opacity: 0.9 }}
           />
-        )}
-        {alternatives.map((ch, i) => {
-          const mid = middleSelections[i];
-          return (
-            mid && (
-              <Marker
-                key={i}
-                position={mid}
-                draggable={markersDraggable}
-                eventHandlers={
-                  markersDraggable ? { dragend: handleDrag("mid", i) } : undefined
-                }
-              />
-            )
-          );
-        })}
-        <Routes start={activeStart} end={activeEnd} middlePoints={middleSelections} />
+        ))}
       </MapContainer>
     </div>
   );

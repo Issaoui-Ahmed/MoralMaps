@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useConfig } from "./AdminApp";
 import SettingsEditor from "./SettingsEditor";
 import ScenarioMapPreview from "./ScenarioMapPreview";
@@ -98,7 +98,44 @@ const normalizeScenarioMap = (scenarios) => {
   );
 };
 
-function CoordListInput({ label, values = [], onChange }) {
+const clampIndex = (idx, length) => {
+  if (!length) return null;
+  const value = typeof idx === "number" && idx >= 0 ? idx : 0;
+  return Math.min(value, length - 1);
+};
+
+const ensureSelectionForScenario = (current = {}, scenario) => {
+  const startLength = Array.isArray(scenario?.start) ? scenario.start.length : 0;
+  const endLength = Array.isArray(scenario?.end) ? scenario.end.length : 0;
+  const defaultRouteLength = Array.isArray(scenario?.default_route_time)
+    ? scenario.default_route_time.length
+    : 0;
+
+  const choiceList = Array.isArray(scenario?.choice_list) ? scenario.choice_list : [];
+
+  return {
+    start: clampIndex(current.start, startLength),
+    end: clampIndex(current.end, endLength),
+    default_route_time: clampIndex(current.default_route_time, defaultRouteLength),
+    choice_list: choiceList.map((route, index) => {
+      const existing = Array.isArray(current.choice_list) ? current.choice_list[index] : {};
+
+      const middleLength = Array.isArray(route?.middle_point) ? route.middle_point.length : 0;
+      const ttsLength = Array.isArray(route?.tts) ? route.tts.length : 0;
+      const valueNameLength = Array.isArray(route?.value_name) ? route.value_name.length : 0;
+      const descriptionLength = Array.isArray(route?.description) ? route.description.length : 0;
+
+      return {
+        middle_point: clampIndex(existing?.middle_point, middleLength),
+        tts: clampIndex(existing?.tts, ttsLength),
+        value_name: clampIndex(existing?.value_name, valueNameLength),
+        description: clampIndex(existing?.description, descriptionLength),
+      };
+    }),
+  };
+};
+
+function CoordListInput({ label, values = [], onChange, selectedIndex = null, onSelect }) {
   const coords = Array.isArray(values) ? values : [];
 
   const update = (idx, lat, lng) => {
@@ -118,7 +155,12 @@ function CoordListInput({ label, values = [], onChange }) {
     <div className="mb-3">
       <label className="block text-sm font-medium mb-1">{label}</label>
       {coords.map((pair, i) => (
-        <div key={i} className="flex items-center gap-2 mb-1">
+        <div
+          key={i}
+          className={`flex items-center gap-2 mb-1 rounded border px-2 py-1 ${
+            selectedIndex === i ? "border-indigo-500 bg-indigo-50" : "border-transparent"
+          }`}
+        >
           <input
             type="number"
             step="any"
@@ -133,6 +175,18 @@ function CoordListInput({ label, values = [], onChange }) {
             onChange={(e) => update(i, pair[0], Number(e.target.value))}
             className="w-1/2 border rounded px-2 py-1 text-sm"
           />
+          <button
+            type="button"
+            onClick={() => onSelect?.(i)}
+            className={`text-xs px-2 py-1 rounded border ${
+              selectedIndex === i
+                ? "border-indigo-600 bg-indigo-600 text-white"
+                : "border-gray-300 text-gray-700 hover:bg-gray-100"
+            }`}
+            aria-pressed={selectedIndex === i}
+          >
+            Select
+          </button>
           {coords.length > 1 && (
             <button
               onClick={() => remove(i)}
@@ -151,7 +205,13 @@ function CoordListInput({ label, values = [], onChange }) {
   );
 }
 
-function NumberListInput({ label, values = [], onChange }) {
+function NumberListInput({
+  label,
+  values = [],
+  onChange,
+  selectedIndex = null,
+  onSelect,
+}) {
   const nums = Array.isArray(values) ? values : [];
 
   const update = (idx, val) => {
@@ -166,13 +226,30 @@ function NumberListInput({ label, values = [], onChange }) {
     <div className="mb-3">
       <label className="block text-sm font-medium mb-1">{label}</label>
       {nums.map((n, i) => (
-        <div key={i} className="flex items-center gap-2 mb-1">
+        <div
+          key={i}
+          className={`flex items-center gap-2 mb-1 rounded border px-2 py-1 ${
+            selectedIndex === i ? "border-indigo-500 bg-indigo-50" : "border-transparent"
+          }`}
+        >
           <input
             type="number"
             value={n}
             onChange={(e) => update(i, Number(e.target.value))}
             className="border rounded px-2 py-1 text-sm w-32"
           />
+          <button
+            type="button"
+            onClick={() => onSelect?.(i)}
+            className={`text-xs px-2 py-1 rounded border ${
+              selectedIndex === i
+                ? "border-indigo-600 bg-indigo-600 text-white"
+                : "border-gray-300 text-gray-700 hover:bg-gray-100"
+            }`}
+            aria-pressed={selectedIndex === i}
+          >
+            Select
+          </button>
           {nums.length > 1 && (
             <button
               onClick={() => remove(i)}
@@ -191,7 +268,14 @@ function NumberListInput({ label, values = [], onChange }) {
   );
 }
 
-function TextListInput({ label, values = [], onChange, placeholder = "" }) {
+function TextListInput({
+  label,
+  values = [],
+  onChange,
+  placeholder = "",
+  selectedIndex = null,
+  onSelect,
+}) {
   const items = Array.isArray(values)
     ? values
     : typeof values === "string"
@@ -210,7 +294,12 @@ function TextListInput({ label, values = [], onChange, placeholder = "" }) {
     <div className="mb-3">
       <label className="block text-sm font-medium mb-1">{label}</label>
       {items.map((text, i) => (
-        <div key={i} className="flex items-center gap-2 mb-1">
+        <div
+          key={i}
+          className={`flex items-center gap-2 mb-1 rounded border px-2 py-1 ${
+            selectedIndex === i ? "border-indigo-500 bg-indigo-50" : "border-transparent"
+          }`}
+        >
           <input
             type="text"
             value={text}
@@ -218,6 +307,18 @@ function TextListInput({ label, values = [], onChange, placeholder = "" }) {
             onChange={(e) => update(i, e.target.value)}
             className="border rounded px-2 py-1 text-sm w-full"
           />
+          <button
+            type="button"
+            onClick={() => onSelect?.(i)}
+            className={`text-xs px-2 py-1 rounded border ${
+              selectedIndex === i
+                ? "border-indigo-600 bg-indigo-600 text-white"
+                : "border-gray-300 text-gray-700 hover:bg-gray-100"
+            }`}
+            aria-pressed={selectedIndex === i}
+          >
+            Select
+          </button>
           {items.length > 1 && (
             <button
               onClick={() => remove(i)}
@@ -236,7 +337,15 @@ function TextListInput({ label, values = [], onChange, placeholder = "" }) {
   );
 }
 
-function AlternativeRouteEditor({ route, onChange, onDelete, index, canDelete }) {
+function AlternativeRouteEditor({
+  route,
+  onChange,
+  onDelete,
+  index,
+  canDelete,
+  selection = {},
+  onSelect,
+}) {
   return (
     <div className="border rounded p-3 mb-3">
       <div className="flex justify-between items-center mb-2">
@@ -251,23 +360,31 @@ function AlternativeRouteEditor({ route, onChange, onDelete, index, canDelete })
         label="Middle points"
         values={route.middle_point}
         onChange={(val) => onChange({ middle_point: val })}
+        selectedIndex={selection?.middle_point ?? null}
+        onSelect={(idx) => onSelect?.("middle_point", idx)}
       />
       <NumberListInput
         label="TTS"
         values={route.tts}
         onChange={(val) => onChange({ tts: val })}
+        selectedIndex={selection?.tts ?? null}
+        onSelect={(idx) => onSelect?.("tts", idx)}
       />
       <TextListInput
         label="Value names (pool)"
         values={route.value_name}
         onChange={(val) => onChange({ value_name: val })}
         placeholder="e.g. drivers safety"
+        selectedIndex={selection?.value_name ?? null}
+        onSelect={(idx) => onSelect?.("value_name", idx)}
       />
       <TextListInput
         label="Descriptions (pool)"
         values={route.description}
         onChange={(val) => onChange({ description: val })}
         placeholder="Brief explanation for participants"
+        selectedIndex={selection?.description ?? null}
+        onSelect={(idx) => onSelect?.("description", idx)}
       />
       <div className="flex items-center gap-2">
         <input
@@ -282,7 +399,14 @@ function AlternativeRouteEditor({ route, onChange, onDelete, index, canDelete })
   );
 }
 
-function ScenarioForm({ scenario, onChange, name }) {
+function ScenarioForm({
+  scenario,
+  onChange,
+  name,
+  selection = {},
+  onSelectField,
+  onSelectRouteField,
+}) {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{name}</h3>
@@ -291,16 +415,22 @@ function ScenarioForm({ scenario, onChange, name }) {
         label="Start"
         values={scenario.start}
         onChange={(val) => onChange({ start: val })}
+        selectedIndex={selection?.start ?? null}
+        onSelect={(idx) => onSelectField?.("start", idx)}
       />
       <CoordListInput
         label="End"
         values={scenario.end}
         onChange={(val) => onChange({ end: val })}
+        selectedIndex={selection?.end ?? null}
+        onSelect={(idx) => onSelectField?.("end", idx)}
       />
       <NumberListInput
         label="Default route time (min)"
         values={scenario.default_route_time}
         onChange={(val) => onChange({ default_route_time: val })}
+        selectedIndex={selection?.default_route_time ?? null}
+        onSelect={(idx) => onSelectField?.("default_route_time", idx)}
       />
       <div className="flex items-center gap-2">
         <input
@@ -347,6 +477,7 @@ function ScenarioForm({ scenario, onChange, name }) {
               route={ch}
               index={i}
               canDelete={scenario.choice_list.length > 1}
+              selection={Array.isArray(selection?.choice_list) ? selection.choice_list[i] : null}
               onChange={(patch) => {
                 const next = scenario.choice_list.map((c, idx) => (idx === i ? { ...c, ...patch } : c));
                 onChange({ choice_list: next });
@@ -355,6 +486,7 @@ function ScenarioForm({ scenario, onChange, name }) {
                 const next = scenario.choice_list.filter((_, idx) => idx !== i);
                 onChange({ choice_list: next.length > 0 ? next : [createDefaultRoute(scenario)] });
               }}
+              onSelect={(field, idx) => onSelectRouteField?.(i, field, idx)}
             />
           ))
         ) : (
@@ -435,7 +567,62 @@ export default function ScenariosEditor() {
     setSelectedKey(Object.keys(rest)[0] || "");
   };
 
+  const [selections, setSelections] = useState({});
+
+  useEffect(() => {
+    setSelections((prev) => {
+      const nextEntries = Object.fromEntries(
+        Object.entries(scenarios).map(([key, scenario]) => [
+          key,
+          ensureSelectionForScenario(prev[key], scenario),
+        ])
+      );
+      return nextEntries;
+    });
+  }, [scenarios]);
+
   const selected = scenarios[selectedKey];
+  const selectedSelection = selections[selectedKey];
+
+  const updateSelectionField = useCallback(
+    (field, index) => {
+      setSelections((prev) => {
+        const currentScenarioSelection = prev[selectedKey] || {};
+        const nextScenarioSelection = {
+          ...currentScenarioSelection,
+          [field]: index,
+        };
+        return { ...prev, [selectedKey]: nextScenarioSelection };
+      });
+    },
+    [selectedKey]
+  );
+
+  const updateRouteSelectionField = useCallback(
+    (routeIndex, field, index) => {
+      setSelections((prev) => {
+        const currentScenarioSelection = prev[selectedKey] || {};
+        const existingRoutes = Array.isArray(currentScenarioSelection.choice_list)
+          ? currentScenarioSelection.choice_list
+          : [];
+        const nextRoutes = existingRoutes.slice();
+        const currentRouteSelection = nextRoutes[routeIndex] || {};
+        nextRoutes[routeIndex] = {
+          ...currentRouteSelection,
+          [field]: index,
+        };
+
+        return {
+          ...prev,
+          [selectedKey]: {
+            ...currentScenarioSelection,
+            choice_list: nextRoutes,
+          },
+        };
+      });
+    },
+    [selectedKey]
+  );
 
   return (
     <div className="relative h-[calc(100vh-6rem)]">
@@ -444,6 +631,7 @@ export default function ScenariosEditor() {
           scenario={selected}
           onChange={(patch) => updateScenario(selectedKey, patch)}
           className="absolute inset-0 z-0"
+          selection={selectedSelection}
         />
       )}
       <div className="absolute top-0 left-0 z-10 h-full w-[30rem] max-w-full overflow-y-auto bg-white p-4 space-y-6 shadow-md">
@@ -480,6 +668,11 @@ export default function ScenariosEditor() {
             scenario={selected}
             scenarioKey={selectedKey}
             onChange={(patch) => updateScenario(selectedKey, patch)}
+            selection={selectedSelection}
+            onSelectField={updateSelectionField}
+            onSelectRouteField={(routeIndex, field, value) =>
+              updateRouteSelectionField(routeIndex, field, value)
+            }
           />
         ) : (
           <p className="text-sm text-gray-500">No scenarios defined.</p>

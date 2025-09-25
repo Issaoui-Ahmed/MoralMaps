@@ -152,8 +152,8 @@ const MapRoute = () => {
         ] ?? null
       : null;
   const panelLabel =
-    currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
-  const panelDescription = currentAlternative?.description || "";
+    activeAlternative?.label || currentScenario?.scenarioName || "Alternative";
+  const panelDescription = activeAlternative?.description || "";
   const choiceOptions = currentScenario
     ? currentScenario.alternatives.map((alt, idx) => ({
         id: idx + 1,

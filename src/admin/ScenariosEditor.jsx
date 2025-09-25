@@ -1,7 +1,102 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useConfig } from "./AdminApp";
 import SettingsEditor from "./SettingsEditor";
 import ScenarioMapPreview from "./ScenarioMapPreview";
+
+const ensureArray = (value, fallback) => {
+  if (Array.isArray(value) && value.length > 0) {
+    return value;
+  }
+  return fallback;
+};
+
+const ensureCoordList = (value, fallback) => {
+  if (!Array.isArray(value) || value.length === 0) {
+    return fallback;
+  }
+  return value.map((pair, index) => {
+    if (Array.isArray(pair) && pair.length === 2) {
+      const [lat, lng] = pair;
+      const latNum = typeof lat === "number" ? lat : fallback[Math.min(index, fallback.length - 1)][0];
+      const lngNum = typeof lng === "number" ? lng : fallback[Math.min(index, fallback.length - 1)][1];
+      return [latNum, lngNum];
+    }
+    return fallback[Math.min(index, fallback.length - 1)] || fallback[0];
+  });
+};
+
+const ensureNumberList = (value, fallback) => {
+  const arr = ensureArray(value, fallback);
+  return arr.map((num) => (typeof num === "number" && !Number.isNaN(num) ? num : 0));
+};
+
+const ensureStringList = (value, fallback) => {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? value : fallback;
+  }
+  if (typeof value === "string" && value.length > 0) {
+    return [value];
+  }
+  return fallback;
+};
+
+const createDefaultRoute = (scenario) => {
+  const start = ensureCoordList(scenario?.start, [[0, 0]]);
+  const end = ensureCoordList(scenario?.end, [[0, 0]]);
+  const [startLat, startLng] = start[0] || [0, 0];
+  const [endLat, endLng] = end[0] || [0, 0];
+  const mid = [(startLat + endLat) / 2, (startLng + endLng) / 2];
+
+  return {
+    middle_point: [mid.every((n) => typeof n === "number" && !Number.isNaN(n)) ? mid : [0, 0]],
+    tts: [0],
+    value_name: [""],
+    description: [""],
+    preselected: false,
+  };
+};
+
+const normalizeRoute = (route, scenario) => {
+  const fallback = createDefaultRoute(scenario);
+  return {
+    ...fallback,
+    ...route,
+    middle_point: ensureCoordList(route?.middle_point, fallback.middle_point),
+    tts: ensureNumberList(route?.tts, fallback.tts),
+    value_name: ensureStringList(route?.value_name, fallback.value_name),
+    description: ensureStringList(route?.description, fallback.description),
+    preselected: typeof route?.preselected === "boolean" ? route.preselected : false,
+  };
+};
+
+const normalizeScenario = (scenario) => {
+  const start = ensureCoordList(scenario?.start, [[0, 0]]);
+  const end = ensureCoordList(scenario?.end, [[0, 0]]);
+  const defaultRoute = createDefaultRoute({ start, end });
+  const routesArray = Array.isArray(scenario?.choice_list) ? scenario.choice_list : [];
+  const normalizedRoutes = routesArray.length
+    ? routesArray.map((route) => normalizeRoute(route, { start, end }))
+    : [defaultRoute];
+
+  return {
+    ...scenario,
+    start,
+    end,
+    default_route_time: ensureNumberList(scenario?.default_route_time, [0]),
+    choice_list: normalizedRoutes,
+    randomly_preselect_route: Boolean(scenario?.randomly_preselect_route),
+  };
+};
+
+const normalizeScenarioMap = (scenarios) => {
+  if (!scenarios || typeof scenarios !== "object") {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(scenarios).map(([key, scenario]) => [key, normalizeScenario(scenario)])
+  );
+};
 
 function CoordListInput({ label, values = [], onChange }) {
   const coords = Array.isArray(values) ? values : [];
@@ -141,14 +236,16 @@ function TextListInput({ label, values = [], onChange, placeholder = "" }) {
   );
 }
 
-function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
+function AlternativeRouteEditor({ route, onChange, onDelete, index, canDelete }) {
   return (
     <div className="border rounded p-3 mb-3">
       <div className="flex justify-between items-center mb-2">
         <h4 className="text-sm font-semibold">Alternative route {index + 1}</h4>
-        <button onClick={onDelete} className="text-xs text-red-600">
-          Delete
-        </button>
+        {canDelete && (
+          <button onClick={onDelete} className="text-xs text-red-600">
+            Delete
+          </button>
+        )}
       </div>
       <CoordListInput
         label="Middle points"
@@ -249,13 +346,14 @@ function ScenarioForm({ scenario, onChange, name }) {
               key={i}
               route={ch}
               index={i}
+              canDelete={scenario.choice_list.length > 1}
               onChange={(patch) => {
                 const next = scenario.choice_list.map((c, idx) => (idx === i ? { ...c, ...patch } : c));
                 onChange({ choice_list: next });
               }}
               onDelete={() => {
                 const next = scenario.choice_list.filter((_, idx) => idx !== i);
-                onChange({ choice_list: next });
+                onChange({ choice_list: next.length > 0 ? next : [createDefaultRoute(scenario)] });
               }}
             />
           ))
@@ -269,10 +367,23 @@ function ScenarioForm({ scenario, onChange, name }) {
 
 export default function ScenariosEditor() {
   const { config, setConfig, setDirty } = useConfig();
-  const scenarios =
+  const rawScenarios =
     typeof config?.scenarios === "object" && config.scenarios !== null
       ? config.scenarios
       : {};
+  const scenarios = useMemo(() => normalizeScenarioMap(rawScenarios), [rawScenarios]);
+
+  useEffect(() => {
+    if (!config || !config.scenarios) return;
+
+    const original = JSON.stringify(rawScenarios);
+    const normalized = JSON.stringify(scenarios);
+
+    if (original !== normalized) {
+      setConfig((prev) => ({ ...prev, scenarios }));
+    }
+  }, [config, rawScenarios, scenarios, setConfig]);
+
   const scenarioKeys = Object.keys(scenarios);
   const [selectedKey, setSelectedKey] = useState(scenarioKeys[0] || "");
 
@@ -283,7 +394,8 @@ export default function ScenariosEditor() {
   }, [scenarioKeys, selectedKey]);
 
   const patchScenarios = (next) => {
-    setConfig((prev) => ({ ...prev, scenarios: next }));
+    const normalized = normalizeScenarioMap(next);
+    setConfig((prev) => ({ ...prev, scenarios: normalized }));
     setDirty(true);
   };
 

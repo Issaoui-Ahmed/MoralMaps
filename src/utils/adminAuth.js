@@ -1,20 +1,25 @@
-const DEFAULT_USERNAME = 'admin';
-const DEFAULT_PASSWORD = 'admin';
-
 export const BASIC_AUTH_REALM = 'MoralMap Admin';
 
 export function readAdminCredentials() {
+  const username =
+    process.env.ADMIN_USERNAME ??
+    process.env.ADMIN_USER ??
+    process.env.NEXT_PUBLIC_ADMIN_USERNAME ??
+    null;
+
+  const password =
+    process.env.ADMIN_PASSWORD ??
+    process.env.ADMIN_PASS ??
+    process.env.NEXT_PUBLIC_ADMIN_PASSWORD ??
+    null;
+
+  if (!username || !password) {
+    throw new Error('Admin credentials are not configured via environment variables');
+  }
+
   return {
-    username:
-      process.env.ADMIN_USERNAME ??
-      process.env.ADMIN_USER ??
-      process.env.NEXT_PUBLIC_ADMIN_USERNAME ??
-      DEFAULT_USERNAME,
-    password:
-      process.env.ADMIN_PASSWORD ??
-      process.env.ADMIN_PASS ??
-      process.env.NEXT_PUBLIC_ADMIN_PASSWORD ??
-      DEFAULT_PASSWORD,
+    username,
+    password,
   };
 }
 

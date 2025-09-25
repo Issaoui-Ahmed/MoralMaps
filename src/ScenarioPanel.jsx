@@ -37,16 +37,6 @@ const ScenarioPanel = ({
             alternatives.map((alt, idx) => {
               const index = idx + 1;
               const isSelected = selectedRouteIndex === index;
-              const altTime = alt.totalTimeMinutes ?? "-";
-              const difference =
-                typeof alt.totalTimeMinutes === "number" && typeof defaultTime === "number"
-                  ? alt.totalTimeMinutes - defaultTime
-                  : null;
-              const diffLabel =
-                Number.isFinite(difference) && difference !== 0
-                  ? `${difference > 0 ? "+" : ""}${difference} min`
-                  : null;
-
               return (
                 <div
                   key={`${alt.label}-${idx}`}
@@ -59,10 +49,6 @@ const ScenarioPanel = ({
                     {alt.description && (
                       <p className="text-xs text-gray-500 mt-1">{alt.description}</p>
                     )}
-                    <p className="text-xs text-gray-600 mt-1">
-                      Estimated time: {altTime} min
-                      {diffLabel && <span className="ml-1">({diffLabel} vs time-efficient)</span>}
-                    </p>
                   </div>
 
                   <label className="inline-flex items-center cursor-pointer">

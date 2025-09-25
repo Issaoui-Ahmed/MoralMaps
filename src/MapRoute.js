@@ -67,22 +67,17 @@ const MapRoute = () => {
                 middle: c.middle_point,
                 tts,
                 totalTimeMinutes: defaultTime + tts,
-                preselected: c.preselected,
+                preselected: Boolean(c.preselected),
                 label,
                 description,
               };
             });
-            const preIdx = Math.max(
-              0,
-              alternatives.findIndex((c) => c.preselected)
-            );
             return {
               scenarioName: sc.scenario_name,
               start: sc.start,
               end: sc.end,
               defaultTime,
               alternatives,
-              preselectedIndex: preIdx,
             };
           })
         );
@@ -130,15 +125,21 @@ const MapRoute = () => {
   const { consentText, scenarioText, instructions } = routeConfig || {};
   const currentScenario = scenarios[scenarioIndex];
   const defaultTime = currentScenario?.defaultTime;
-  const currentAlternative = currentScenario
-    ? selectedRouteIndex === 0
-      ? currentScenario.alternatives[currentScenario.preselectedIndex]
-      : currentScenario.alternatives[selectedRouteIndex - 1]
-    : null;
+  const currentAlternative =
+    currentScenario && selectedRouteIndex > 0
+      ? currentScenario.alternatives[selectedRouteIndex - 1]
+      : null;
+
   const panelLabel =
-    currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
-  const panelDescription = currentAlternative?.description || "";
-  const panelTime = currentAlternative?.totalTimeMinutes ?? defaultTime;
+    selectedRouteIndex === 0
+      ? "Default"
+      : currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
+  const panelDescription =
+    selectedRouteIndex === 0 ? "" : currentAlternative?.description || "";
+  const panelTime =
+    selectedRouteIndex === 0
+      ? defaultTime
+      : currentAlternative?.totalTimeMinutes ?? defaultTime;
   const bounds = useMemo(() => {
     if (!currentScenario) return null;
     const pts = [currentScenario.start, currentScenario.end];

@@ -17,7 +17,17 @@ export function buildScenarios(cfg = {}) {
 
   let chosen = allEntries.slice();
   if (count < allEntries.length) {
-    chosen = chosen.sort(() => Math.random() - 0.5).slice(0, count);
+    const selected = [];
+    let toSelect = count;
+    for (let i = 0; i < allEntries.length && toSelect > 0; i++) {
+      const remaining = allEntries.length - i;
+      const probability = toSelect / remaining;
+      if (Math.random() < probability) {
+        selected.push(allEntries[i]);
+        toSelect -= 1;
+      }
+    }
+    chosen = selected;
   }
   if (settings.scenario_shuffle) {
     chosen = chosen.sort(() => Math.random() - 0.5);

@@ -67,13 +67,6 @@ export function validateScenarioConfig(config) {
       errors.push(prefix + "scenario_name must be a non-empty string");
     }
 
-    if (!validString(sc?.value_name)) {
-      errors.push(prefix + "value_name must be a non-empty string");
-    }
-    if (!validString(sc?.description)) {
-      errors.push(prefix + "description must be a non-empty string");
-    }
-
     if (routes.length === 0) {
       errors.push(prefix + "Alternative routes must not be empty");
     }
@@ -86,6 +79,14 @@ export function validateScenarioConfig(config) {
       const tts = Array.isArray(ch?.tts) ? ch.tts : [];
       if (tts.length === 0 || tts.some((n) => !Number.isInteger(n) || n < 0)) {
         errors.push(cPrefix + "tts must contain non-negative integers");
+      }
+      const valueNames = Array.isArray(ch?.value_name) ? ch.value_name : [];
+      if (valueNames.length === 0 || valueNames.some((s) => !validString(s))) {
+        errors.push(cPrefix + "value_name must be a non-empty array of strings");
+      }
+      const descriptions = Array.isArray(ch?.description) ? ch.description : [];
+      if (descriptions.length === 0 || descriptions.some((s) => !validString(s))) {
+        errors.push(cPrefix + "description must be a non-empty array of strings");
       }
       if (typeof ch?.preselected !== "boolean") {
         errors.push(cPrefix + "preselected must be boolean");

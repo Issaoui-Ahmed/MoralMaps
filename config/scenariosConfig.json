@@ -30,17 +30,43 @@
             [
               45.37434260639422,
               -75.69853482150437
+            ],
+            [
+              45.37434260639422,
+              -75.69853482150437
             ]
           ],
           "tts": [
             4
           ],
+          "value_name": [
+            "drivers safety"
+          ],
+          "description": [
+            "This route prioritizes safer streets with better lighting and lower traffic."
+          ],
+          "preselected": false
+        },
+        {
+          "middle_point": [
+            [
+              45.33042787045188,
+              -75.76378154531083
+            ]
+          ],
+          "tts": [
+            6
+          ],
+          "value_name": [
+            "time efficient"
+          ],
+          "description": [
+            "This route balances travel time with exposure to busier arterial roads."
+          ],
           "preselected": false
         }
       ],
-      "scenario_name": "Driver Safety",
-      "value_name": "drivers safety",
-      "description": "This route prioritizes driver safety including avoiding unprotected left turns when possible.",
+      "scenario_name": "Scenario 1",
       "randomly_preselect_route": false
     },
     "scenario_2": {
@@ -82,16 +108,21 @@
           "tts": [
             11
           ],
+          "value_name": [
+            "protected cycling"
+          ],
+          "description": [
+            "This route uses protected cycling infrastructure and minimizes high-traffic intersections."
+          ],
           "preselected": false
         }
       ],
-      "scenario_name": "Vulnerable Road User Safety",
-      "value_name": "time-efficient safety",
-      "description": "This route prioritizes routes that have protected bike lanes and avoids areas with high pedestrian traffic.",
+      "scenario_name": "Scenario 2",
       "randomly_preselect_route": false
+    }
   },
   "settings": {
     "scenario_shuffle": false,
     "number_of_scenarios": 2
   }
-}}
+}

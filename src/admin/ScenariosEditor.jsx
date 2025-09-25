@@ -96,6 +96,51 @@ function NumberListInput({ label, values = [], onChange }) {
   );
 }
 
+function TextListInput({ label, values = [], onChange, placeholder = "" }) {
+  const items = Array.isArray(values)
+    ? values
+    : typeof values === "string"
+    ? [values]
+    : [];
+
+  const update = (idx, val) => {
+    const next = items.map((n, i) => (i === idx ? val : n));
+    onChange(next);
+  };
+
+  const add = () => onChange([...items, ""]);
+  const remove = (idx) => onChange(items.filter((_, i) => i !== idx));
+
+  return (
+    <div className="mb-3">
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      {items.map((text, i) => (
+        <div key={i} className="flex items-center gap-2 mb-1">
+          <input
+            type="text"
+            value={text}
+            placeholder={placeholder}
+            onChange={(e) => update(i, e.target.value)}
+            className="border rounded px-2 py-1 text-sm w-full"
+          />
+          {items.length > 1 && (
+            <button
+              onClick={() => remove(i)}
+              className="text-xs text-red-600"
+              aria-label="Remove value"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      ))}
+      <button onClick={add} className="text-xs px-2 py-1 border rounded">
+        Add
+      </button>
+    </div>
+  );
+}
+
 function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
   return (
     <div className="border rounded p-3 mb-3">
@@ -114,6 +159,18 @@ function AlternativeRouteEditor({ route, onChange, onDelete, index }) {
         label="TTS"
         values={route.tts}
         onChange={(val) => onChange({ tts: val })}
+      />
+      <TextListInput
+        label="Value names (pool)"
+        values={route.value_name}
+        onChange={(val) => onChange({ value_name: val })}
+        placeholder="e.g. drivers safety"
+      />
+      <TextListInput
+        label="Descriptions (pool)"
+        values={route.description}
+        onChange={(val) => onChange({ description: val })}
+        placeholder="Brief explanation for participants"
       />
       <div className="flex items-center gap-2">
         <input
@@ -148,23 +205,6 @@ function ScenarioForm({ scenario, onChange, name }) {
         values={scenario.default_route_time}
         onChange={(val) => onChange({ default_route_time: val })}
       />
-      <div>
-        <label className="block text-sm font-medium mb-1">Value name</label>
-        <input
-          type="text"
-          value={scenario.value_name || ""}
-          onChange={(e) => onChange({ value_name: e.target.value })}
-          className="border rounded px-2 py-1 text-sm w-full"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
-        <textarea
-          value={scenario.description || ""}
-          onChange={(e) => onChange({ description: e.target.value })}
-          className="border rounded px-2 py-1 text-sm w-full"
-        />
-      </div>
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -188,7 +228,13 @@ function ScenarioForm({ scenario, onChange, name }) {
               onChange({
                 choice_list: [
                   ...(scenario.choice_list || []),
-                  { middle_point: [mid], tts: [0], preselected: false },
+                  {
+                    middle_point: [mid],
+                    tts: [0],
+                    value_name: [""],
+                    description: [""],
+                    preselected: false,
+                  },
                 ],
               });
             }}
@@ -258,8 +304,6 @@ export default function ScenariosEditor() {
           default_route_time: [0],
           choice_list: [],
           scenario_name: `Scenario ${nextIndex}`,
-          value_name: "",
-          description: "",
           randomly_preselect_route: false,
         };
 

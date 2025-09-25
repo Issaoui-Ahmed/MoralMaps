@@ -3,16 +3,15 @@ import React from "react";
 const ScenarioPanel = ({
   label,
   description,
-  isSelected,
-  onToggle,
   onSubmit,
   scenarioNumber,
   totalScenarios,
   defaultTime,
   alternativeTime,
   scenarioText,
-  alternatives = [],
-  activeAlternativeIndex = -1,
+  choices = [],
+  onToggleRoute,
+
 }) => {
   const safeLabel =
     typeof label === "string" && label.trim() !== ""
@@ -136,32 +135,69 @@ const ScenarioPanel = ({
       </div>
 
       <div className="space-y-6">
+        <div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">{label}</p>
+              {description && (
+                <p className="text-xs text-gray-500">{description}</p>
+              )}
+            </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">{safeLabel}</p>
-            {description && (
-              <p className="text-xs text-gray-500">{description}</p>
-            )}
           </div>
 
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggle}
-              className="sr-only peer"
-            />
-            <div
-              className={
-                "w-14 h-7 bg-gray-300 rounded-full relative transition-colors " +
-                "peer-checked:bg-blue-600 " +
-                "after:content-[''] after:absolute after:top-[2px] after:left-[2px] " +
-                "after:w-6 after:h-6 after:bg-white after:rounded-full after:transition-transform " +
-                "peer-checked:after:translate-x-7"
-              }
-            ></div>
-          </label>
+          {choices.length > 0 ? (
+            <div className="mt-4 space-y-4">
+              {choices.map((choice) => (
+                <div
+                  key={choice.id}
+                  className="flex items-start justify-between gap-4"
+                >
+                  <div className="text-sm">
+                    <p className="font-medium text-gray-800">{choice.label}</p>
+                    {choice.description && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {choice.description}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      Travel time: {choice.totalTimeMinutes} minutes
+                      {choice.recommended && " • Recommended"}
+                    </p>
+                  </div>
+
+                  <label className="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(choice.isSelected)}
+                      onChange={(e) => {
+                        if (!onToggleRoute) return;
+                        if (e.target.checked) {
+                          onToggleRoute(choice.id);
+                        } else {
+                          onToggleRoute(0);
+                        }
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div
+                      className={
+                        "w-14 h-7 bg-gray-300 rounded-full relative transition-colors " +
+                        "peer-checked:bg-blue-600 " +
+                        "after:content-[''] after:absolute after:top-[2px] after:left-[2px] " +
+                        "after:w-6 after:h-6 after:bg-white after:rounded-full after:transition-transform " +
+                        "peer-checked:after:translate-x-7"
+                      }
+                    ></div>
+                  </label>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 mt-4">
+              No alternative routes available for this scenario.
+            </p>
+          )}
         </div>
 
         <button

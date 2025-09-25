@@ -19,7 +19,7 @@ const ThankYou = () => {
         setConfig(data);
         const initial = {};
         (data.survey || []).forEach(field => {
-          initial[field.name] = "";
+          initial[field.name] = field.type === "multiselect" ? [] : "";
         });
         setResponses(initial);
       })
@@ -31,6 +31,16 @@ const ThankYou = () => {
 
   const handleChange = (name, value) => {
     setResponses(prev => ({ ...prev, [name]: value }));
+  };
+
+  const toggleMultiSelect = (name, option) => {
+    setResponses(prev => {
+      const current = Array.isArray(prev[name]) ? prev[name] : [];
+      const next = current.includes(option)
+        ? current.filter((value) => value !== option)
+        : [...current, option];
+      return { ...prev, [name]: next };
+    });
   };
 
   const handleSubmit = async () => {
@@ -97,6 +107,29 @@ const ThankYou = () => {
                   </option>
                 ))}
               </select>
+            ) : field.type === "multiselect" ? (
+              <div className="rounded-md border border-gray-300 px-3 py-2">
+                <div className="flex flex-col gap-2">
+                  {(field.options || []).length ? (
+                    (field.options || []).map((opt) => {
+                      const checked = Array.isArray(responses[field.name]) && responses[field.name].includes(opt);
+                      return (
+                        <label key={opt} className="flex items-center gap-2 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={checked}
+                            onChange={() => toggleMultiSelect(field.name, opt)}
+                          />
+                          {opt}
+                        </label>
+                      );
+                    })
+                  ) : (
+                    <p className="text-sm text-gray-500">No options configured.</p>
+                  )}
+                </div>
+              </div>
             ) : (
               <input
                 type={field.type}

@@ -31,6 +31,8 @@ const parseEdgeConfigConnection = (connectionString) => {
 const getAdminCredentials = () => {
   let edgeConfigId = process.env.EDGE_CONFIG_ID || '';
   let token =
+    process.env.VERCEL_API_TOKEN ||
+    process.env.VERCEL_OIDC_TOKEN ||
     process.env.EDGE_CONFIG_ADMIN_TOKEN ||
     process.env.EDGE_CONFIG_TOKEN ||
     '';
@@ -59,6 +61,9 @@ const updateEdgeConfigItems = async (items) => {
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
+      ...(process.env.EDGE_CONFIG_DIGEST
+        ? { 'X-Vercel-Edge-Config-Digest': process.env.EDGE_CONFIG_DIGEST }
+        : {}),
     },
     body: JSON.stringify({ items }),
   });

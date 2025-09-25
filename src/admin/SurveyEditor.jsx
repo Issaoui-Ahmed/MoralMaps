@@ -13,7 +13,7 @@ import { withBasePath } from "../utils/basePath";
 const API_URL = withBasePath("/api/route-endpoints");
 
 const EMPTY_FIELD = () => ({ name: "question", type: "text", options: [] });
-const FIELD_TYPES = ["text", "number", "email", "date", "select"];
+const FIELD_TYPES = ["text", "number", "email", "date", "select", "multiselect"];
 
 export default function SurveyEditor() {
   const [config, setConfig] = useState(null); // full config
@@ -161,7 +161,7 @@ export default function SurveyEditor() {
                 <li key={i} className={`flex items-center justify-between px-3 py-2 cursor-pointer ${selected===i?"bg-indigo-50":"hover:bg-gray-50"}`} onClick={() => setSelected(i)}>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium">{f.name}</div>
-                    <div className="text-xs text-gray-500">{f.type}{f.type==="select" && ` • ${f.options?.length||0} options`}</div>
+                    <div className="text-xs text-gray-500">{f.type}{["select","multiselect"].includes(f.type) && ` • ${f.options?.length||0} options`}</div>
                   </div>
                   <div className="flex items-center gap-1">
                     <button className="text-xs px-2 py-1 border rounded-lg" onClick={(e)=>{e.stopPropagation(); handleDuplicate(i);}}>Duplicate</button>
@@ -263,7 +263,7 @@ function FieldEditor({ field, onChange, onChangeOption }) {
       </div>
 
       {/* Options (for select) */}
-      {field.type === "select" && (
+      {["select", "multiselect"].includes(field.type) && (
         <OptionsEditor options={field.options || []} onChange={onChangeOption} />
       )}
     </div>
@@ -318,11 +318,28 @@ function SurveyPreview({ fields }) {
         <div key={idx} className="flex flex-col gap-1">
           <label className="text-sm text-gray-700">{f.name}</label>
           {f.type === "select" ? (
-            <select className="border rounded-lg px-3 py-2">
-              {(f.options || []).map((o, i) => (
-                <option key={i} value={o}>{o}</option>
-              ))}
-            </select>
+            (f.options || []).length ? (
+              <select className="border rounded-lg px-3 py-2">
+                {(f.options || []).map((o, i) => (
+                  <option key={i} value={o}>{o}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="text-xs text-gray-500">No options configured.</div>
+            )
+          ) : f.type === "multiselect" ? (
+            (f.options || []).length ? (
+              <div className="flex flex-col gap-1">
+                {(f.options || []).map((o, i) => (
+                  <label key={i} className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox" className="h-4 w-4 rounded border-gray-300" />
+                    <span>{o}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500">No options configured.</div>
+            )
           ) : (
             <input className="border rounded-lg px-3 py-2" type={f.type} />
           )}
@@ -333,7 +350,7 @@ function SurveyPreview({ fields }) {
 }
 
 function stripEmptyOptions(f) {
-  if (f.type !== "select") {
+  if (!["select", "multiselect"].includes(f.type)) {
     const { options, ...rest } = f;
     return rest;
   }
@@ -360,9 +377,9 @@ function validateFields(fields) {
   // Valid types and select has options
   fields.forEach((f, i) => {
     if (!FIELD_TYPES.includes(f.type)) errors.push(`Field ${i + 1}: invalid type`);
-    if (f.type === "select") {
+    if (["select", "multiselect"].includes(f.type)) {
       const opts = (f.options || []).map((s) => `${s}`.trim()).filter(Boolean);
-      if (opts.length === 0) errors.push(`Field ${i + 1}: select requires at least one option`);
+      if (opts.length === 0) errors.push(`Field ${i + 1}: ${f.type} requires at least one option`);
     }
   });
 

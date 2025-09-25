@@ -19,7 +19,7 @@ const ThankYou = () => {
         setConfig(data);
         const initial = {};
         (data.survey || []).forEach(field => {
-          initial[field.name] = "";
+          initial[field.name] = field.type === "multiselect" ? [] : "";
         });
         setResponses(initial);
       })
@@ -31,6 +31,16 @@ const ThankYou = () => {
 
   const handleChange = (name, value) => {
     setResponses(prev => ({ ...prev, [name]: value }));
+  };
+
+  const toggleMultiSelectValue = (name, option) => {
+    setResponses(prev => {
+      const current = Array.isArray(prev[name]) ? prev[name] : [];
+      const next = current.includes(option)
+        ? current.filter((value) => value !== option)
+        : [...current, option];
+      return { ...prev, [name]: next };
+    });
   };
 
   const handleSubmit = async () => {
@@ -83,20 +93,46 @@ const ThankYou = () => {
               {field.name}
             </label>
             {field.type === "select" ? (
-              <select
-                value={responses[field.name] || ""}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="" disabled>
-                  Select an option
-                </option>
-                {(field.options || []).map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
+              (field.options || []).length ? (
+                <select
+                  value={responses[field.name] || ""}
+                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled>
+                    Select an option
                   </option>
-                ))}
-              </select>
+                  {(field.options || []).map((opt, idx) => (
+                    <option key={`${field.name}-${idx}`} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-sm text-gray-500">No options available.</p>
+              )
+            ) : field.type === "multiselect" ? (
+              (field.options || []).length ? (
+                <div className="space-y-2">
+                  {(field.options || []).map((opt, idx) => {
+                    const selectedValues = Array.isArray(responses[field.name]) ? responses[field.name] : [];
+                    const checked = selectedValues.includes(opt);
+                    return (
+                      <label key={`${field.name}-${idx}`} className="flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleMultiSelectValue(field.name, opt)}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No options available.</p>
+              )
             ) : (
               <input
                 type={field.type}

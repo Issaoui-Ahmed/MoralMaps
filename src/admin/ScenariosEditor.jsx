@@ -291,6 +291,7 @@ export default function ScenariosEditor() {
         />
       )}
       <div className="absolute top-0 left-0 z-10 h-full w-[30rem] max-w-full overflow-y-auto bg-white p-4 space-y-6 shadow-md">
+        <SettingsEditor />
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold">Scenarios</h2>
@@ -318,7 +319,6 @@ export default function ScenariosEditor() {
             ))}
           </div>
         </div>
-        <SettingsEditor />
         {selected ? (
           <ScenarioForm
             scenario={selected}

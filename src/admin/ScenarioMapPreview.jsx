@@ -139,7 +139,9 @@ export default function ScenarioMapPreview({
 
   if (!activeStart || !activeEnd) {
     return (
-      <div className={`flex items-center justify-center bg-gray-100 text-sm text-gray-600 ${className}`}>
+      <div
+        className={`flex items-center justify-center bg-gray-100 text-sm text-gray-600 ${className}`}
+      >
         Select valid start and end coordinates to preview the scenario.
       </div>
     );
@@ -159,52 +161,54 @@ export default function ScenarioMapPreview({
     .filter(Boolean);
 
   return (
-    <div className={`relative ${className}`}>
-      <MapContainer
-        bounds={bounds ?? undefined}
-        center={bounds ? undefined : activeStart}
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom={false}
-        doubleClickZoom={false}
-        touchZoom={false}
-        boxZoom={false}
-        keyboard={false}
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-        />
-        <Marker
-          position={activeStart}
-          draggable
-          icon={startIcon}
-          eventHandlers={{ dragend: handleDrag("start") }}
-        />
-        <Marker
-          position={activeEnd}
-          draggable
-          icon={endIcon}
-          eventHandlers={{ dragend: handleDrag("end") }}
-        />
-        {middleMarkers.map(({ position, routeIndex }) => (
+    <div className={className}>
+      <div className="relative h-full w-full">
+        <MapContainer
+          bounds={bounds ?? undefined}
+          center={bounds ? undefined : activeStart}
+          zoom={13}
+          style={{ height: "100%", width: "100%" }}
+          scrollWheelZoom={false}
+          doubleClickZoom={false}
+          touchZoom={false}
+          boxZoom={false}
+          keyboard={false}
+          zoomControl={false}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          />
           <Marker
-            key={`middle-${routeIndex}`}
-            position={position}
+            position={activeStart}
             draggable
-            eventHandlers={{ dragend: handleDrag("middle", routeIndex) }}
+            icon={startIcon}
+            eventHandlers={{ dragend: handleDrag("start") }}
           />
-        ))}
-        {previewRoutes.map((route, index) => (
-          <Polyline
-            // eslint-disable-next-line react/no-array-index-key
-            key={index}
-            positions={route.points}
-            pathOptions={{ color: route.color, weight: route.weight, opacity: 0.9 }}
+          <Marker
+            position={activeEnd}
+            draggable
+            icon={endIcon}
+            eventHandlers={{ dragend: handleDrag("end") }}
           />
-        ))}
-      </MapContainer>
+          {middleMarkers.map(({ position, routeIndex }) => (
+            <Marker
+              key={`middle-${routeIndex}`}
+              position={position}
+              draggable
+              eventHandlers={{ dragend: handleDrag("middle", routeIndex) }}
+            />
+          ))}
+          {previewRoutes.map((route, index) => (
+            <Polyline
+              // eslint-disable-next-line react/no-array-index-key
+              key={index}
+              positions={route.points}
+              pathOptions={{ color: route.color, weight: route.weight, opacity: 0.9 }}
+            />
+          ))}
+        </MapContainer>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,12 @@ import { withBasePath } from "../utils/basePath";
 
 const API_URL = withBasePath("/api/route-endpoints");
 
+const exampleOptions = [
+  { value: "", label: "No example" },
+  { value: "switch", label: "Toggle switch" },
+  { value: "button", label: "Confirmation button" },
+];
+
 const emptyStep = () => ({ title: "", lines: [""], example: "" });
 
 export default function InstructionsEditor() {
@@ -123,12 +129,17 @@ export default function InstructionsEditor() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Example (optional)</label>
-              <input
-                type="text"
+              <select
                 value={steps[selected].example || ""}
                 onChange={(e) => handleStepChange(selected, { example: e.target.value })}
                 className="w-full border rounded px-2 py-1 text-sm"
-              />
+              >
+                {exampleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <button
               onClick={() => deleteStep(selected)}

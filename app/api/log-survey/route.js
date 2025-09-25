@@ -5,9 +5,6 @@ import { redis } from '../_redis';
 export const runtime = 'nodejs';
 
 
-const logKey = (sessionId) => `user-log:${sessionId}:${new Date().toISOString()}:${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
-
-
 export async function POST(req) {
 let payload; try { payload = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
 const { sessionId, responses } = payload || {};
@@ -16,13 +13,19 @@ return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
 }
 
 
-const session = await redis.json.get(`session:${sessionId}`);
+const key = `user-data:${sessionId}`;
+const session = await redis.json.get(key);
 if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 400 });
 
 
-const entry = { ...session, responses, sessionId, timestamp: new Date().toISOString() };
-await redis.json.set(logKey(sessionId), '$', entry);
-await redis.del(`session:${sessionId}`);
+const entry = {
+  ...session,
+  responses,
+  sessionId: session.sessionId ?? sessionId,
+  completedAt: new Date().toISOString(),
+};
+await redis.json.set(key, '$', entry);
+await redis.expire(key, 60 * 60 * 24 * 30);
 
 
 return NextResponse.json({ success: true });

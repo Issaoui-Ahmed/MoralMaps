@@ -11,17 +11,120 @@ const ScenarioPanel = ({
   defaultTime,
   alternativeTime,
   scenarioText,
+  alternatives = [],
+  activeAlternativeIndex = -1,
 }) => {
+  const safeLabel =
+    typeof label === "string" && label.trim() !== ""
+      ? label
+      : "Alternative";
+  const labelLower = safeLabel.toLowerCase();
+  const defaultTimeValue =
+    typeof defaultTime === "number" || typeof defaultTime === "string"
+      ? defaultTime
+      : "?";
+  const alternativeTimeValue =
+    typeof alternativeTime === "number" || typeof alternativeTime === "string"
+      ? alternativeTime
+      : defaultTimeValue;
+  const alternativeCount = Array.isArray(alternatives)
+    ? alternatives.length
+    : 0;
 
-  const line1 = scenarioText?.line1?.replace('{defaultTime}', defaultTime) ||
-    `The time-efficient route takes approximately ${defaultTime} minutes.`;
-  const line2 = scenarioText?.line2
-    ?.replace('{label}', label)
-    ?.replace('{alternativeTime}', alternativeTime) ||
-    `The ${label} route prioritizes safety and takes about ${alternativeTime} minutes.`;
-  const line3 = scenarioText?.line3
-    ?.replace('{label}', label.toLowerCase()) ||
-    `Use the toggle below to activate the ${label.toLowerCase()} route if you prefer safety over speed.`;
+  const normalizeLabel = (value) =>
+    typeof value === "string" ? value.trim() : "";
+
+  const uniqueLabels = Array.from(
+    new Set(
+      (Array.isArray(alternatives) ? alternatives : [])
+        .map((alt) => normalizeLabel(alt?.label))
+        .filter(Boolean)
+    )
+  );
+
+  const currentAltLabel = normalizeLabel(
+    alternatives?.[activeAlternativeIndex]?.label
+  );
+  const currentAltLabelLower = currentAltLabel.toLowerCase();
+  const otherLabels = currentAltLabel
+    ? uniqueLabels.filter(
+        (name) => name.toLowerCase() !== currentAltLabelLower
+      )
+    : uniqueLabels;
+
+  const formatList = (items) => {
+    const filtered = items.filter(Boolean);
+    if (!filtered.length) return "";
+
+    if (typeof Intl !== "undefined" && typeof Intl.ListFormat === "function") {
+      return new Intl.ListFormat("en", {
+        style: "long",
+        type: "conjunction",
+      }).format(filtered);
+    }
+
+    if (filtered.length === 1) return filtered[0];
+    if (filtered.length === 2) return `${filtered[0]} and ${filtered[1]}`;
+
+    const head = filtered.slice(0, -1).join(", ");
+    const tail = filtered[filtered.length - 1];
+    return `${head}, and ${tail}`;
+  };
+
+  const labelsList = formatList(uniqueLabels);
+  const otherLabelsList = formatList(otherLabels);
+
+  const replacements = {
+    defaultTime: defaultTimeValue,
+    alternativeTime: alternativeTimeValue,
+    label: safeLabel,
+    labelLower,
+    labelsList,
+    otherLabelsList,
+    alternativeCount,
+  };
+
+  const formatLine = (template, fallback) => {
+    if (typeof template === "string" && template.trim() !== "") {
+      return template.replace(/\{(.*?)\}/g, (_, key) => {
+        const trimmed = key.trim();
+        if (Object.prototype.hasOwnProperty.call(replacements, trimmed)) {
+          const value = replacements[trimmed];
+          return value != null ? String(value) : "";
+        }
+        return `{${trimmed}}`;
+      });
+    }
+    return fallback;
+  };
+
+  const line1 = formatLine(
+    scenarioText?.line1,
+    `The time-efficient route takes approximately ${defaultTimeValue} minutes.`
+  );
+
+  const multipleLine2Template =
+    scenarioText?.line2Multiple ?? scenarioText?.line2 ?? "";
+  const singleLine2Fallback =
+    `The ${safeLabel} route prioritizes safety and takes about ${alternativeTimeValue} minutes.`;
+  const multipleLine2Fallback =
+    `There are ${alternativeCount} alternative routes available. The currently selected ${safeLabel} option takes about ${alternativeTimeValue} minutes.`;
+  const line2 =
+    alternativeCount > 1
+      ? formatLine(multipleLine2Template, multipleLine2Fallback)
+      : formatLine(scenarioText?.line2, singleLine2Fallback);
+
+  const multipleLine3Template =
+    scenarioText?.line3Multiple ?? scenarioText?.line3 ?? "";
+  const singleLine3Fallback =
+    `Use the toggle below to activate the ${labelLower} route if you prefer safety over speed.`;
+  const multipleLine3Fallback = otherLabelsList
+    ? `Use the toggle or select on the map to compare the other routes, such as ${otherLabelsList}.`
+    : `Use the toggle or select on the map to explore the available routes.`;
+  const line3 =
+    alternativeCount > 1
+      ? formatLine(multipleLine3Template, multipleLine3Fallback)
+      : formatLine(scenarioText?.line3, singleLine3Fallback);
 
   return (
     <div className="absolute top-5 left-5 w-80 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
@@ -36,7 +139,7 @@ const ScenarioPanel = ({
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{label}</p>
+            <p className="font-medium">{safeLabel}</p>
             {description && (
               <p className="text-xs text-gray-500">{description}</p>
             )}

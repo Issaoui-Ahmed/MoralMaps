@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import { startIcon, endIcon } from "../markerIcons";
@@ -19,15 +19,97 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow.src || markerShadow,
 });
 
-function Routes({ scenario }) {
+function isValidCoord(point) {
+  return (
+    Array.isArray(point) &&
+    point.length === 2 &&
+    point.every((value) => typeof value === "number" && Number.isFinite(value))
+  );
+}
+
+function buildCombinations(scenario) {
+  if (!scenario) return [];
+
+  const startOptions = Array.isArray(scenario.start)
+    ? scenario.start.filter(isValidCoord)
+    : [];
+  const endOptions = Array.isArray(scenario.end)
+    ? scenario.end.filter(isValidCoord)
+    : [];
+
+  if (!startOptions.length || !endOptions.length) return [];
+
+  const alternatives = Array.isArray(scenario.choice_list)
+    ? scenario.choice_list
+    : [];
+
+  const middleOptions = alternatives.map((alt) => {
+    const mids = Array.isArray(alt?.middle_point)
+      ? alt.middle_point.filter(isValidCoord)
+      : [];
+    return mids.length ? mids : [null];
+  });
+
+  const combos = [];
+
+  startOptions.forEach((start, startIndex) => {
+    endOptions.forEach((end, endIndex) => {
+      const iterate = (depth, selected) => {
+        if (depth === middleOptions.length) {
+          combos.push({
+            start,
+            end,
+            startIndex,
+            endIndex,
+            middlePoints: middleOptions.map((options, idx) => {
+              const optIndex = selected[idx];
+              const coord = options[optIndex] || null;
+              return {
+                coord: coord && isValidCoord(coord) ? coord : null,
+                index: coord && isValidCoord(coord) ? optIndex : null,
+              };
+            }),
+          });
+          return;
+        }
+
+        const options = middleOptions[depth];
+        options.forEach((_, optionIndex) => {
+          iterate(depth + 1, [...selected, optionIndex]);
+        });
+      };
+
+      if (middleOptions.length) {
+        iterate(0, []);
+      } else {
+        combos.push({
+          start,
+          end,
+          startIndex,
+          endIndex,
+          middlePoints: [],
+        });
+      }
+    });
+  });
+
+  return combos;
+}
+
+function Routes({ start, end, middlePoints }) {
   const map = useMap();
   const [routes, setRoutes] = useState([]);
 
-  useEffect(() => {
-    if (!map || !scenario) return;
+  const startKey = Array.isArray(start) ? start.join(",") : "";
+  const endKey = Array.isArray(end) ? end.join(",") : "";
+  const middleKey = Array.isArray(middlePoints)
+    ? middlePoints
+        .map((mid) => (Array.isArray(mid) ? mid.join(",") : "null"))
+        .join("|")
+    : "";
 
-    const start = Array.isArray(scenario.start?.[0]) ? scenario.start[0] : null;
-    const end = Array.isArray(scenario.end?.[0]) ? scenario.end[0] : null;
+  useEffect(() => {
+    if (!map || !Array.isArray(start) || !Array.isArray(end)) return;
     if (
       !start ||
       !end ||
@@ -37,11 +119,13 @@ function Routes({ scenario }) {
     )
       return;
 
+    const validMids = Array.isArray(middlePoints)
+      ? middlePoints.filter((mid) => Array.isArray(mid) && mid.length === 2)
+      : [];
+
     const waypointSets = [[start, end]];
-    const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
-    alternatives.forEach((ch) => {
-      const mid = Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null;
-      if (mid) waypointSets.push([start, mid, end]);
+    validMids.forEach((mid) => {
+      waypointSets.push([start, mid, end]);
     });
 
     const controller = new AbortController();
@@ -74,7 +158,7 @@ function Routes({ scenario }) {
       controller.abort();
       setRoutes([]);
     };
-  }, [map, scenario]);
+  }, [map, startKey, endKey, middleKey]);
 
   return (
     <>
@@ -101,11 +185,58 @@ export default function ScenarioMapPreview({
   onChange = () => {},
   className = "h-64 w-full",
 }) {
+  const [previewMode, setPreviewMode] = useState("canonical");
+  const [comboIndex, setComboIndex] = useState(0);
+
   const start = Array.isArray(scenario?.start?.[0]) ? scenario.start[0] : null;
   const end = Array.isArray(scenario?.end?.[0]) ? scenario.end[0] : null;
   if (!start || !end) return null;
 
   const alternatives = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
+
+  const combinations = useMemo(() => buildCombinations(scenario), [scenario]);
+
+  useEffect(() => {
+    if (previewMode === "canonical") {
+      setComboIndex(0);
+      return;
+    }
+
+    if (previewMode === "sample" && combinations.length) {
+      setComboIndex((prev) => {
+        if (combinations.length === 1) return 0;
+        let next = Math.floor(Math.random() * combinations.length);
+        if (next === prev) {
+          next = (next + 1) % combinations.length;
+        }
+        return next;
+      });
+    }
+  }, [previewMode, combinations]);
+
+  useEffect(() => {
+    if (!combinations.length) {
+      setComboIndex(0);
+      return;
+    }
+
+    setComboIndex((idx) => {
+      if (idx >= combinations.length) {
+        return combinations.length - 1;
+      }
+      return idx;
+    });
+  }, [combinations.length]);
+
+  const activeCombo = combinations.length ? combinations[comboIndex] : null;
+
+  const activeStart = activeCombo?.start || start;
+  const activeEnd = activeCombo?.end || end;
+  const middleSelections = activeCombo
+    ? activeCombo.middlePoints.map((mp) => mp?.coord || null)
+    : alternatives.map((ch) => (Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null));
+
+  const markersDraggable = previewMode === "canonical";
 
   const handleDrag = (type, idx) => (e) => {
     const { lat, lng } = e.target.getLatLng();
@@ -128,10 +259,98 @@ export default function ScenarioMapPreview({
     }
   };
 
-  const bounds = L.latLngBounds([start, end]);
+  const boundCoords = [activeStart, activeEnd, ...middleSelections.filter(Boolean)];
+  const bounds = L.latLngBounds(boundCoords);
+
+  const canCycle = combinations.length > 1;
+
+  const cyclePrev = () => {
+    if (!canCycle || previewMode !== "sample") return;
+    setComboIndex((idx) => (idx - 1 + combinations.length) % combinations.length);
+  };
+
+  const cycleNext = () => {
+    if (!canCycle || previewMode !== "sample") return;
+    setComboIndex((idx) => (idx + 1) % combinations.length);
+  };
+
+  const randomize = () => {
+    if (!canCycle || previewMode !== "sample") return;
+    setComboIndex((prev) => {
+      let next = Math.floor(Math.random() * combinations.length);
+      if (next === prev) {
+        next = (next + 1) % combinations.length;
+      }
+      return next;
+    });
+  };
 
   return (
-    <div className={className}>
+    <div className={`relative ${className}`}>
+      <div className="absolute right-3 top-3 z-[1000] flex flex-col items-end gap-2">
+        <div className="flex overflow-hidden rounded bg-white shadow">
+          <button
+            type="button"
+            onClick={() => setPreviewMode("canonical")}
+            className={`px-3 py-1 text-xs font-medium transition ${
+              previewMode === "canonical"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Canonical preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setPreviewMode("sample")}
+            className={`px-3 py-1 text-xs font-medium transition ${
+              previewMode === "sample"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Sample preview
+          </button>
+        </div>
+        {canCycle && (
+          <div className="flex items-center gap-2 rounded bg-white/95 px-3 py-1 text-xs shadow">
+            <button
+              type="button"
+              onClick={cyclePrev}
+              disabled={previewMode !== "sample"}
+              className="rounded border px-2 py-0.5 disabled:opacity-40"
+              aria-label="Previous combination"
+            >
+              ◀
+            </button>
+            <span className="font-medium">
+              {comboIndex + 1} / {combinations.length}
+            </span>
+            <button
+              type="button"
+              onClick={cycleNext}
+              disabled={previewMode !== "sample"}
+              className="rounded border px-2 py-0.5 disabled:opacity-40"
+              aria-label="Next combination"
+            >
+              ▶
+            </button>
+            <button
+              type="button"
+              onClick={randomize}
+              disabled={previewMode !== "sample"}
+              className="rounded border px-2 py-0.5 disabled:opacity-40"
+            >
+              Shuffle
+            </button>
+          </div>
+        )}
+        {previewMode === "sample" && (
+          <span className="rounded bg-white/90 px-2 py-0.5 text-[0.65rem] text-gray-600 shadow">
+            Sample mode is read-only
+          </span>
+        )}
+      </div>
       <MapContainer
         bounds={bounds}
         boundsOptions={{ padding: [20, 20], maxZoom: 15 }}
@@ -147,36 +366,42 @@ export default function ScenarioMapPreview({
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
-        {start && (
+        {activeStart && (
           <Marker
-            position={start}
-            draggable
+            position={activeStart}
+            draggable={markersDraggable}
             icon={startIcon}
-            eventHandlers={{ dragend: handleDrag("start") }}
+            eventHandlers={
+              markersDraggable ? { dragend: handleDrag("start") } : undefined
+            }
           />
         )}
-        {end && (
+        {activeEnd && (
           <Marker
-            position={end}
-            draggable
+            position={activeEnd}
+            draggable={markersDraggable}
             icon={endIcon}
-            eventHandlers={{ dragend: handleDrag("end") }}
+            eventHandlers={
+              markersDraggable ? { dragend: handleDrag("end") } : undefined
+            }
           />
         )}
         {alternatives.map((ch, i) => {
-          const mid = Array.isArray(ch.middle_point?.[0]) ? ch.middle_point[0] : null;
+          const mid = middleSelections[i];
           return (
             mid && (
               <Marker
                 key={i}
                 position={mid}
-                draggable
-                eventHandlers={{ dragend: handleDrag("mid", i) }}
+                draggable={markersDraggable}
+                eventHandlers={
+                  markersDraggable ? { dragend: handleDrag("mid", i) } : undefined
+                }
               />
             )
           );
         })}
-        <Routes scenario={scenario} />
+        <Routes start={activeStart} end={activeEnd} middlePoints={middleSelections} />
       </MapContainer>
     </div>
   );

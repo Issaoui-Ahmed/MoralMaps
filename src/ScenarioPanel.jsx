@@ -81,7 +81,7 @@ const ScenarioPanel = ({
                     )}
                     <p className="text-xs text-gray-600 mt-1">
                       Estimated time: {altTime} min
-                      {diffLabel && <span className="ml-1">({diffLabel} vs default)</span>}
+                      {diffLabel && <span className="ml-1">({diffLabel} vs time-efficient)</span>}
                     </p>
                   </div>
 

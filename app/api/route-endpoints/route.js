@@ -15,19 +15,24 @@ export async function GET() {
       get('surveyConfig'),
     ]);
 
-    // Build scenarios for the public payload
-    const scenarios = buildScenarios({
-      settings: scenariosConfig?.settings ?? {},
-      scenarios: scenariosConfig?.scenarios ?? {},
+    const rawScenarios = scenariosConfig?.scenarios ?? {};
+    const settings = scenariosConfig?.settings ?? {};
+
+    // Build scenarios for the public payload while returning the full admin config
+    const publicScenarios = buildScenarios({
+      settings,
+      scenarios: rawScenarios,
     });
 
-    // Return the same public shape your UI expects
+    // Return both the admin configuration and the public payload shape
     return NextResponse.json({
-      scenarios,
+      scenarios: rawScenarios,
+      settings,
       consentText: textsConfig?.consentText ?? '',
       scenarioText: textsConfig?.scenarioText ?? {},
       instructions: Array.isArray(instructionsConfig?.steps) ? instructionsConfig.steps : [],
       survey: Array.isArray(surveyConfig?.survey) ? surveyConfig.survey : [],
+      publicScenarios,
     });
   } catch (err) {
     console.error('Failed to load config', err);

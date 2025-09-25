@@ -138,6 +138,7 @@ const MapRoute = () => {
   const panelLabel =
     currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
   const panelDescription = currentAlternative?.description || "";
+  const panelTime = currentAlternative?.totalTimeMinutes ?? defaultTime;
   const bounds = useMemo(() => {
     if (!currentScenario) return null;
     const pts = [currentScenario.start, currentScenario.end];
@@ -146,6 +147,22 @@ const MapRoute = () => {
     });
     return L.latLngBounds(pts);
   }, [currentScenario]);
+
+  const handleSelectRoute = (index) => {
+    if (!currentScenario) return;
+
+    if (index === 0) {
+      setSelectedLabel("default");
+      setSelectedRouteIndex(0);
+      return;
+    }
+
+    const alt = currentScenario.alternatives[index - 1];
+    if (!alt) return;
+
+    setSelectedLabel(alt?.label || "alternative");
+    setSelectedRouteIndex(index);
+  };
 
   if (error) return <div>{error}</div>;
   if (!routeConfig || scenarios.length === 0 || !bounds)
@@ -177,15 +194,7 @@ const MapRoute = () => {
           alternatives={currentScenario.alternatives}
           defaultTimeMinutes={defaultTime}
           selectedIndex={selectedRouteIndex}
-          setSelectedIndex={(i) => {
-            setSelectedRouteIndex(i);
-            if (i === 0) {
-              setSelectedLabel("default");
-            } else {
-              const alt = currentScenario.alternatives[i - 1];
-              setSelectedLabel(alt?.label || "alternative");
-            }
-          }}
+          setSelectedIndex={handleSelectRoute}
           consentGiven={consentGiven}
           setMapPoints={setMapPoints}
           setRoutes={setRoutes}
@@ -239,30 +248,17 @@ const MapRoute = () => {
 
       {consentGiven && !showOnboarding && (
         <ScenarioPanel
-          label={panelLabel}
-          description={panelDescription}
-          isSelected={selectedRouteIndex !== 0}
-          onToggle={() => {
-            if (selectedRouteIndex !== 0) {
-              setSelectedLabel("default");
-              setSelectedRouteIndex(0);
-            } else {
-              const alt =
-                currentScenario.alternatives[currentScenario.preselectedIndex];
-              setSelectedLabel(alt?.label || "alternative");
-              setSelectedRouteIndex(currentScenario.preselectedIndex + 1);
-            }
-          }}
-          onSubmit={handleChoice}
           scenarioNumber={scenarioIndex + 1}
           totalScenarios={scenarios.length}
           defaultTime={defaultTime}
-          alternativeTime={
-            selectedRouteIndex === 0
-              ? defaultTime
-              : currentScenario.alternatives[selectedRouteIndex - 1]?.totalTimeMinutes
-          }
           scenarioText={scenarioText}
+          activeLabel={panelLabel}
+          activeDescription={panelDescription}
+          activeTime={panelTime}
+          alternatives={currentScenario.alternatives}
+          selectedRouteIndex={selectedRouteIndex}
+          onSelectRoute={handleSelectRoute}
+          onSubmit={handleChoice}
         />
       )}
     </div>

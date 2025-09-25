@@ -43,28 +43,44 @@ const MapRoute = () => {
           : buildScenarios({ scenarios: data.scenarios, settings: data.settings });
         setScenarios(
           builtScenarios.map((sc) => {
+            const defaultTime = sc.default_route_time;
             const alternatives = (sc.choice_list || []).map((c) => {
-              const tts = c?.tts ?? 0;
+              const rawTts = c?.tts;
+              const tts =
+                typeof rawTts === "number"
+                  ? rawTts
+                  : Array.isArray(rawTts)
+                  ? rawTts[0] ?? 0
+                  : 0;
+              const labelCandidate = c?.value_name;
+              const label =
+                typeof labelCandidate === "string" && labelCandidate.trim() !== ""
+                  ? labelCandidate
+                  : sc.scenario_name;
+              const description =
+                typeof c?.description === "string"
+                  ? c.description
+                  : Array.isArray(c?.description)
+                  ? c.description[0] ?? ""
+                  : "";
               return {
                 middle: c.middle_point,
                 tts,
-                totalTimeMinutes: sc.default_route_time + tts,
+                totalTimeMinutes: defaultTime + tts,
                 preselected: c.preselected,
+                label,
+                description,
               };
             });
             const preIdx = Math.max(
               0,
               alternatives.findIndex((c) => c.preselected)
             );
-            const valueName = sc.value_name || sc.scenario_name;
             return {
-              label: valueName,
               scenarioName: sc.scenario_name,
-              valueName,
-              description: sc.description,
               start: sc.start,
               end: sc.end,
-              defaultTime: sc.default_route_time,
+              defaultTime,
               alternatives,
               preselectedIndex: preIdx,
             };
@@ -114,6 +130,14 @@ const MapRoute = () => {
   const { consentText, scenarioText, instructions } = routeConfig || {};
   const currentScenario = scenarios[scenarioIndex];
   const defaultTime = currentScenario?.defaultTime;
+  const currentAlternative = currentScenario
+    ? selectedRouteIndex === 0
+      ? currentScenario.alternatives[currentScenario.preselectedIndex]
+      : currentScenario.alternatives[selectedRouteIndex - 1]
+    : null;
+  const panelLabel =
+    currentAlternative?.label || currentScenario?.scenarioName || "Alternative";
+  const panelDescription = currentAlternative?.description || "";
   const bounds = useMemo(() => {
     if (!currentScenario) return null;
     const pts = [currentScenario.start, currentScenario.end];
@@ -155,7 +179,12 @@ const MapRoute = () => {
           selectedIndex={selectedRouteIndex}
           setSelectedIndex={(i) => {
             setSelectedRouteIndex(i);
-            setSelectedLabel(i === 0 ? "default" : currentScenario.label);
+            if (i === 0) {
+              setSelectedLabel("default");
+            } else {
+              const alt = currentScenario.alternatives[i - 1];
+              setSelectedLabel(alt?.label || "alternative");
+            }
           }}
           consentGiven={consentGiven}
           setMapPoints={setMapPoints}
@@ -210,15 +239,17 @@ const MapRoute = () => {
 
       {consentGiven && !showOnboarding && (
         <ScenarioPanel
-          label={currentScenario.label}
-          description={currentScenario.description}
+          label={panelLabel}
+          description={panelDescription}
           isSelected={selectedRouteIndex !== 0}
           onToggle={() => {
             if (selectedRouteIndex !== 0) {
               setSelectedLabel("default");
               setSelectedRouteIndex(0);
             } else {
-              setSelectedLabel(currentScenario.label);
+              const alt =
+                currentScenario.alternatives[currentScenario.preselectedIndex];
+              setSelectedLabel(alt?.label || "alternative");
               setSelectedRouteIndex(currentScenario.preselectedIndex + 1);
             }
           }}

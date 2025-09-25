@@ -41,15 +41,15 @@ export function buildScenarios(cfg = {}) {
       scenario_name: Array.isArray(sc.scenario_name)
         ? pickOne(sc.scenario_name)
         : sc.scenario_name,
-      value_name: Array.isArray(sc.value_name)
-        ? pickOne(sc.value_name)
-        : sc.value_name,
-      description: Array.isArray(sc.description)
-        ? pickOne(sc.description)
-        : sc.description,
       choice_list: (sc.choice_list || []).map((route) => ({
         middle_point: pickOne(route.middle_point),
         tts: pickOne(route.tts),
+        value_name: Array.isArray(route.value_name)
+          ? pickOne(route.value_name)
+          : route.value_name,
+        description: Array.isArray(route.description)
+          ? pickOne(route.description)
+          : route.description,
         preselected: route.preselected,
       })),
       randomly_preselect_route: sc.randomly_preselect_route,

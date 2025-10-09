@@ -149,6 +149,11 @@ const MapRoute = () => {
     return L.latLngBounds(pts);
   }, [currentScenario]);
 
+  const maxBounds = useMemo(() => {
+    if (!bounds) return null;
+    return bounds.pad(0.25);
+  }, [bounds]);
+
   const handleSelectRoute = (index) => {
     if (!currentScenario) return;
 
@@ -177,6 +182,8 @@ const MapRoute = () => {
       <MapContainer
         bounds={bounds}
         boundsOptions={{ padding: [50, 50], maxZoom: 15 }}
+        maxBounds={maxBounds ?? undefined}
+        maxBoundsViscosity={1.0}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={false}
         doubleClickZoom={false}
@@ -184,6 +191,8 @@ const MapRoute = () => {
         boxZoom={false}
         keyboard={false}
         zoomControl={false}
+        dragging={false}
+        inertia={false}
       >
         <TileLayer
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'

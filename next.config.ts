@@ -3,7 +3,7 @@ import type { NextConfig } from 'next'
 const rawBasePath =
   process.env.NEXT_PUBLIC_BASE_PATH ??
   process.env.NEXT_PUBLIC_WEBFLOW_BASE_PATH ??
-  '/app'
+  ''
 
 const normalizedBasePath =
   rawBasePath && rawBasePath !== '/'

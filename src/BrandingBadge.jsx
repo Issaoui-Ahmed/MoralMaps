@@ -11,19 +11,24 @@ const BrandingBadge = () => {
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-6 left-6 z-[1000]">
-      <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-white/90 px-4 py-2 shadow-xl shadow-black/20 backdrop-blur">
+    <div className="pointer-events-none fixed top-6 right-6 z-[1000]">
+      <div className="pointer-events-auto flex items-center gap-4 rounded-2xl border border-white/50 bg-gradient-to-br from-white/80 via-white/60 to-white/80 px-5 py-3 shadow-2xl shadow-slate-900/10 backdrop-blur-xl">
         <Image
           src="/branding/craiedl_logo.png"
           alt="Craiedl logo"
-          width={40}
-          height={40}
-          className="h-10 w-10 object-contain"
+          width={56}
+          height={56}
+          className="h-14 w-14 object-contain drop-shadow-sm"
           priority
         />
-        <span className="text-lg font-semibold tracking-wide text-slate-800">
-          MoralMaps
-        </span>
+        <div className="flex flex-col text-right">
+          <span className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
+            Powered by
+          </span>
+          <span className="text-xl font-semibold tracking-tight text-slate-800">
+            MoralMaps
+          </span>
+        </div>
       </div>
     </div>
   );

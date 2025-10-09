@@ -23,67 +23,77 @@ const ScenarioPanel = ({
       ? scenarioText
       : defaultScenarioText;
   return (
-    <div className="absolute top-5 left-5 w-96 bg-white p-6 rounded-xl shadow-lg z-[1000] text-base text-gray-800 font-sans">
-      <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
-      <div className="mt-3 mb-6 p-4 bg-gray-100 rounded-md text-gray-700">
-        <p className="whitespace-pre-line">{scenarioDescription}</p>
-      </div>
-
-      <div className="space-y-4">
-        <div className="space-y-3">
-          {alternatives.length === 0 ? (
-            <p className="text-sm text-gray-500">No alternative routes configured.</p>
-          ) : (
-            alternatives.map((alt, idx) => {
-              const index = idx + 1;
-              const isSelected = selectedRouteIndex === index;
-              return (
-                <div
-                  key={`${alt.label}-${idx}`}
-                  className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
-                    isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200"
-                  }`}
-                >
-                  <div className="pr-4">
-                    <p className="font-medium text-sm">{alt.label}</p>
-                    {alt.description && (
-                      <p className="text-xs text-gray-500 mt-1">{alt.description}</p>
-                    )}
-                  </div>
-
-                  <label className="inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => onSelectRoute(isSelected ? 0 : index)}
-                      className="sr-only peer"
-                    />
-                    <div
-                      className={
-                        "w-14 h-7 bg-gray-300 rounded-full relative transition-colors " +
-                        "peer-checked:bg-blue-600 " +
-                        "after:content-[''] after:absolute after:top-[2px] after:left-[2px] " +
-                        "after:w-6 after:h-6 after:bg-white after:rounded-full after:transition-transform " +
-                        "peer-checked:after:translate-x-7"
-                      }
-                    ></div>
-                  </label>
-                </div>
-              );
-            })
-          )}
+    <div className="absolute left-5 top-5 z-[1000] flex w-96 max-h-[calc(100vh-40px)] flex-col rounded-xl bg-white p-6 font-sans text-base text-gray-800 shadow-lg">
+      <div className="flex-1 overflow-y-auto pr-2">
+        <p className="font-semibold">Scenario {scenarioNumber} out of {totalScenarios}</p>
+        <div className="mt-3 mb-6 rounded-md bg-gray-100 p-4 text-gray-700">
+          <p className="whitespace-pre-line">{scenarioDescription}</p>
         </div>
 
-        <button
-          onClick={onSubmit}
-          className={
-            "w-full py-3 px-5 bg-blue-600 text-white font-semibold " +
-            "rounded-md shadow hover:bg-blue-700 " +
-            "focus:outline-none focus:ring-2 focus:ring-blue-500"
-          }
-        >
-          Confirm & Continue
-        </button>
+        <div className="space-y-4">
+          <div className="space-y-3">
+            {alternatives.length === 0 ? (
+              <p className="text-sm text-gray-500">No alternative routes configured.</p>
+            ) : (
+              alternatives.map((alt, idx) => {
+                const index = idx + 1;
+                const isSelected = selectedRouteIndex === index;
+                return (
+                  <div
+                    key={`${alt.label}-${idx}`}
+                    className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
+                      isSelected ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                    }`}
+                  >
+                    <div className="pr-4">
+                      <p className="text-sm font-medium">{alt.label}</p>
+                      {alt.description && (
+                        <p className="mt-1 text-xs text-gray-500">{alt.description}</p>
+                      )}
+                    </div>
+
+                    <label className="inline-flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onSelectRoute(isSelected ? 0 : index)}
+                        className="peer sr-only"
+                      />
+                      <div
+                        className={
+                          "relative h-7 w-14 rounded-full bg-gray-300 transition-colors " +
+                          "peer-checked:bg-blue-600 " +
+                          "after:absolute after:left-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:transition-transform " +
+                          "peer-checked:after:translate-x-7"
+                        }
+                      ></div>
+                    </label>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <button
+            onClick={onSubmit}
+            className={
+              "w-full rounded-md bg-blue-600 px-5 py-3 font-semibold text-white shadow hover:bg-blue-700 " +
+              "focus:outline-none focus:ring-2 focus:ring-blue-500"
+            }
+          >
+            Confirm & Continue
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6 border-t border-gray-200 pt-4">
+        <div className="flex justify-center">
+          <img
+            src="/branding/craiedl_logo.png"
+            alt="Craiedl logo"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
       </div>
     </div>
   );

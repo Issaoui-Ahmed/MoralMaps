@@ -1,5 +1,6 @@
+import Image from "next/image";
+
 import "../src/index.css";
-import BrandingBadge from "../src/BrandingBadge";
 
 export const metadata = {
   icons: {
@@ -24,7 +25,16 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body suppressHydrationWarning>
         {children}
-        <BrandingBadge />
+        <div className="pointer-events-none fixed right-6 top-6 z-[1000]">
+          <Image
+            src="/branding/craiedl_favicon.png"
+            alt="Craiedl icon"
+            width={48}
+            height={48}
+            className="pointer-events-auto h-12 w-12 object-contain drop-shadow-sm"
+            priority
+          />
+        </div>
       </body>
     </html>
   );

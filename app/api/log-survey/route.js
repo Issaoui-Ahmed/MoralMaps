@@ -104,7 +104,6 @@ export async function POST(req) {
   delete entry.defaultTime;
 
   await redis.json.set(key, '$', entry);
-  await redis.expire(key, 60 * 60 * 24 * 30);
 
   return NextResponse.json({ success: true });
 }

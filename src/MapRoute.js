@@ -177,7 +177,7 @@ const MapRoute = () => {
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       {consentGiven && !showOnboarding && (
-        <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length + 1} />
+        <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length} />
       )}
       <MapContainer
         bounds={bounds}

@@ -74,9 +74,25 @@ const normalizeScenario = (scenario) => {
   const end = ensureCoordList(scenario?.end, [[0, 0]]);
   const defaultRoute = createDefaultRoute({ start, end });
   const routesArray = Array.isArray(scenario?.choice_list) ? scenario.choice_list : [];
-  const normalizedRoutes = routesArray.length
+  const baseRoutes = routesArray.length
     ? routesArray.map((route) => normalizeRoute(route, { start, end }))
     : [defaultRoute];
+
+  const randomlyPreselect = Boolean(scenario?.randomly_preselect_route);
+
+  let seenPreselected = false;
+  const normalizedRoutes = baseRoutes.map((route) => {
+    if (randomlyPreselect) {
+      return { ...route, preselected: false };
+    }
+
+    if (route.preselected && !seenPreselected) {
+      seenPreselected = true;
+      return { ...route, preselected: true };
+    }
+
+    return { ...route, preselected: false };
+  });
 
   return {
     ...scenario,
@@ -84,7 +100,7 @@ const normalizeScenario = (scenario) => {
     end,
     default_route_time: ensureNumberList(scenario?.default_route_time, [0]),
     choice_list: normalizedRoutes,
-    randomly_preselect_route: Boolean(scenario?.randomly_preselect_route),
+    randomly_preselect_route: randomlyPreselect,
   };
 };
 
@@ -345,6 +361,7 @@ function AlternativeRouteEditor({
   canDelete,
   selection = {},
   onSelect,
+  preselectDisabled = false,
 }) {
   return (
     <div className="border rounded p-3 mb-3">
@@ -391,7 +408,8 @@ function AlternativeRouteEditor({
           type="checkbox"
           checked={!!route?.preselected}
           onChange={(e) => onChange({ preselected: e.target.checked })}
-          className="h-4 w-4"
+          className={`h-4 w-4 ${preselectDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          aria-disabled={preselectDisabled}
         />
         <label className="text-xs">Preselected</label>
       </div>
@@ -407,6 +425,50 @@ function ScenarioForm({
   onSelectField,
   onSelectRouteField,
 }) {
+  const choiceList = Array.isArray(scenario.choice_list) ? scenario.choice_list : [];
+
+  const handleRandomToggle = (checked) => {
+    const patch = { randomly_preselect_route: checked };
+
+    if (checked && choiceList.length) {
+      patch.choice_list = choiceList.map((route) => ({ ...route, preselected: false }));
+    }
+
+    onChange(patch);
+  };
+
+  const handleRouteChange = (index, patch) => {
+    const isPreselectToggle = Object.prototype.hasOwnProperty.call(patch, "preselected");
+    const nextRoutes = choiceList.map((route, idx) => {
+      if (idx !== index) {
+        if (isPreselectToggle && patch.preselected) {
+          return { ...route, preselected: false };
+        }
+        return route;
+      }
+
+      return { ...route, ...patch };
+    });
+
+    if (isPreselectToggle) {
+      const shouldPreselect = Boolean(patch.preselected);
+      const scenarioPatch = {
+        choice_list: nextRoutes.map((route, idx) =>
+          idx === index ? { ...route, preselected: shouldPreselect } : route
+        ),
+      };
+
+      if (shouldPreselect && scenario.randomly_preselect_route) {
+        scenarioPatch.randomly_preselect_route = false;
+      }
+
+      onChange(scenarioPatch);
+      return;
+    }
+
+    onChange({ choice_list: nextRoutes });
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{name}</h3>
@@ -436,7 +498,7 @@ function ScenarioForm({
         <input
           type="checkbox"
           checked={!!scenario.randomly_preselect_route}
-          onChange={(e) => onChange({ randomly_preselect_route: e.target.checked })}
+          onChange={(e) => handleRandomToggle(e.target.checked)}
           className="h-4 w-4"
         />
         <label className="text-sm">Randomly preselect route</label>
@@ -470,23 +532,21 @@ function ScenarioForm({
             Add alternative route
           </button>
         </div>
-        {Array.isArray(scenario.choice_list) && scenario.choice_list.length > 0 ? (
-          scenario.choice_list.map((ch, i) => (
+        {choiceList.length > 0 ? (
+          choiceList.map((ch, i) => (
             <AlternativeRouteEditor
               key={i}
               route={ch}
               index={i}
-              canDelete={scenario.choice_list.length > 1}
+              canDelete={choiceList.length > 1}
               selection={Array.isArray(selection?.choice_list) ? selection.choice_list[i] : null}
-              onChange={(patch) => {
-                const next = scenario.choice_list.map((c, idx) => (idx === i ? { ...c, ...patch } : c));
-                onChange({ choice_list: next });
-              }}
+              onChange={(patch) => handleRouteChange(i, patch)}
               onDelete={() => {
-                const next = scenario.choice_list.filter((_, idx) => idx !== i);
+                const next = choiceList.filter((_, idx) => idx !== i);
                 onChange({ choice_list: next.length > 0 ? next : [createDefaultRoute(scenario)] });
               }}
               onSelect={(field, idx) => onSelectRouteField?.(i, field, idx)}
+              preselectDisabled={!!scenario.randomly_preselect_route}
             />
           ))
         ) : (

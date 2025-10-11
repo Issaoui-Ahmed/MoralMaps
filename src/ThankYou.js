@@ -1,16 +1,35 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import ProgressBar from "./ProgressBar";
 import { withBasePath } from "./utils/basePath";
+
+const computeScenarioCount = (cfg) => {
+  if (!cfg) return 0;
+  if (Array.isArray(cfg.scenarios)) {
+    return cfg.scenarios.length;
+  }
+
+  if (cfg.scenarios && typeof cfg.scenarios === "object") {
+    const total = Object.keys(cfg.scenarios).length;
+    const desired =
+      typeof cfg?.settings?.number_of_scenarios === "number"
+        ? cfg.settings.number_of_scenarios
+        : total;
+    return Math.min(desired, total);
+  }
+
+  return 0;
+};
 
 const ThankYou = () => {
   const sessionId = typeof window !== "undefined" ? localStorage.getItem("sessionId") : null;
-
 
   const [config, setConfig] = useState(null);
   const [responses, setResponses] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
+  const [totalSteps, setTotalSteps] = useState(1);
 
   useEffect(() => {
     fetch(withBasePath("/api/route-endpoints"))
@@ -22,6 +41,8 @@ const ThankYou = () => {
           initial[field.name] = field.type === "multiselect" ? [] : "";
         });
         setResponses(initial);
+        const count = computeScenarioCount(data);
+        setTotalSteps(Math.max(1, count + 1));
       })
       .catch((err) => {
         console.error("Failed to load survey config:", err);
@@ -65,30 +86,40 @@ const ThankYou = () => {
   };
 
 
+  const currentStep = Math.max(totalSteps - 1, 0);
+
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-        <p className="text-2xl font-semibold text-gray-800">
-          Thank you for your feedback!
-        </p>
+      <div className="relative min-h-screen w-full bg-gray-50">
+        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <p className="text-2xl font-semibold text-gray-800">
+            Thank you for your feedback!
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!config) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="relative min-h-screen w-full bg-gray-50">
+        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="flex w-full max-w-lg flex-col rounded-lg bg-white p-8 shadow-lg">
-        <div className="flex-1 overflow-y-auto pr-1">
-          {(config.survey || []).map((field) => (
-            <div key={field.name} className="mb-5">
+    <div className="relative min-h-screen w-full bg-gray-50">
+      <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="flex w-full max-w-lg flex-col rounded-lg bg-white p-8 shadow-lg">
+          <div className="flex-1 overflow-y-auto pr-1">
+            {(config.survey || []).map((field) => (
+              <div key={field.name} className="mb-5">
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 {field.name}
               </label>

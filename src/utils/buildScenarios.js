@@ -55,7 +55,7 @@ export function buildScenarios(cfg = {}) {
       randomly_preselect_route: sc.randomly_preselect_route,
     };
 
-    if (scenario.randomly_preselect_route) {
+    if (scenario.randomly_preselect_route && scenario.choice_list.length > 0) {
       const idx = Math.floor(Math.random() * scenario.choice_list.length);
       scenario.choice_list = scenario.choice_list.map((r, i) => ({
         ...r,
@@ -66,13 +66,10 @@ export function buildScenarios(cfg = {}) {
       scenario.choice_list = scenario.choice_list.map((r) => {
         if (r.preselected && !found) {
           found = true;
-          return r;
+          return { ...r, preselected: true };
         }
         return { ...r, preselected: false };
       });
-      if (!found && scenario.choice_list.length > 0) {
-        scenario.choice_list[0].preselected = true;
-      }
     }
 
     delete scenario.randomly_preselect_route;

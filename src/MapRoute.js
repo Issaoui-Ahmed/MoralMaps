@@ -132,6 +132,30 @@ const MapRoute = () => {
       ? currentScenario.alternatives[selectedRouteIndex - 1]
       : null;
 
+  useEffect(() => {
+    if (!currentScenario) return;
+
+    const preselectedIdx = currentScenario.alternatives.findIndex((alt) => alt.preselected);
+
+    if (preselectedIdx >= 0) {
+      const nextIndex = preselectedIdx + 1;
+      if (selectedRouteIndex !== nextIndex) {
+        setSelectedRouteIndex(nextIndex);
+      }
+      const nextLabel = currentScenario.alternatives[preselectedIdx]?.label || "alternative";
+      if (selectedLabel !== nextLabel) {
+        setSelectedLabel(nextLabel);
+      }
+    } else {
+      if (selectedRouteIndex !== 0) {
+        setSelectedRouteIndex(0);
+      }
+      if (selectedLabel !== "default") {
+        setSelectedLabel("default");
+      }
+    }
+  }, [currentScenario, scenarioIndex]);
+
   const panelLabel =
     selectedRouteIndex === 0
       ? "Default"

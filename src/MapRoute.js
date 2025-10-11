@@ -106,6 +106,8 @@ const MapRoute = () => {
           choice: selectedLabel,
           tts,
           defaultTime,
+          selectedRouteIndex,
+          scenario: currentScenario,
         }),
       });
 

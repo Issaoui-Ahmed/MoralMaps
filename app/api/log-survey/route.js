@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import { redis } from '../_redis';
 import { get } from '@vercel/edge-config';
 
-
 export const runtime = 'nodejs';
-
 
 function normalizeMultiSelect(value, options = []) {
   const optionSet = new Set(Array.isArray(options) ? options : []);
@@ -60,34 +58,53 @@ function normalizeResponses(responses, surveyConfig) {
 }
 
 export async function POST(req) {
-let payload; try { payload = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
-const { sessionId, responses } = payload || {};
-if (typeof sessionId !== 'string' || typeof responses !== 'object' || !responses) {
-return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
-}
+  let payload;
+  try {
+    payload = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
+  const { sessionId, responses } = payload || {};
+  if (typeof sessionId !== 'string' || typeof responses !== 'object' || !responses) {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+  }
 
-const key = `user-data:${sessionId}`;
-const session = await redis.json.get(key);
-if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 400 });
+  const key = `user-data:${sessionId}`;
+  const session = await redis.json.get(key);
+  if (!session) return NextResponse.json({ error: 'Session not found' }, { status: 400 });
 
+  let surveyConfig;
+  try {
+    surveyConfig = await get('surveyConfig');
+  } catch {
+    // ignore missing config; fall back to raw responses
+  }
 
-let surveyConfig;
-try {
-  surveyConfig = await get('surveyConfig');
-} catch {}
+  const normalizedResponses = normalizeResponses(responses, surveyConfig);
+  const completedAt = new Date().toISOString();
 
-const normalizedResponses = normalizeResponses(responses, surveyConfig);
+  const entry = {
+    ...(session && typeof session === 'object' ? session : {}),
+    sessionId: session?.sessionId ?? sessionId,
+    surveyResponses: normalizedResponses,
+    completedAt,
+    lastUpdatedAt: completedAt,
+  };
 
-const entry = {
-  ...session,
-  responses: normalizedResponses,
-  sessionId: session.sessionId ?? sessionId,
-  completedAt: new Date().toISOString(),
-};
-await redis.json.set(key, '$', entry);
-await redis.expire(key, 60 * 60 * 24 * 30);
+  if (!entry.createdAt) {
+    entry.createdAt = session?.createdAt || session?.timestamp || completedAt;
+  }
+  if (!entry.timestamp) {
+    entry.timestamp = entry.createdAt;
+  }
 
+  delete entry.responses;
+  delete entry.choices;
+  delete entry.defaultTime;
 
-return NextResponse.json({ success: true });
+  await redis.json.set(key, '$', entry);
+  await redis.expire(key, 60 * 60 * 24 * 30);
+
+  return NextResponse.json({ success: true });
 }

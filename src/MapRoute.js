@@ -258,7 +258,7 @@ const MapRoute = () => {
       {!ageConfirmed && (
         <AgeConfirmationModal
           onConfirm={() => setAgeConfirmed(true)}
-          onDecline={() => router.push("/thank-you")}
+          onDecline={() => router.push("/ineligible")}
         />
       )}
 

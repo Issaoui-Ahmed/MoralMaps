@@ -40,34 +40,7 @@ export default function IneligiblePage() {
                 We sincerely appreciate your curiosity and willingness to contribute. Your interest
                 helps us continue building thoughtful, inclusive research experiences.
               </p>
-              <p className="text-sm text-slate-300">
-                If you have any questions about the study, please reach out to the research team
-                using the contact information provided in your invitation materials.
-              </p>
-            </div>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-sm font-medium">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-white transition hover:border-emerald-300/60 hover:bg-emerald-400/10"
-              >
-                Return to home
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M8.25 4.5 15.75 12l-7.5 7.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
-              <a
-                href="mailto:research@moralmaps.org"
-                className="inline-flex items-center gap-2 rounded-full bg-emerald-400/20 px-5 py-2.5 text-emerald-200 transition hover:bg-emerald-400/30"
-              >
-                Contact the team
-              </a>
+             
             </div>
           </div>
         </div>

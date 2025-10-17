@@ -7,6 +7,7 @@ import Routing from "./Routing";
 import RoutingLabels from "./RoutingLabels";
 import OnboardingModal from "./OnboardingModal";
 import ConsentModal from "./ConsentModal";
+import AgeConfirmationModal from "./AgeConfirmationModal";
 import ScenarioPanel from "./ScenarioPanel";
 import ProgressBar from "./ProgressBar";
 import { v4 as uuidv4 } from "uuid";
@@ -16,6 +17,7 @@ import { withBasePath } from "./utils/basePath";
 
 const MapRoute = () => {
   const [routeConfig, setRouteConfig] = useState(null);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -202,7 +204,7 @@ const MapRoute = () => {
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
-      {consentGiven && !showOnboarding && (
+      {ageConfirmed && consentGiven && !showOnboarding && (
         <ProgressBar currentStep={scenarioIndex} totalSteps={scenarios.length + 1} />
       )}
       <MapContainer
@@ -237,7 +239,7 @@ const MapRoute = () => {
         />
       </MapContainer>
 
-      {consentGiven && (
+      {ageConfirmed && consentGiven && (
         <div
           style={{
             position: "absolute",
@@ -253,7 +255,14 @@ const MapRoute = () => {
         </div>
       )}
 
-      {!consentGiven && (
+      {!ageConfirmed && (
+        <AgeConfirmationModal
+          onConfirm={() => setAgeConfirmed(true)}
+          onDecline={() => router.push("/thank-you")}
+        />
+      )}
+
+      {ageConfirmed && !consentGiven && (
         <ConsentModal
           consentText={consentText}
           checkboxChecked={checkboxChecked}
@@ -265,7 +274,7 @@ const MapRoute = () => {
         />
       )}
 
-      {showOnboarding && (
+      {ageConfirmed && showOnboarding && (
         <OnboardingModal
           step={onboardingStep}
           instructions={instructions}
@@ -282,7 +291,7 @@ const MapRoute = () => {
         />
       )}
 
-      {consentGiven && !showOnboarding && (
+      {ageConfirmed && consentGiven && !showOnboarding && (
         <ScenarioPanel
           scenarioNumber={scenarioIndex + 1}
           totalScenarios={scenarios.length}
